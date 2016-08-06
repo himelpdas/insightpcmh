@@ -1,0 +1,20 @@
+.panel .question-box-heading {
+    text-transform: none;
+    font-size:17px;
+}
+
+.panel .question-box-title-done:hover {
+    color: #d1d1d1;
+}
+
+/*
+.panel .question-box-title-done:hover {
+    text-decoration: none;
+    color: inherit;
+}
+
+.panel .question-box-title-done {
+    text-decoration: line-through;
+    color: #d1d1d1;
+}
+*/

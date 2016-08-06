@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>jQuery Word Export</title>
+
+    <!-- Bootstrap -->
+    <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+        .export-icon {
+            font-family: "Helvetica", sans-serif;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            padding: 2px 5px;
+            vertical-align: middle;
+        }
+        .word-icon {
+            background-color: #0054a6;
+            padding: 0.20em 0.5em;
+        }
+        .pdf-icon {
+            background-color: orangered;
+            padding: 0.20em 0.65em;
+        }
+        .mail-icon {
+            background-color: gold;
+            padding: 0.20em 0.60em;
+        }
+        table td, table th {
+            padding:10px;
+        }
+        #page-content {
+            box-shadow: 10px 0px 10px 1px #aaaaaa;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="page-header" style="text-align: center;">
+        <h3>Auto-generated Policy / Procedure</h3>
+        <h4>&copy; {{=request.now.year}} Insight Management Corp</h4>
+        <p>Export this document as word, and make further changes if necessary.</p>
+        <div class="row">
+        <div class="col-xs-4">
+            <p><a class="btn jquery-word-export" href="javascript:void(0)">
+                <span class="export-icon pdf-icon">P</span>
+                <span class="hidden-xs">Export as .pdf</span>
+            </a></p>
+        </div>
+        <div class="col-xs-4">
+            <p><a class="btn jquery-word-export" href="javascript:void(0)">
+                <span class="export-icon word-icon">W</span>
+                <span class="hidden-xs">Export as .doc</span>
+            </a></p>
+        </div>
+        <div class="col-xs-4">
+            <p><a class="btn jquery-word-export" href="javascript:void(0)">
+                <span class="export-icon mail-icon">M</span>
+                <span class="hidden-xs">Send as Email</span>
+            </a></p>
+        </div>
+        </div>
+    </div>
+    <div class="row">
+            <div id="page-content" class="panel panel-default center-block" style="width:8.5in;min-height:11.0in">
+                <div class="panel-body" style="margin:0.7in">
+                    <h2>PCMH 1A, Factor 1: Same-day Scheduling Policy</h2>
+                    <ul>
+                        <li>Personal Clinicians:
+                            <p> For all routine office visits (check-ups, follow-ups) and physical patients are to be
+                                scheduled with their personal clinician (which-ever provider they see on a regular
+                                basis) to keep continuity of care.
+                        </li>
+                        <li>Same-Day Appointments:
+                            <p> {{=practice_name}} practices as an "Advanced Access" practice. Any patient that
+                                needs to be seen on a day the office is open (Monday-Sunday) will be able to be seen
+                                that day with the available clinician. Not all clinicians will have opening every due to
+                                their community schedules, but there will be a clinician available to see a patient when
+                                they call.</p>
+                        <li>Procedures and Exams:
+                            <p> When scheduling a patient for an annual physical, please make sure that they have the
+                                lab work done one-week prior to visit. This will ensure that the results are in—house
+                                for the doctor to review at time of service.</p>
+                        </li>
+                    </ul>
+                    <table border="1" cellpadding="10">  {{# same as css padding, since stylesheets puts padding to 0}}
+                        <tr>
+                            <th>test</th>
+                            <th>test2</th>
+                        </tr>
+                        <tr>
+                            <td>yp</td>
+                            <td>yx</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        <!-- /.blog-main -->
+    </div>
+    <!-- /.row -->
+</div>
+<!-- /.container -->
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+<!-- FileSaver.js (necessary for saving the word document!) -->
+<script src="http://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2014-11-29/FileSaver.min.js"></script>
+<!-- jQuery-Word-Export plugin -->
+<script src="{{=URL('static','js/custom/jquery.wordexport.js')}}"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+    jQuery(document).ready(function ($) {
+        $("a.jquery-word-export").click(function (event) {
+            $("#page-content").wordExport();
+        });
+    });
+</script>
+</body>
+
+</html>

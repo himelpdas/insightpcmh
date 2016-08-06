@@ -1,0 +1,97 @@
+{{import urllib}}
+{{left_sidebar_enabled,right_sidebar_enabled=True,False}}
+{{extend 'layout.html'}}
+
+{{block header}}
+<header style="text-align: center;">
+    {{# <h3>A. Spencer MD (MDLand)</h3>  {{#practice}}
+    <h3>Ebony Proudfoot <span class="text-muted">(Your Trainer)</span></h3>  {{#practice}}
+    <h4><span class="glyphicon glyphicon-map-marker"></span> <a href="http://maps.google.com/?q={{=urllib.urlencode({'q':'660 White Plains Rd #325, Tarrytown, NY 10573'})}}">660 White Plains Rd #325, Tarrytown, NY 10573</a></h4>  {{#address}} {{# http://bit.ly/2a59inp}}
+    <h5>
+    <span class="glyphicon glyphicon-earphone"></span> (914) 524-0500 <span style="opacity:0.2">|</span>
+    <span class="glyphicon glyphicon-print"></span> (914) 524-0501 <span style="opacity:0.2">|</span>
+    {{# <span class="glyphicon glyphicon-envelope"></span> <a href="mailto:allison@insightmanagement.org">allison@insightmanagement.org</a>}}
+    <span class="glyphicon glyphicon-envelope"></span> <a href="mailto:ebony@insightmanagement.org">ebony@insightmanagement.org</a>
+    </h5>
+</header>
+{{end}}
+
+{{block left_sidebar}}
+<ul class="nav nav-pills nav-stacked">
+  <li role="presentation" class="active"><a href="#">Schedule</a></li>
+  <li role="presentation"><a href="#">Patient Communication</a></li>
+  <li role="presentation"><a href="#">Progress Notes</a></li>
+  <li role="presentation"><a href="#">Non Clinical Workflow</a></li>
+  <li role="presentation"><a href="#">Polices and Procedures</a></li>
+  <li role="presentation"><a href="#">EMR Screenshots</a></li>
+</ul>
+{{end}}
+
+{{def QUESTION_PANEL(question, answered, form, icon="question-sign"):}}
+{{if form:}}
+<div class="panel panel-{{if answered:}}primary{{else:}}info{{pass}}">
+    <div class="panel-heading question-box-heading"><span class="pull-right glyphicon glyphicon-{{=icon}}"></span><span class="glyphicon glyphicon-{{if answered:}}check{{else:}}unchecked{{pass}}"></span><span class="question-box-title-done"> {{if answered:}}[Answered] {{pass}}{{=question}}</span></div>
+    <div class="panel-body">
+
+    {{if getattr(answered, 'upload', None):}}
+        <ul>
+            <li><a href="{{=URL('download', args=answered.upload)}}">{{=answered.filename}}</a></li>
+        </ul>
+    {{pass}}
+    {{=form}}</div>
+</div>
+{{pass}}
+{{return}}
+
+{{
+        actions = []
+        if MISSING_ANSWERS(
+            (transition_of_care_plan_internal_row, transition_of_care_plan_internal_form),
+            (intake_form_upload_row, intake_form_upload_form),
+            (intake_form_row, intake_form_form),
+            (intake_form_patient_example_row, intake_form_patient_example_form)
+        ):
+            actions.append(XML(T("Please satisfy one or more questions / instructions below.")))
+        pass
+        if getattr(transition_of_care_plan_internal_row, "please_choose", None) == "N":
+            actions.append(XML(T("Please schedule a training session with your trainer.")))
+        pass
+        if getattr(intake_form_row, "please_choose", None) == "N":
+            actions.append(XML(T("Please customize <a href='%s'>this intake form</a> and change the corresponding answer when you are ready."%URL("policy", "PCMH_1A_1"))))
+            actions.append(XML(T("Please ensure that you complete 3 of these forms and upload it in the patient record.")))
+        pass
+
+        has_action = bool(actions)
+}}
+
+<div class="panel panel-primary panel-{{if has_action:}}danger{{else:}}success{{pass}}">
+    <div class="panel-heading question-box-heading" style="text-transform: none; font-size:17px"><span class="pull-right glyphicon glyphicon-{{if not has_action:}}ok-sign{{else:}}exclamation-sign{{pass}}"></span>{{if has_action:}}Action{{="s" if len(actions)>1 else ""}} needed...{{else:}}Success!{{pass}}</div>
+    <div class="panel-body">
+        <ul>
+            {{for action in actions:}}
+                <li>{{=action}}</li>
+            {{pass}}
+            {{if not has_action:}}
+                <li>You have completed this section!</li>
+            {{pass}}
+        </ul>
+    </div>
+</div>
+
+{{QUESTION_PANEL("Does the practice have a transition of care plan for importing a patient from pediatric care?", transition_of_care_plan_internal_row, transition_of_care_plan_internal_form)}}
+{{QUESTION_PANEL("Do you have an intake form for transitioning a pediatric patient into your practice?", intake_form_row, intake_form_form)}}
+{{QUESTION_PANEL("You said you have an intake form. Please upload a copy of this intake form here.", intake_form_upload_row, intake_form_upload_form, icon="file")}}
+{{QUESTION_PANEL("Enter 3 patient names or IDs where each patient has a completed intake form in the patient record.", intake_form_patient_example_row, intake_form_patient_example_form)}}
+
+{{block right_sidebar}}
+{{end}}
+
+{{block page_js}}
+{{super}}
+<script>
+    $(".panel-body").each(function(){
+        $(this).hide();
+        $(this).fadeIn(500);
+    })
+</script>
+{{end page_js}}
