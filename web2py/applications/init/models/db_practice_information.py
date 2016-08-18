@@ -16,7 +16,7 @@ db.define_table("intake_form",
                 _note_field)
 
 db.define_table("intake_form_upload",
-                Field("upload", "upload", label="Upload Intake Form"),
+                Field("upload", "upload", requires=IS_NOT_EMPTY(), label="Upload Intake Form"),
                 Field("filename", readable=False, writable=False),
                 _note_field)
 

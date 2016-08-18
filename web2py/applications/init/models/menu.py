@@ -29,7 +29,9 @@ response.google_analytics_id = None
 # ----------------------------------------------------------------------------------------------------------------------
 
 response.menu = [
-    (T('Home'), False, URL('default', 'index'), [])
+    (T('Practice Information'), False, URL('default', 'index'), []),
+    (T('Gap Analysis'), False, URL('default', 'index'), []),
+    (T('Data Gathering'), False, URL('default', 'index'), [])
 ]
 
 DEVELOPMENT_MENU = False

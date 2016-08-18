@@ -19,34 +19,43 @@ def index():
     """
     #response.flash = T("Hello World")
 
-    transition_of_care_plan_internal_row, transition_of_care_plan_internal_form = \
-        FORM_PROCESSOR_GENERIC(True, db.transition_of_care_plan_internal)
-
-    transition_of_care_plan_internal_form.addWarnings(
-        getattr(transition_of_care_plan_internal_row, "please_choose", None) == "N",
-        XML(T("Please schedule a training session with your trainer."))
+    transition_of_care_plan_internal = question_and_answer(
+        True,
+        db.transition_of_care_plan_internal,
+        "Does the practice have a transition of care plan for importing a patient from pediatric care?"
+    )
+    transition_of_care_plan_internal.addWarnings(
+        getattr(transition_of_care_plan_internal.row, "please_choose", None) == "N",
+        XML(T("Please schedule a training session with your trainer. Change your answer after training."))
     )
 
-    intake_form_row, intake_form_form = FORM_PROCESSOR_GENERIC(getattr(
-        transition_of_care_plan_internal_row, "please_choose", None) == "Y",
-                                                               db.intake_form)
+    intake_form = question_and_answer(
+        getattr(transition_of_care_plan_internal.row, "please_choose", None) == "Y",
+        db.intake_form,
+        "Do you have an intake form for transitioning a pediatric patient into your practice?"
+    )
+    intake_form.addWarnings(
+        getattr(intake_form.row, "please_choose", None) == "N",
+        XML(T("Please download this {intake_form_url} and customize it. Change your answer when you're done".format(
+            intake_form_url=A("template", _href=URL("policy", "ADHD_screening_letter.doc"))
+        )))
+    )
 
-    intake_form_upload_row, intake_form_upload_form = FORM_PROCESSOR_GENERIC(getattr(
-        intake_form_row, "please_choose", None) == "Y",
-                                                               db.intake_form_upload, validator=VALIDATE_FILENAME)
+    intake_form_upload = question_and_answer(
+        getattr(intake_form.row, "please_choose", None) == "Y",
+        db.intake_form_upload,
+        "You said you have an intake form. Please upload a copy of this intake form here.",
+        validator=VALIDATE_FILENAME
+    )
 
-    intake_form_patient_example_rows, intake_form_patient_example_form = FORM_PROCESSOR_GENERIC(getattr(
-        intake_form_row, "please_choose", None) == "Y",
-                                                               db.intake_form_patient_example, multi=True)
+    intake_form_patient_example = question_and_answer(
+        getattr(intake_form.row, "please_choose", None) == "Y",
+        db.intake_form_patient_example,
+        XML("Enter <u>3 or more</u> patient names where each patient has a completed intake form in the patient record."),
+        multi=3
+    )
 
-    return dict(transition_of_care_plan_internal_form=transition_of_care_plan_internal_form,
-                transition_of_care_plan_internal_row=transition_of_care_plan_internal_row,
-                intake_form_form=intake_form_form,
-                intake_form_row=intake_form_row,
-                intake_form_upload_form=intake_form_upload_form,
-                intake_form_upload_row=intake_form_upload_row,
-                intake_form_patient_example_form=intake_form_patient_example_form,
-                intake_form_patient_example_rows=intake_form_patient_example_rows)
+    return dict()
 
 def user():
     """

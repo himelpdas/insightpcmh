@@ -9,15 +9,26 @@ def dtable():
     db.commit()
 
 class SQLFORM_ANSWER(SQLFORM):
-    def __init__(self, table, row_object, *args, **kwargs):
-        self.warnings = []  # keep warnings here instead of class, because we can refer to self objects or other objects for the conditionals
+    def __init__(self, table, row, rows, *args, **kwargs):
+
+        submit_label = "Submit Answer"
+        if bool(row):
+            submit_label = T("Change Answer")
+        elif len(rows):
+            submit_label = T("Add Another")
+
+        buttons = [TAG.button(submit_label, _type="submit", _class="btn btn-primary pull-right")]
+
+        if len(rows) > 0 or bool(row):
+            buttons.insert(0, TAG.button('Clear', _type="button", _class="btn btn-info pull-right",
+                            _onClick="if(confirm('Clear entry?')){parent.location='%s'}" % URL()))  # confirm redirect
+
         super(self.__class__, self).__init__(table,
-            record=row_object,
-            submit_button=T('Change Answer') if bool(row_object) else T("Submit Answer"),
+            record=row,
+            #submit_button=T('Change Answer') if bool(row) else T("Submit Answer"),
+            buttons=buttons,
             showid=False, *args, **kwargs)
-    def addWarnings(self, conditional, message):
-        if conditional:
-            self.warnings.append(message)
+
 
 def MISSING_ANSWERS(*args):  # if form is true AND row is true, then question has been answered
     needs_answering = []
@@ -50,8 +61,12 @@ def FORM_PROCESSOR_GENERIC(condition_to_show, question_table, validator=None, mu
     return (result if not multi else results), form
 
 class question_and_answer():
-    def __init__(self, show, question_table, validator=None, multi=1):
-        self.table = question_table
+    instances = []
+
+    def __init__(self, show, table, question, validator=None, multi=1):
+
+        self.table = table
+        self.question = question
         self.validator = validator
         self.multi = multi
         self.show = show
@@ -59,25 +74,28 @@ class question_and_answer():
         self.form = None
         self.row = None
         self.rows = []
+        self.warnings = []
+
+        self.__class__.instances.append(self)  # keep track of instances
 
         if not show:
             return
 
         if multi > 1:
-            self.preprocess_single()
-        else:
             self.preprocess_multi()
+        else:
+            self.preprocess_single()
 
         self.form_process()
 
     def preprocess_single(self):
         """make form editable"""
         self.row = db(self.table.id > 0).select().last()
-        self.form = SQLFORM_ANSWER(self.table, self.row)
+        self.form = SQLFORM_ANSWER(self.table, self.row, [])
 
     def preprocess_multi(self):
         self.rows = db(self.table.id > 0).select(orderby=~db[self.table].id,limitby=(0,self.multi))  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
-        self.form = SQLFORM_ANSWER(self.table, None)
+        self.form = SQLFORM_ANSWER(self.table, None, self.rows)
 
     def form_process(self):
         if self.form.process(onvalidation=self.validator).accepted:
@@ -87,7 +105,11 @@ class question_and_answer():
     def has_warnings(self):
         if not self.form:
             return False
-        return bool(len(self.form.warnings))
+        return bool(len(self.warnings))
+
+    def addWarnings(self, conditional, message):
+        if self.form and conditional:
+            self.warnings.append(message)
 
     def needs_answer(self):
         if not self.show:
