@@ -1,4 +1,6 @@
 {{import urllib}}
+{{import pydal.objects}}
+{{from collections import OrderedDict}}
 {{left_sidebar_enabled,right_sidebar_enabled=True,False}}
 {{extend 'layout.html'}}
 
@@ -27,18 +29,37 @@
 </ul>
 {{end}}
 
-{{def QUESTION_PANEL(question, answered, form, icon="question-sign"):}}
+{{def QUESTION_PANEL(question, answered, form, multi=0, icon="question-sign"):}}
 {{if form:}}
 <div class="panel panel-{{if answered:}}primary{{else:}}info{{pass}}">
     <div class="panel-heading question-box-heading"><span class="pull-right glyphicon glyphicon-{{=icon}}"></span><span class="glyphicon glyphicon-{{if answered:}}check{{else:}}unchecked{{pass}}"></span><span class="question-box-title-done"> {{if answered:}}[Answered] {{pass}}{{=question}}</span></div>
     <div class="panel-body">
 
-    {{if getattr(answered, 'upload', None):}}
+    {{if getattr(answered, 'upload', None):}}  {{# for single uploads}}
         <ul>
             <li><a href="{{=URL('download', args=answered.upload)}}">{{=answered.filename}}</a></li>
         </ul>
     {{pass}}
-    {{=form}}</div>
+
+    {{if answered and isinstance(answered, pydal.objects.BasicRows):}}  {{# the pythonic way to test object, instead of type-checking}}
+        <ul>
+        {{flattened_answers = map(lambda each: each[1],answered.as_dict().items())}}  {{'''}} as_dict returns as {4L: {..., 'id':4L}}, flatten to {..., 'id':4L} {{'''}}
+        {{for answer_dict in flattened_answers:}}
+            <li><b class="text-info">
+            {{for multi_field_value in filter(lambda field_value: "multi_" in field_value[0], sorted(answer_dict.items())):}}  {{# get the fields that have "multi_" in them}}
+                {{if not "_note" in multi_field_value[0]:}}{{=multi_field_value[1]}}&nbsp;{{elif multi_field_value[1]:}}- {{=I(multi_field_value[1])}}{{pass}}
+            {{pass}}
+            </b></li>
+        {{pass}}
+        </ul>
+    {{pass}}
+    {{=form}}
+    <ul>
+        {{for warning in form.warnings:}}
+            <li class="text-danger">{{=warning}}</li>
+        {{pass}}
+    </ul>
+    </div>
 </div>
 {{pass}}
 {{return}}
@@ -49,16 +70,14 @@
             (transition_of_care_plan_internal_row, transition_of_care_plan_internal_form),
             (intake_form_upload_row, intake_form_upload_form),
             (intake_form_row, intake_form_form),
-            (intake_form_patient_example_row, intake_form_patient_example_form)
+            (len(intake_form_patient_example_rows)>=3, intake_form_patient_example_form)
         ):
-            actions.append(XML(T("Please satisfy one or more questions / instructions below.")))
+            actions.append(XML(T("Please answer one or more questions / instructions below.")))
         pass
-        if getattr(transition_of_care_plan_internal_row, "please_choose", None) == "N":
-            actions.append(XML(T("Please schedule a training session with your trainer.")))
-        pass
-        if getattr(intake_form_row, "please_choose", None) == "N":
-            actions.append(XML(T("Please customize <a href='%s'>this intake form</a> and change the corresponding answer when you are ready."%URL("policy", "PCMH_1A_1"))))
-            actions.append(XML(T("Please ensure that you complete 3 of these forms and upload it in the patient record.")))
+        if INCORRECT_ANSWERS(
+            transition_of_care_plan_internal_form, intake_form_upload_form, intake_form_form, intake_form_patient_example_form
+        ):
+            actions.append(XML(T("Please fix one or more questions / instructions below.")))
         pass
 
         has_action = bool(actions)
@@ -78,10 +97,26 @@
     </div>
 </div>
 
-{{QUESTION_PANEL("Does the practice have a transition of care plan for importing a patient from pediatric care?", transition_of_care_plan_internal_row, transition_of_care_plan_internal_form)}}
-{{QUESTION_PANEL("Do you have an intake form for transitioning a pediatric patient into your practice?", intake_form_row, intake_form_form)}}
-{{QUESTION_PANEL("You said you have an intake form. Please upload a copy of this intake form here.", intake_form_upload_row, intake_form_upload_form, icon="file")}}
-{{QUESTION_PANEL("Enter 3 patient names or IDs where each patient has a completed intake form in the patient record.", intake_form_patient_example_row, intake_form_patient_example_form)}}
+{{QUESTION_PANEL("Does the practice have a transition of care plan for importing a patient from pediatric care?",
+    transition_of_care_plan_internal_row,
+    transition_of_care_plan_internal_form
+)}}
+
+{{QUESTION_PANEL("Do you have an intake form for transitioning a pediatric patient into your practice?",
+    intake_form_row,
+    intake_form_form
+)}}
+
+{{QUESTION_PANEL("You said you have an intake form. Please upload a copy of this intake form here.",
+    intake_form_upload_row,
+    intake_form_upload_form,
+    icon="file"
+)}}
+
+{{QUESTION_PANEL("Enter 3 patient names or IDs where each patient has a completed intake form in the patient record.",
+intake_form_patient_example_rows,
+intake_form_patient_example_form
+)}}
 
 {{block right_sidebar}}
 {{end}}

@@ -22,28 +22,22 @@ def index():
     transition_of_care_plan_internal_row, transition_of_care_plan_internal_form = \
         FORM_PROCESSOR_GENERIC(True, db.transition_of_care_plan_internal)
 
+    transition_of_care_plan_internal_form.addWarnings(
+        getattr(transition_of_care_plan_internal_row, "please_choose", None) == "N",
+        XML(T("Please schedule a training session with your trainer."))
+    )
+
     intake_form_row, intake_form_form = FORM_PROCESSOR_GENERIC(getattr(
         transition_of_care_plan_internal_row, "please_choose", None) == "Y",
                                                                db.intake_form)
 
-    intake_form_upload_row = None
-    intake_form_upload_form = None
-    if intake_form_row and intake_form_row.please_choose == "Y":
-        intake_form_upload_row = db(db.intake_form_upload.id > 0).select().last()
-        intake_form_upload_form = SQLFORM_ANSWER(db.intake_form_upload, intake_form_upload_row)
-        if intake_form_upload_form.process(onvalidation=VALIDATE_FILENAME).accepted:
-            session.flash = "Answer saved!"
-            redirect(URL())
+    intake_form_upload_row, intake_form_upload_form = FORM_PROCESSOR_GENERIC(getattr(
+        intake_form_row, "please_choose", None) == "Y",
+                                                               db.intake_form_upload, validator=VALIDATE_FILENAME)
 
-    intake_form_patient_example_row = None
-    intake_form_patient_example_form = None
-    if getattr(intake_form_row, "please_choose", None) == "Y":
-        intake_form_patient_example_row = db(db.intake_form_patient_example.id > 0).select().last()
-        intake_form_patient_example_form = SQLFORM_ANSWER(db.intake_form_patient_example,
-                                                          intake_form_patient_example_row)
-        if intake_form_patient_example_form.process().accepted:
-            session.flash = "Answer saved!"
-            redirect(URL())
+    intake_form_patient_example_rows, intake_form_patient_example_form = FORM_PROCESSOR_GENERIC(getattr(
+        intake_form_row, "please_choose", None) == "Y",
+                                                               db.intake_form_patient_example, multi=True)
 
     return dict(transition_of_care_plan_internal_form=transition_of_care_plan_internal_form,
                 transition_of_care_plan_internal_row=transition_of_care_plan_internal_row,
@@ -52,7 +46,7 @@ def index():
                 intake_form_upload_form=intake_form_upload_form,
                 intake_form_upload_row=intake_form_upload_row,
                 intake_form_patient_example_form=intake_form_patient_example_form,
-                intake_form_patient_example_row=intake_form_patient_example_row)
+                intake_form_patient_example_rows=intake_form_patient_example_rows)
 
 def user():
     """
