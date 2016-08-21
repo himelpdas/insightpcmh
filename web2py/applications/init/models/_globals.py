@@ -1,6 +1,13 @@
+from string import Formatter
+
 _telephone_field_validator = IS_MATCH("^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$")
 _note_field = Field("note", label=XML("<span class='text-muted'>Note to Trainer (Optional)</span>"))
 _yes_no_field_default = Field("please_choose", requires=IS_IN_SET([("Y", "Yes"), ("N", "No")]))
+
+
+def _validate_filename(form):
+    form.vars.filename = request.vars.upload.filename
+
 
 def dtable():
     for each in db.tables:
@@ -8,121 +15,150 @@ def dtable():
             db(db[each].id > 0).delete()
     db.commit()
 
-class SQLFORM_ANSWER(SQLFORM):
-    def __init__(self, table, row, rows, *args, **kwargs):
+
+class SingleSQLFORM(SQLFORM):
+    def __init__(self, table, row, *args, **kwargs):
 
         submit_label = "Submit Answer"
+        btn_class = "warning"
+
         if bool(row):
             submit_label = T("Change Answer")
-        elif len(rows):
+            btn_class = "primary"
+
+        buttons = [TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right"%btn_class)]
+
+        if bool(row):
+            buttons.insert(0, TAG.button('Clear', _type="button", _class="btn btn-info pull-right",
+                                         _onClick="if(confirm('Clear entry?')){parent.location='%s'}" % URL()
+                                         ))  # confirm redirect
+
+        super(self.__class__, self).__init__(table, record=row, buttons=buttons, showid=False, *args, **kwargs)
+
+
+class MultiSQLFORM(SQLFORM):
+    def __init__(self, table, rows, multi, *args, **kwargs):
+
+        submit_label = "Add Answer"
+        if len(rows):
             submit_label = T("Add Another")
 
-        buttons = [TAG.button(submit_label, _type="submit", _class="btn btn-primary pull-right")]
+        if len(rows) < multi:
+            btn_class = "warning"
+        else:
+            btn_class = "primary"
 
-        if len(rows) > 0 or bool(row):
+        buttons = [TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right"%btn_class)]
+
+        if len(rows):
             buttons.insert(0, TAG.button('Clear', _type="button", _class="btn btn-info pull-right",
                             _onClick="if(confirm('Clear entry?')){parent.location='%s'}" % URL()))  # confirm redirect
 
         super(self.__class__, self).__init__(table,
-            record=row,
+            #record=row,
             #submit_button=T('Change Answer') if bool(row) else T("Submit Answer"),
             buttons=buttons,
             showid=False, *args, **kwargs)
 
 
-def MISSING_ANSWERS(*args):  # if form is true AND row is true, then question has been answered
-    needs_answering = []
-    for answered, form in args:
-        needs_answering.append(not (not form or (form and answered)))
-    return any(needs_answering)
-
-
-def INCORRECT_ANSWERS(*forms):
-    needs_fixing = []
-    for form in filter(lambda x: bool(x), forms):
-        needs_fixing.append(form.warnings)
-    return any(needs_fixing)
-
-
-def FORM_PROCESSOR_GENERIC(condition_to_show, question_table, validator=None, multi=False):
-    form = None
-    result = None  # keep None here in case previous answer changes
-    results = []
-    if condition_to_show:
-        if not multi:
-            result = db(question_table.id > 0).select().last()
-            form = SQLFORM_ANSWER(question_table, result)
-        else:
-            results = db(question_table.id > 0).select()
-            form = SQLFORM_ANSWER(question_table, None)
-        if form.process(onvalidation=validator).accepted:
-            session.flash = "Answer saved!"
-            redirect(URL())
-    return (result if not multi else results), form
-
-class question_and_answer():
+class QNA(object):
     instances = []
 
-    def __init__(self, show, table, question, validator=None, multi=1):
+    def require_show(func):  # get decorated func as first argument
+        def func_wrapper(self, *args, **kwargs):  # this is the function that will replace func
+            if self.show:
+                return func(self, *args, **kwargs)  # run func as normal is condition met
+            return False  # otherwise don't
 
+        return func_wrapper  # this is the function that will replace func
+
+    def __init__(self, show, table, question, validator=None):
+        self.__class__.instances.append(self)  # keep track of instances
+        #argument
         self.table = table
         self.question = question
         self.validator = validator
-        self.multi = multi
         self.show = show
-
+        #generate
         self.form = None
         self.row = None
         self.rows = []
-        self.warnings = []
+        self.warnings = []  #
 
-        self.__class__.instances.append(self)  # keep track of instances
-
-        if not show:
-            return
-
-        if multi > 1:
-            self.preprocess_multi()
-        else:
-            self.preprocess_single()
-
-        self.form_process()
-
-    def preprocess_single(self):
-        """make form editable"""
-        self.row = db(self.table.id > 0).select().last()
-        self.form = SQLFORM_ANSWER(self.table, self.row, [])
-
-    def preprocess_multi(self):
-        self.rows = db(self.table.id > 0).select(orderby=~db[self.table].id,limitby=(0,self.multi))  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
-        self.form = SQLFORM_ANSWER(self.table, None, self.rows)
-
-    def form_process(self):
+    def _form_process(self):
         if self.form.process(onvalidation=self.validator).accepted:
             session.flash = "Answer saved!"
             redirect(URL())
 
+    def preprocess(self):
+        """Perform tasks related to Single or Multi forms before form_process"""
+        raise NotImplementedError
+
+    @require_show  # because __init__ was not yet called, self is not the first argument here
+    def process(self):
+        self.preprocess()
+        self._form_process()
+
+    @require_show
     def has_warnings(self):
-        if not self.form:
-            return False
         return bool(len(self.warnings))
 
-    def addWarnings(self, conditional, message):
-        if self.form and conditional:
+    @require_show
+    def add_warning(self, conditional, message):
+        if conditional:
             self.warnings.append(message)
+            return True
 
+    require_show = staticmethod( require_show )  # http://stackoverflow.com/questions/1263451/python-decorators-in-classes
+
+
+class MultiQNA(QNA):
+    def __init__(self, multi, limit, *args, **kwargs):
+        super(self.__class__, self).__init__(*args, **kwargs)
+        self.multi = multi
+        self.limit = limit
+        self.template = None
+
+        self.process()
+
+    def preprocess(self):
+        # self.rows = db(self.table.id > 0).select(orderby=~db[self.table].id,limitby=(0,self.multi))  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
+        self.rows = db(self.table.id > 0).select()  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
+        self.form = MultiSQLFORM(self.table, self.rows, self.multi)
+
+    @QNA.require_show  # returns False if we're not supposed to show this form
     def needs_answer(self):
-        if not self.show:
-            return False
 
-        if self.multi < 2 and self.row:
+        if self.multi <= len(self.rows):
             return False
+        return True
 
-        if self.multi == len(self.rows):
+    def set_template(self, template):
+        self.template = template
+
+    def render_template(self):
+        for row in self.rows:
+            keys = filter(lambda key: key, [i[1] for i in Formatter().parse(self.template)])  #filter because we get Nones # http://stackoverflow.com/questions/13037401/get-keys-from-template
+            yield XML(self.template.format(
+                **dict(
+                    map(lambda key: (key, row[key]), keys)
+                )))  # would look like self.template.format(name="Jon", ...)
+
+class SingleQNA(QNA):
+    def __init__(self, *args, **kwargs):
+        super(self.__class__, self).__init__(*args, **kwargs)
+
+        self.process()
+
+    def preprocess(self):
+        """make form editable"""
+        self.row = db(self.table.id > 0).select().last()
+        self.form = SingleSQLFORM(self.table, self.row)
+
+    @QNA.require_show
+    def needs_answer(self):
+        if self.row:
             return False
-
         return True
 
 
-def VALIDATE_FILENAME(form):
-    form.vars.filename = request.vars.upload.filename

@@ -35,23 +35,13 @@
     <div class="panel-heading question-box-heading"><span class="pull-right glyphicon glyphicon-{{=icon}}"></span><span class="glyphicon glyphicon-{{if not qna.needs_answer():}}check{{else:}}unchecked{{pass}}"></span><span class="question-box-title-done"> {{if not qna.needs_answer():}}[Answered] {{pass}}{{=qna.question}}</span></div>
     <div class="panel-body">
 
-    {{if getattr(qna.row, 'upload', None):}}  {{# for single uploads}}
-        <ul>
-            <li><b><a href="{{=URL('download', args=qna.row.upload)}}">{{=qna.row.filename}}</a></b></li>
-        </ul>
-    {{pass}}
-
     {{if qna.rows:}}
-        <ul>
-        {{flattened_answers = map(lambda each: each[1],qna.rows.as_dict().items())}}  {{'''}} as_dict returns as {4L: {..., 'id':4L}}, flatten to {..., 'id':4L} {{'''}}
-        {{for answer_dict in flattened_answers:}}
-            <li><b class="text-success">
-            {{for multi_field_value in filter(lambda field_value: "multi_" in field_value[0], sorted(answer_dict.items())):}}  {{# get the fields that have "multi_" in them}}
-                {{if not "_note" in multi_field_value[0]:}}{{=multi_field_value[1]}}&nbsp;{{elif multi_field_value[1]:}}- {{=I(multi_field_value[1])}}{{pass}}
-            {{pass}}
-            </b></li>
+        <h4><ol>
+        {{for rendered in qna.render_template():}}
+            <li>{{=rendered}}</li>
         {{pass}}
-        </ul>
+        </ol></h4>
+        <br>
     {{pass}}
     {{=qna.form}}
     <h4><ul>
@@ -67,12 +57,12 @@
 {{
         actions = []
         show_generic = False
-        if any(map(lambda e: e.needs_answer(), question_and_answer.instances)):
-            actions.append(XML(T("Please <b>answer</b> one or more questions below.")))
+        if any(map(lambda e: e.needs_answer(), QNA.instances)):
+            actions.append(XML(T("Please <b class='text-warning'>answer</b> one or more questions below.")))
             show_generic = True
         pass
-        if any(map(lambda e: e.has_warnings(), question_and_answer.instances)):
-            actions.append(XML(T("Please <b>resolve</b> one or more questions below.")))
+        if any(map(lambda e: e.has_warnings(), QNA.instances)):
+            actions.append(XML(T("Please <b class='text-danger'>resolve</b> one or more questions below.")))
             show_generic = True
         pass
         if show_generic:
@@ -95,7 +85,7 @@
     </div>
 </div>
 
-{{for qna in reversed(question_and_answer.instances):}}
+{{for qna in reversed(QNA.instances):}}
 
     {{QUESTION_PANEL(qna)}}
 

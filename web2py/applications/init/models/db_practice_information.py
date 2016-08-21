@@ -21,8 +21,8 @@ db.define_table("intake_form_upload",
                 _note_field)
 
 db.define_table("intake_form_patient_example",
-                Field("multi_1_patient_first_name", label="Patient First Name"),
-                Field("multi_2_patient_last_name", label="Patient Last Name"),
-                Field("multi_3_patient_DOB", "date", label="Patient DOB"),
-                Field("multi_4_note", label=XML("<span class='text-muted'>Note to Trainer (Optional)</span>")),
+                Field("patient_first_name", label="Patient First Name", requires=IS_NOT_EMPTY()),
+                Field("patient_last_name", label="Patient Last Name", requires=IS_NOT_EMPTY()),
+                Field("patient_DOB", "date", label="Patient DOB", requires=IS_NOT_EMPTY()),
+                Field("note", label=XML("<span class='text-muted'>Note to Trainer (Optional)</span>")),
 )

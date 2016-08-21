@@ -27,6 +27,6 @@ def ADHD_screening_letter():
         PRACTICE_ZIP="11101",
         RAND_LETTER_1=chr(random.randint(65, 90)),
         RAND_PAD="0"*random.randint(10, 20),
-        RAND_LETTER_2=chr(random.randint(65, 90)),
+        RAND_LETTER_2=chr(random.randint(65, 90)).lower(),
         PATIENT_GENDER_PRONOUN="her" if random.choice([True,False]) else "his",
     ))
