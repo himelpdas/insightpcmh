@@ -1,0 +1,101 @@
+{{import urllib}}
+{{import pydal.objects}}
+{{from collections import OrderedDict}}
+{{left_sidebar_enabled,right_sidebar_enabled=True,False}}
+{{extend 'layout.html'}}
+
+{{block header}}
+<header style="text-align: center;">
+    {{# <h3>A. Spencer MD (MDLand)</h3>  {{#practice}}
+    <h3>Ebony Proudfoot <span class="text-muted">(Your Trainer)</span></h3>  {{#practice}}
+    <h4><span class="glyphicon glyphicon-map-marker"></span> <a href="http://maps.google.com/?q={{=urllib.urlencode({'q':'660 White Plains Rd #325, Tarrytown, NY 10573'})}}">660 White Plains Rd #325, Tarrytown, NY 10573</a></h4>  {{#address}} {{# http://bit.ly/2a59inp}}
+    <h5>
+    <span class="glyphicon glyphicon-earphone"></span> (914) 524-0500 <span style="opacity:0.2">|</span>
+    <span class="glyphicon glyphicon-print"></span> (914) 524-0501 <span style="opacity:0.2">|</span>
+    {{# <span class="glyphicon glyphicon-envelope"></span> <a href="mailto:allison@insightmanagement.org">allison@insightmanagement.org</a>}}
+    <span class="glyphicon glyphicon-envelope"></span> <a href="mailto:ebony@insightmanagement.org">ebony@insightmanagement.org</a>
+    </h5>
+</header>
+{{end}}
+
+{{block left_sidebar}}
+<ul class="nav nav-pills nav-stacked">
+  <li role="presentation" class="active"><a href="#">Schedule</a></li>
+  <li role="presentation"><a href="#">Patient Communication</a></li>
+  <li role="presentation"><a href="#">Progress Notes</a></li>
+  <li role="presentation"><a href="#">Non Clinical Workflow</a></li>
+  <li role="presentation"><a href="#">Polices and Procedures</a></li>
+  <li role="presentation"><a href="#">EMR Screenshots</a></li>
+</ul>
+{{end}}
+
+{{def QUESTION_PANEL(qna, icon="question-sign"):}}
+{{if qna.show:}}
+<div class="panel panel-{{if qna.needs_answer():}}primary{{else:}}info{{pass}}">
+    <div class="panel-heading question-box-heading"><span class="pull-right glyphicon glyphicon-{{=icon}}"></span><span class="glyphicon glyphicon-{{if not qna.needs_answer():}}check{{else:}}unchecked{{pass}}"></span><span class="question-box-title-done"> {{if not qna.needs_answer():}}[Answered] {{pass}}{{=qna.question}}</span></div>
+    <div class="panel-body">
+
+    {{if qna.rows:}}
+        <h4><ol>
+        {{for rendered in qna.render_template():}}
+            <li>{{=rendered}}</li>
+        {{pass}}
+        </ol></h4>
+        <br>
+    {{pass}}
+    {{=qna.form}}
+    <h4><ul>
+        {{for warning in qna.warnings:}}
+            <li class="text-danger">{{=warning}}</li>
+        {{pass}}
+    </ul></h4>
+    </div>
+</div>
+{{pass}}
+{{return}}
+
+{{
+        actions = []
+        show_generic = False
+        if any(map(lambda e: e.needs_answer(), QNA.instances)):
+            actions.append(XML(T("Please <b class='text-warning'>answer</b> one or more questions below.")))
+            show_generic = True
+        pass
+        if any(map(lambda e: e.has_warnings(), QNA.instances)):
+            actions.append(XML(T("Please <b class='text-danger'>resolve</b> one or more questions below.")))
+            show_generic = True
+        pass
+        if show_generic:
+            actions.append(XML(T("If you feel stuck at any point, please contact your trainer above.")))
+        pass
+        has_action = bool(actions)
+}}
+
+<div class="panel panel-primary panel-{{if has_action:}}danger{{else:}}success{{pass}}">
+    <div class="panel-heading question-box-heading" style="text-transform: none; font-size:17px"><span class="pull-right glyphicon glyphicon-{{if not has_action:}}ok-sign{{else:}}exclamation-sign{{pass}}"></span>{{if has_action:}}Action{{="s" if len(actions)>1 else ""}} needed...{{else:}}Success!{{pass}}</div>
+    <div class="panel-body">
+        <ul>
+            {{for action in actions:}}
+                <li>{{=action}}</li>
+            {{pass}}
+            {{if not has_action:}}
+                <li>You have completed this section!</li>
+            {{pass}}
+        </ul>
+    </div>
+</div>
+
+{{include}}
+
+{{block right_sidebar}}
+{{end}}
+
+{{block page_js}}
+{{super}}
+<script>
+    $(".panel-body").each(function(){
+        $(this).hide();
+        $(this).fadeIn(500);
+    })
+</script>
+{{end page_js}}

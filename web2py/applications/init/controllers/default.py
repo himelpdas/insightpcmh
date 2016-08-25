@@ -24,6 +24,7 @@ def index():
         'transition_of_care_plan_internal',
         "Does the practice have a transition of care plan for importing a patient from pediatric care?"
     )
+
     transition_of_care_plan_internal.add_warning(
         getattr(transition_of_care_plan_internal.row, "please_choose", None) == "N",
         XML(T("Please schedule a training session with your trainer. Change your answer after training."))
