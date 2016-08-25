@@ -21,7 +21,7 @@ def index():
 
     transition_of_care_plan_internal = SingleQNA(
         True,
-        db.transition_of_care_plan_internal,
+        'transition_of_care_plan_internal',
         "Does the practice have a transition of care plan for importing a patient from pediatric care?"
     )
     transition_of_care_plan_internal.add_warning(
@@ -31,7 +31,7 @@ def index():
 
     intake_form = SingleQNA(
         getattr(transition_of_care_plan_internal.row, "please_choose", None) == "Y",
-        db.intake_form,
+        'intake_form',
         "Do you have an intake form for transitioning a pediatric patient into your practice?"
     )
 
@@ -45,7 +45,7 @@ def index():
     intake_form_upload = MultiQNA(
         1, False,
         getattr(intake_form.row, "please_choose", None) == "Y",
-        db.intake_form_upload,
+        'intake_form_upload',
         "You said you have an intake form. Please upload a copy of this intake form here.",
         validator=_validate_filename,
     )
@@ -56,7 +56,7 @@ def index():
     intake_form_patient_example = MultiQNA(
         3, False,
         getattr(intake_form.row, "please_choose", None) == "Y",
-        db.intake_form_patient_example,
+        'intake_form_patient_example',
         XML("Enter <u>3 or more</u> patient names where each patient has a completed intake form in the patient record."),
     )
 

@@ -16,8 +16,20 @@ def dtable():
     db.commit()
 
 
-class SingleSQLFORM(SQLFORM):
-    def __init__(self, table, row, *args, **kwargs):
+class MixinSQLFORM(object):
+    def __init__(self, table_name):
+        self.buttons = []
+        self.table_name = table_name
+
+    def insert_clear_btn(self):
+        self.buttons.insert(0, TAG.button('Clear', _type="button", _class="btn btn-info pull-right",
+                                     _onClick="if(confirm('Clear entry?')){parent.location='%s'}" %
+                                              URL(vars=dict(delete=self.table_name))))  # confirm redirect
+
+
+class SingleSQLFORM(SQLFORM, MixinSQLFORM):
+    def __init__(self, table_name, row, *args, **kwargs):
+        MixinSQLFORM.__init__(self, table_name)
 
         submit_label = "Submit Answer"
         btn_class = "warning"
@@ -26,18 +38,17 @@ class SingleSQLFORM(SQLFORM):
             submit_label = T("Change Answer")
             btn_class = "primary"
 
-        buttons = [TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right"%btn_class)]
+        self.buttons.append(TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right"%btn_class))
 
         if bool(row):
-            buttons.insert(0, TAG.button('Clear', _type="button", _class="btn btn-info pull-right",
-                                         _onClick="if(confirm('Clear entry?')){parent.location='%s'}" % URL()
-                                         ))  # confirm redirect
+            self.insert_clear_btn()
 
-        super(self.__class__, self).__init__(table, record=row, buttons=buttons, showid=False, *args, **kwargs)
+        super(self.__class__, self).__init__(db[table_name], record=row, buttons=self.buttons, showid=False, *args, **kwargs)
 
 
-class MultiSQLFORM(SQLFORM):
-    def __init__(self, table, rows, multi, *args, **kwargs):
+class MultiSQLFORM(SQLFORM, MixinSQLFORM):
+    def __init__(self, table_name, rows, multi, *args, **kwargs):
+        MixinSQLFORM.__init__(self, table_name)
 
         submit_label = "Add Answer"
         if len(rows):
@@ -48,16 +59,15 @@ class MultiSQLFORM(SQLFORM):
         else:
             btn_class = "primary"
 
-        buttons = [TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right"%btn_class)]
+        self.buttons.append(TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right"%btn_class))
 
         if len(rows):
-            buttons.insert(0, TAG.button('Clear', _type="button", _class="btn btn-info pull-right",
-                            _onClick="if(confirm('Clear entry?')){parent.location='%s'}" % URL()))  # confirm redirect
+            self.insert_clear_btn()
 
-        super(self.__class__, self).__init__(table,
+        super(self.__class__, self).__init__(db[table_name],
             #record=row,
             #submit_button=T('Change Answer') if bool(row) else T("Submit Answer"),
-            buttons=buttons,
+            buttons=self.buttons,
             showid=False, *args, **kwargs)
 
 
@@ -72,10 +82,11 @@ class QNA(object):
 
         return func_wrapper  # this is the function that will replace func
 
-    def __init__(self, show, table, question, validator=None):
+    def __init__(self, show, table_name, question, validator=None):  # constructor
         self.__class__.instances.append(self)  # keep track of instances
         #argument
-        self.table = table
+        self.table_name = table_name
+        self.table = db[table_name]
         self.question = question
         self.validator = validator
         self.show = show
@@ -96,6 +107,10 @@ class QNA(object):
 
     @require_show  # because __init__ was not yet called, self is not the first argument here
     def process(self):
+        if request.vars["delete"] == self.table_name:  # security to prevent SQL Injection attach
+            db(db[self.table_name].id > 0).delete()  # change to active = False
+            session.flash = "deleted question %s"%self.table_name
+            redirect(URL())
         self.preprocess()
         self._form_process()
 
@@ -109,7 +124,7 @@ class QNA(object):
             self.warnings.append(message)
             return True
 
-    require_show = staticmethod( require_show )  # http://stackoverflow.com/questions/1263451/python-decorators-in-classes
+    require_show = staticmethod(require_show)  # http://stackoverflow.com/questions/1263451/python-decorators-in-classes
 
 
 class MultiQNA(QNA):
@@ -124,7 +139,7 @@ class MultiQNA(QNA):
     def preprocess(self):
         # self.rows = db(self.table.id > 0).select(orderby=~db[self.table].id,limitby=(0,self.multi))  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
         self.rows = db(self.table.id > 0).select()  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
-        self.form = MultiSQLFORM(self.table, self.rows, self.multi)
+        self.form = MultiSQLFORM(self.table_name, self.rows, self.multi)
 
     @QNA.require_show  # returns False if we're not supposed to show this form
     def needs_answer(self):
@@ -153,7 +168,7 @@ class SingleQNA(QNA):
     def preprocess(self):
         """make form editable"""
         self.row = db(self.table.id > 0).select().last()
-        self.form = SingleSQLFORM(self.table, self.row)
+        self.form = SingleSQLFORM(self.table_name, self.row)
 
     @QNA.require_show
     def needs_answer(self):
