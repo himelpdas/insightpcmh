@@ -23,8 +23,8 @@ def same_day_appointments():
         validator=_validate_start_end_time,
     )
 
-    same_day_block.add_formatted_time_fields()
-    same_day_block.set_template("<b class='text-success'>{day_of_the_week} {start_time_formatted} - "
-                                "{end_time_formatted}</b> <i>{note}</i>")
+    #same_day_block.add_formatted_time_fields()
+    same_day_block.set_template("<b class='text-success'>{day_of_the_week} {start_time_virtual} - "
+                                "{end_time_virtual}</b> <i>{note}</i>")
 
     return dict()

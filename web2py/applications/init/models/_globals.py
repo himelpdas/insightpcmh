@@ -11,6 +11,10 @@ _day_of_week_field = lambda label=None: Field("day_of_the_week",
 _am_pm_time_validator = IS_TIME("Enter time as HH:MM [AM/PM]")
 
 
+def virtual_time_field(time_field_name, table):
+    return Field.Virtual(time_field_name+"_virtual", lambda row: row[table][time_field_name].strftime('%I:%M %p'))
+
+
 def _validate_filename(form):
     form.vars.filename = request.vars.upload.filename
 
@@ -176,10 +180,6 @@ class MultiQNA(QNA):
                     map(lambda key: (key, row[key]), keys)
                 )))  # would look like self.template.format(name="Jon", ...)
 
-    def add_formatted_time_fields(self, start_field_name="start_time", end_field_name="end_time"):
-        for row in self.rows:
-            row[start_field_name+"_formatted"] = row[start_field_name].strftime('%I:%M %p')
-            row[end_field_name+"_formatted"] = row[end_field_name].strftime('%I:%M %p')
 
 class SingleQNA(QNA):
     def __init__(self, *args, **kwargs):
