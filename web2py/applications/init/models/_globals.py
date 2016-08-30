@@ -3,13 +3,26 @@ from string import Formatter
 _telephone_field_validator = IS_MATCH("^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$")
 _note_field = Field("note", label=XML("<span class='text-muted'>Note to Trainer (Optional)</span>"))
 _yes_no_field_default = Field("please_choose", requires=IS_IN_SET([("Y", "Yes"), ("N", "No")]))
+_day_of_week_field = lambda label=None: Field("day_of_the_week",
+                                          requires=IS_IN_SET(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+                                                              "Saturday", "Sunday"], zero=None),
+                                          label = label
+                                          )
+_am_pm_time_validator = IS_TIME("Enter time as HH:MM [AM/PM]")
 
 
 def _validate_filename(form):
     form.vars.filename = request.vars.upload.filename
 
 
-def dtable():
+def _validate_start_end_time(form, start_field_name="start_time", end_field_name="end_time"):
+    # get the actual datetime.time object and compare
+    if form.vars[start_field_name] > form.vars[end_field_name]:
+        form.errors[start_field_name] = "Start time cannot be after the end time!"
+        form.errors[end_field_name] = "End time cannot be before the start time!"
+
+
+def d_tables():
     for each in db.tables:
         if not "auth_" in each:
             db(db[each].id > 0).delete()
@@ -87,7 +100,7 @@ class QNA(object):
         #argument
         self.table_name = table_name
         self.table = db[table_name]
-        self.question = question
+        self.question = XML(question)
         self.validator = validator
         self.show = show
         #generate
@@ -121,7 +134,7 @@ class QNA(object):
     @require_show
     def add_warning(self, conditional, message):
         if conditional:
-            self.warnings.append(message)
+            self.warnings.append(XML(message))
             return True
 
     require_show = staticmethod(require_show)  # http://stackoverflow.com/questions/1263451/python-decorators-in-classes
@@ -129,6 +142,9 @@ class QNA(object):
 
 class MultiQNA(QNA):
     def __init__(self, multi, limit, *args, **kwargs):
+        """multi: integer of number required to be answered, OR needs answer if False
+           limit: turn of form submit if limit is True and multi is reached
+        """
         super(self.__class__, self).__init__(*args, **kwargs)
         self.multi = multi
         self.limit = limit
@@ -139,12 +155,13 @@ class MultiQNA(QNA):
     def preprocess(self):
         # self.rows = db(self.table.id > 0).select(orderby=~db[self.table].id,limitby=(0,self.multi))  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
         self.rows = db(self.table.id > 0).select()  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
-        self.form = MultiSQLFORM(self.table_name, self.rows, self.multi)
+        self.form = MultiSQLFORM(self.table_name, self.rows, self.multi)  # if limit, prevent submit
 
     @QNA.require_show  # returns False if we're not supposed to show this form
     def needs_answer(self):
-
-        if self.multi <= len(self.rows):
+        if str(self.multi).isdigit() and self.multi <= len(self.rows):
+            return False
+        elif not self.multi:
             return False
         return True
 
@@ -158,6 +175,11 @@ class MultiQNA(QNA):
                 **dict(
                     map(lambda key: (key, row[key]), keys)
                 )))  # would look like self.template.format(name="Jon", ...)
+
+    def add_formatted_time_fields(self, start_field_name="start_time", end_field_name="end_time"):
+        for row in self.rows:
+            row[start_field_name+"_formatted"] = row[start_field_name].strftime('%I:%M %p')
+            row[end_field_name+"_formatted"] = row[end_field_name].strftime('%I:%M %p')
 
 class SingleQNA(QNA):
     def __init__(self, *args, **kwargs):

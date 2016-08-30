@@ -1,13 +1,4 @@
-# -*- coding: utf-8 -*-
-# this file is released under public domain and you can use without limitations
-
-# -------------------------------------------------------------------------
-# This is a sample controller
-# - index is the default action of any application
-# - user is required for authentication and authorization
-# - download is for downloading files uploaded in the db (does streaming)
-# -------------------------------------------------------------------------
-
+response.view = 'templates/survey_extend.html'  # http://stackoverflow.com/questions/8750723/is-it-possible-to-change-a-web2py-view-on-the-fly
 
 def transition_of_care():
     """
@@ -58,7 +49,7 @@ def transition_of_care():
         3, False,
         getattr(intake_form.row, "please_choose", None) == "Y",
         'intake_form_patient_example',
-        XML("Enter <u>3 or more</u> patient names where each patient has a completed intake form in the patient record."),
+        "Enter <u>3 or more</u> patient names where each patient has a completed intake form in the patient record.",
     )
 
     intake_form_patient_example.set_template("<b class='text-success'>{patient_first_name} {patient_last_name}, {patient_DOB} {note}</b>")

@@ -116,7 +116,11 @@
     <!-- The javascript =============================== -->
     <script src="{{=URL('static','js/bootstrap.min.js')}}"></script>
     <script src="{{=URL('static','js/web2py-bootstrap3.js')}}"></script>
-    {{block page_js}}{{end page_js}}
+    {{block page_js}}
+    <script>
+        jQuery.timeEntry.setDefaults({show24Hours: false, showSeconds: false, ampmNames: [' AM', ' PM']});  {{#show24Hours: false,}}
+    </script>
+    {{end page_js}}
     {{if response.google_analytics_id:}}
     <!-- Analytics ==================================== -->
     <script src="{{=URL('static','js/analytics.min.js')}}"></script>
@@ -126,7 +130,7 @@
       });
     </script>
     {{pass}}
-    <!-- Share ============================y============ -->
+    <!-- Share ======================================== -->
     <script src="{{=URL('static','js/share.js',vars=dict(static=URL('static','images')))}}"></script>
   </body>
 </html>
