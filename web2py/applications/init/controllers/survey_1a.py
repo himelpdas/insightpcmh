@@ -24,7 +24,7 @@ def same_day_appointments():
     )
 
     #same_day_block.add_formatted_time_fields()
-    same_day_block.set_template("<b class='text-success'>{day_of_the_week} {start_time_virtual} - "
-                                "{end_time_virtual}</b> <i>{note}</i>")
+    same_day_block.set_template("<b class='text-success'>{day_of_the_week} {start_time:%I}:{start_time:%M} "
+                                "{start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}</b> <i>{note}</i>")
 
     return dict()

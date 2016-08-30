@@ -7,7 +7,5 @@ db.define_table("same_day_block",
     _day_of_week_field(),
     Field("start_time", "time", requires=_am_pm_time_validator),  # DO NOT use IS_NOT_EMPTY, as it will be submitted as a String instead of a datetime.time object!
     Field("end_time", "time", requires=_am_pm_time_validator),
-    virtual_time_field("start_time", "same_day_block"),
-    virtual_time_field("end_time", "same_day_block"),
     _note_field
 )
