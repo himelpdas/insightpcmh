@@ -29,13 +29,13 @@ response.google_analytics_id = None
 # ----------------------------------------------------------------------------------------------------------------------
 
 response.menu = [
-    (T('PC Info'), False, URL('default', 'index'), []),
-    (T('PCMH 1'), False, URL('init', '1a', 'index'), []),
-    (T('PCMH 2'), False, URL('default', 'index'), []),
-    (T('PCMH 3'), False, URL('default', 'index'), []),
-    (T('PCMH 4'), False, URL('default', 'index'), []),
-    (T('PCMH 5'), False, URL('default', 'index'), []),
-    (T('PCMH 6'), False, URL('default', 'index'), []),
+    (T('PC Info'), ('info' in request.function), URL('default', 'index'), []),
+    (T('PCMH 1'), ('1' in request.controller), URL('init', '1a', 'index'), []),
+    (T('PCMH 2'), ('2' in request.controller), URL('default', 'index'), []),
+    (T('PCMH 3'), ('3' in request.controller), URL('default', 'index'), []),
+    (T('PCMH 4'), ('4' in request.controller), URL('default', 'index'), []),
+    (T('PCMH 5'), ('5' in request.controller), URL('default', 'index'), []),
+    (T('PCMH 6'), ('6' in request.controller), URL('default', 'index'), []),
 ]
 
 DEVELOPMENT_MENU = False

@@ -4,6 +4,13 @@
 {{left_sidebar_enabled,right_sidebar_enabled=True,False}}
 {{extend 'layout.html'}}
 
+{{block head}}
+<style>
+    .web2py-menu-active {
+        background-color: #BA55D3;
+    }
+</style>
+{{end}}
 {{block header}}
 <header style="text-align: center;">
     {{# <h3>A. Spencer MD (MDLand)</h3>  {{#practice}}
@@ -28,7 +35,7 @@
     {{_element = request.controller[1]}}
     {{if _pcmh.isdigit():}}
         {{for l in _pcmh_info[_pcmh]:}}
-            <li role="presentation" {{if _element==l:}}class="active"{{pass}}><a href="{{=_element+l}}">Element {{=l.upper()}}</a></li>
+            <li role="presentation" {{if _element==l:}}class="active"{{pass}}><a href="{{=_pcmh+l}}">Element {{=l.upper()}}</a></li>
         {{pass}}
     {{else:}}
         <li role="presentation" class="active"><a href="#">Schedule</a></li>
