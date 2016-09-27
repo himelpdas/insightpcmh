@@ -20,12 +20,24 @@
 
 {{block left_sidebar}}
 <ul class="nav nav-pills nav-stacked">
-  <li role="presentation" class="active"><a href="#">Schedule</a></li>
-  <li role="presentation"><a href="#">Patient Communication</a></li>
-  <li role="presentation"><a href="#">Progress Notes</a></li>
-  <li role="presentation"><a href="#">Non Clinical Workflow</a></li>
-  <li role="presentation"><a href="#">Polices and Procedures</a></li>
-  <li role="presentation"><a href="#">EMR Screenshots</a></li>
+    {{_pcmh_info = {
+        "1":"abc",
+        "2":"abcd",
+    } }}
+    {{_pcmh = request.controller[0]}}
+    {{_element = request.controller[1]}}
+    {{if _pcmh.isdigit():}}
+        {{for l in _pcmh_info[_pcmh]:}}
+            <li role="presentation" {{if _element==l:}}class="active"{{pass}}><a href="{{=_element+l}}">Element {{=l.upper()}}</a></li>
+        {{pass}}
+    {{else:}}
+        <li role="presentation" class="active"><a href="#">Schedule</a></li>
+        <li role="presentation"><a href="#">Patient Communication</a></li>
+        <li role="presentation"><a href="#">Progress Notes</a></li>
+        <li role="presentation"><a href="#">Non Clinical Workflow</a></li>
+        <li role="presentation"><a href="#">Polices and Procedures</a></li>
+        <li role="presentation"><a href="#">EMR Screenshots</a></li>
+    {{pass}}
 </ul>
 {{end}}
 

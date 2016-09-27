@@ -29,9 +29,13 @@ response.google_analytics_id = None
 # ----------------------------------------------------------------------------------------------------------------------
 
 response.menu = [
-    (T('Practice Information'), False, URL('default', 'index'), []),
-    (T('Gap Analysis'), False, URL('default', 'index'), []),
-    (T('Data Gathering'), False, URL('default', 'index'), [])
+    (T('PC Info'), False, URL('default', 'index'), []),
+    (T('PCMH 1'), False, URL('init', '1a', 'index'), []),
+    (T('PCMH 2'), False, URL('default', 'index'), []),
+    (T('PCMH 3'), False, URL('default', 'index'), []),
+    (T('PCMH 4'), False, URL('default', 'index'), []),
+    (T('PCMH 5'), False, URL('default', 'index'), []),
+    (T('PCMH 6'), False, URL('default', 'index'), []),
 ]
 
 DEVELOPMENT_MENU = False

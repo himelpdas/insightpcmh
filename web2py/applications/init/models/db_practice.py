@@ -9,8 +9,8 @@ _note_field,
 
 db.define_table("clinical_hours",
 _day_of_week_field(),
-Field("start_time", "time", label="opens"),
-Field("end_time", "time", label="closes"),
+Field("start_time", "time", label="Opens"),
+Field("end_time", "time", label="Closes"),
 _note_field,
 )
 

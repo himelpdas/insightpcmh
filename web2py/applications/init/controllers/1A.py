@@ -1,6 +1,7 @@
 response.view = 'templates/survey_extend.html'  # http://stackoverflow.com/questions/8750723/is-it-possible-to-change-a-web2py-view-on-the-fly
 
-def same_day_appointments():
+def index():
+
     same_day_appointments = SingleQNA(
         True,
         'same_day_appointments',
@@ -16,7 +17,7 @@ def same_day_appointments():
     )
 
     same_day_block = MultiQNA(
-        20, False,
+        3, False,
         getattr(same_day_appointments.row, "please_choose", None) == "Y",
         'same_day_block',
         "Enter your same-day time blocks. You must have same-day blocks for each day your practice sees patients.",
