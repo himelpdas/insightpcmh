@@ -16,8 +16,8 @@ def index():
            "examples</a> of ideal same-day scheduling.") % None)
     )
 
-    same_day_block = MultiQNA(
-        3, False,
+    same_day_blocks = MultiQNA(
+        3, False,  # change the 3 to the number of days the practice is open from the info
         getattr(same_day_appointments.row, "please_choose", None) == "Y",
         'same_day_block',
         "Enter your same-day time blocks. You must have same-day blocks for each day your practice sees patients.",
@@ -25,7 +25,39 @@ def index():
     )
 
     #same_day_block.add_formatted_time_fields()
-    same_day_block.set_template("<b class='text-success'>{day_of_the_week} {start_time:%I}:{start_time:%M} "
+    same_day_blocks.set_template("<b class='text-success'>{day_of_the_week} {start_time:%I}:{start_time:%M} "
                                 "{start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}</b> <i>{note}</i>")
+
+
+    after_hours = SingleQNA(
+        True,
+        'after_hours',
+        "Does the practice have any after hours, <u>at least</u> once a week?"
+    )
+
+    after_hour_blocks = MultiQNA(
+        1, False,
+        getattr(after_hours.row, "please_choose", None) == "Y",
+        'after_hour_block',
+        "You said you have after-hours. Please enter your after-hours here.",
+        validator=_validate_start_end_time,
+    )
+
+    walkin = SingleQNA(
+        True,
+        'walkin',
+        "Aside from same-day appointments, are you mainly a walk-in clinic?"
+    )
+
+    next_available_appointments = MultiQNA(
+        1, False,
+        getattr(walkin.row, "please_choose", None) == "N",
+        'next_available_appointment',
+        "Aside from same-day appointments, what are your other appointment types and how long until their next available appointments?",
+    )
+
+    next_available_appointments.set_template("<b class='text-success'>{day_of_the_week}</b> <i>{note}</i>")
+
+
 
     return dict()

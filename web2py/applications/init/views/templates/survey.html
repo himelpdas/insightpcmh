@@ -6,13 +6,17 @@
 
 {{block head}}
 <style>
+    #web2py-logo {
+       color: #BA55D3;
+       text-shadow: 2px 2px #000000;
+    }
     .web2py-menu-active {
         background-color: #BA55D3;
     }
 </style>
 {{end}}
 {{block header}}
-<header style="text-align: center;">
+<header style="text-align: center; padding-bottom:1px;">
     {{# <h3>A. Spencer MD (MDLand)</h3>  {{#practice}}
     <h3>Ebony Proudfoot <span class="text-muted">(Your Trainer)</span></h3>  {{#practice}}
     <h4><span class="glyphicon glyphicon-map-marker"></span> <a href="http://maps.google.com/?q={{=urllib.urlencode({'q':'660 White Plains Rd #325, Tarrytown, NY 10573'})}}">660 White Plains Rd #325, Tarrytown, NY 10573</a></h4>  {{#address}} {{# http://bit.ly/2a59inp}}
@@ -51,7 +55,7 @@
 {{def QUESTION_PANEL(qna):}}
 {{if qna.show:}}
 <div class="panel panel-{{if qna.needs_answer():}}primary{{else:}}info{{pass}}">
-    <div class="panel-heading question-box-heading"><span class="pull-right glyphicon glyphicon-{{if not qna.needs_answer():}}check{{else:}}unchecked{{pass}}"></span><span class="question-box-title-done"> {{if not qna.needs_answer():}}[Answered] {{pass}}{{=qna.question}}</span></div>
+    <div class="panel-heading question-box-heading"><span class="pull-right glyphicon glyphicon-{{if not qna.needs_answer():}}check{{else:}}unchecked{{pass}}"></span><span class="question-box-title-done">{{if qna.needs_answer():}}[Needs Answer]{{else:}}[Answered]{{pass}} {{=qna.question}}</span></div>
     <div class="panel-body">
 
     {{if qna.rows:}}
@@ -99,6 +103,7 @@
             {{pass}}
             {{if not has_action:}}
                 <li>You have completed this section!</li>
+                <li>Download <a href="">PCMH 1A policy</a></li>
             {{pass}}
         </ul>
     </div>

@@ -6,7 +6,7 @@ _yes_no_field_default = Field("please_choose", requires=IS_IN_SET([("Y", "Yes"),
 _day_of_week_field = lambda label=None: Field("day_of_the_week",
                                           requires=IS_IN_SET(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
                                                               "Saturday", "Sunday"], zero=None),
-                                          label = label
+                                          label=label
                                           )
 _am_pm_time_validator = IS_TIME("Enter time as HH:MM [AM/PM]")
 
