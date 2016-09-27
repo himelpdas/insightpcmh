@@ -35,7 +35,7 @@
     {{_element = request.controller[1]}}
     {{if _pcmh.isdigit():}}
         {{for l in _pcmh_info[_pcmh]:}}
-            <li role="presentation" {{if _element==l:}}class="active"{{pass}}><a href="{{=_pcmh+l}}">Element {{=l.upper()}}</a></li>
+            <li role="presentation" {{if _element==l:}}class="active"{{pass}}><a href="{{=URL('init', _pcmh+l, 'index')}}">Element {{=l.upper()}}</a></li>
         {{pass}}
     {{else:}}
         <li role="presentation" class="active"><a href="#">Schedule</a></li>
