@@ -32,10 +32,10 @@ db.define_table("walkin",
     _note_field
 )
 
+_unit_field = Field("unit", requires=IS_IN_SET(['Minutes', 'Hour(s)', 'Day(s)', 'Week(s)', 'Month(s)']))
 db.define_table("next_available_appointment",
-    _day_of_week_field(),
     Field("appointment_type"),
     Field("available_within", "integer"),
-    Field("unit", requires=IS_IN_SET([("m", "Minutes"), ("h", "Hour(s)"), ("d", "Day(s)"), ("w", "Week(s)")])),
+    _unit_field,
     _note_field
 )

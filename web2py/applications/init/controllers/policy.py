@@ -9,6 +9,27 @@ def PCMH_1A_1():
         accute_illnesses_seen_within=24,
     )
 
+def PCMH_1A_4():
+
+
+    walkin = db(db.walkin.id>0).select().last()
+    if not walkin:
+        raise HTTP(404)
+    is_walkin_only = walkin.please_choose == "Y"
+
+    next_available_appointments = db(db.next_available_appointment.id>0).select()
+    #sorted(next_available_appointments)
+
+    return dict(
+        PRACTICE_NAME="Parkchester Medical PC",
+        SITE_ADDRESS="660 White Plains Rd, Ste 460, Tarrytown NY 10591",
+        SITE_TELEPHONE="903-524-0500",
+        SITE_FAX="903-524-0500",
+        NEXT_AVAIL_APPTS=next_available_appointments,
+        IS_WALKIN_ONLY = is_walkin_only,
+    )
+
+
 def testing():
     #response.headers['Content-Type'] = 'application/octet-stream'  # will force download if using .xml extension or else browser will just view
     #response.headers['Content-Type'] = 'application/msword'  # will save as doc if using .xml extension, commented out because we changed the .xml template to .doc, but still using wordprocessingml http://stackoverflow.com/questions/4212861/what-is-a-correct-mime-type-for-docx-pptx-etc

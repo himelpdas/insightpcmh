@@ -103,7 +103,9 @@
             {{pass}}
             {{if not has_action:}}
                 <li>You have completed this section!</li>
-                <li>Download <a href="">PCMH 1A policy</a></li>
+                {{for doc in documents:}}
+                    <li>Download <a href="{{=doc[1]}}">{{=doc[0]}}</a></li>
+                {{pass}}
             {{pass}}
         </ul>
     </div>

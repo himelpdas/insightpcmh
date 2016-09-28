@@ -43,6 +43,9 @@ def index():
         validator=_validate_start_end_time,
     )
 
+    after_hour_blocks.set_template("<b class='text-success'>{day_of_the_week} {start_time:%I}:{start_time:%M} "
+                                "{start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}</b> <i>{note}</i>")
+
     walkin = SingleQNA(
         True,
         'walkin',
@@ -56,8 +59,8 @@ def index():
         "Aside from same-day appointments, what are your other appointment types and how long until their next available appointments?",
     )
 
-    next_available_appointments.set_template("<b class='text-success'>{day_of_the_week}</b> <i>{note}</i>")
+    next_available_appointments.set_template("<b class='text-success'>{appointment_type} available within {available_within} {unit}</b> <i>{note}</i>")
 
-
-
-    return dict()
+    return dict(documents = {
+        ("PCMH_1A_4.doc", URL("init", "policy", "PCMH_1A_4.doc"))
+    })
