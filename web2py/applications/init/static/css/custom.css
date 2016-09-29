@@ -4,6 +4,10 @@
     font-weight: lighter;
 }
 
+.weak-font {
+    font-weight: lighter;
+}
+
 /*
 .panel .question-box-title-done:hover {
     color: #d1d1d1;

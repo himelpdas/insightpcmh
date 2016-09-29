@@ -29,7 +29,7 @@ response.google_analytics_id = None
 # ----------------------------------------------------------------------------------------------------------------------
 
 response.menu = [
-    (T('PC Info'), ('info' in request.function), URL('default', 'index'), []),
+    (T('PC Info'), ('info' in request.function), URL('init', 'info', 'index'), []),
     (T('PCMH 1'), ('1' in request.controller), URL('init', '1a', 'index'), []),
     (T('PCMH 2'), ('2' in request.controller), URL('default', 'index'), []),
     (T('PCMH 3'), ('3' in request.controller), URL('default', 'index'), []),

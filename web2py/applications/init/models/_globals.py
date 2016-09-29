@@ -1,13 +1,27 @@
 from string import Formatter
 
-_telephone_field_validator = IS_MATCH("^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$")
+_telephone_field_validator = IS_MATCH("^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$", error_message="Enter telephone in this format (123) 123-1234")
 _note_field = Field("note", label=XML("<span class='text-muted'>Note to Trainer (Optional)</span>"))
 _yes_no_field_default = Field("please_choose", requires=IS_IN_SET([("Y", "Yes"), ("N", "No")]))
-_day_of_week_field = lambda label=None: Field("day_of_the_week",
-                                          requires=IS_IN_SET(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
-                                                              "Saturday", "Sunday"], zero=None),
-                                          label=label
-                                          )
+
+_days_of_the_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
+_day_of_week_field = lambda label=None, comment=None: \
+    Field("day_of_the_week",
+          requires=IS_IN_SET(_days_of_the_week, zero=None),
+          label=label,
+          comment=comment
+    )
+
+_days_of_week_field = lambda label=None, comment=None: \
+    Field("days_of_the_week", 'list:string',
+          requires=[IS_IN_SET(_days_of_the_week, zero=None, multiple=True),
+                    IS_NOT_EMPTY()],
+          widget=SQLFORM.widgets.multiple.widget,
+          label=label,
+          comment=comment
+    )
+
 _am_pm_time_validator = IS_TIME("Enter time as HH:MM [AM/PM]")
 
 
@@ -174,7 +188,9 @@ class MultiQNA(QNA):
             keys = filter(lambda key: key, [i[1] for i in Formatter().parse(self.template)])  #filter because we get Nones # http://stackoverflow.com/questions/13037401/get-keys-from-template
             yield XML(self.template.format(
                 **dict(
-                    map(lambda key: (key, row[key]), keys)
+                    map(lambda key: (key,
+                                     row[key] if not hasattr(row[key], '__iter__') else ", ".join(row[key])  #join with commas if object is list-like (python 2 only) http://stackoverflow.com/questions/1835018/python-check-if-an-object-is-a-list-or-tuple-but-not-string
+                                     ), keys)  #
                 )))  # would look like self.template.format(name="Jon", ...)
 
 

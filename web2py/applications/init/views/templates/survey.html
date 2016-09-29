@@ -5,16 +5,20 @@
 {{extend 'layout.html'}}
 
 {{block head}}
-<style>
-    #web2py-logo {
-       color: #BA55D3;
-       text-shadow: 2px 2px #000000;
-    }
-    .web2py-menu-active {
-        background-color: #BA55D3;
-    }
-</style>
+    {{super}}
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/css/bootstrap-multiselect.css"/>
+
+    <style>
+        #web2py-logo {
+           color: #BA55D3;
+           text-shadow: 2px 2px #000000;
+        }
+        .web2py-menu-active {
+            background-color: #BA55D3;
+        }
+    </style>
 {{end}}
+
 {{block header}}
 <header style="text-align: center; padding-bottom:1px;">
     {{# <h3>A. Spencer MD (MDLand)</h3>  {{#practice}}
@@ -42,12 +46,11 @@
             <li role="presentation" {{if _element==l:}}class="active"{{pass}}><a href="{{=URL('init', _pcmh+l, 'index')}}">Element {{=l.upper()}}</a></li>
         {{pass}}
     {{else:}}
-        <li role="presentation" class="active"><a href="#">Schedule</a></li>
-        <li role="presentation"><a href="#">Patient Communication</a></li>
-        <li role="presentation"><a href="#">Progress Notes</a></li>
-        <li role="presentation"><a href="#">Non Clinical Workflow</a></li>
-        <li role="presentation"><a href="#">Polices and Procedures</a></li>
-        <li role="presentation"><a href="#">EMR Screenshots</a></li>
+        <li role="presentation" {{if request.function in ["index", "practice"]:}}class="active"{{pass}}><a href="{{=URL('init', 'info', 'index')}}">Practice</a></li>
+        <li role="presentation" {{if request.function == "staff":}}class="active"{{pass}}><a href="{{=URL('init', 'info', 'staff')}}">Staff</a></li>
+        <li role="presentation"><a href="#">EMR</a></li>
+        <li role="presentation"><a href="#">Credentials</a></li>
+        <li role="presentation"><a href="#">NCQA</a></li>  {{# credit card http://stackoverflow.com/questions/1146810/taking-credit-card-information-online-without-processing-how-best-to-do-so}}
     {{pass}}
 </ul>
 {{end}}
@@ -118,10 +121,16 @@
 
 {{block page_js}}
 {{super}}
-<script>
-    $(".panel-body").each(function(){
-        $(this).hide();
-        $(this).fadeIn(500);
-    })
-</script>
+    <script>
+        $(".panel-body").each(function(){
+            $(this).hide();
+            $(this).fadeIn(500);
+        })
+    </script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/js/bootstrap-multiselect.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("[multiple='multiple']").multiselect();
+        });
+    </script>
 {{end page_js}}
