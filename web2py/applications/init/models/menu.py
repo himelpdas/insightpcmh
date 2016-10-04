@@ -29,13 +29,13 @@ response.google_analytics_id = None
 # ----------------------------------------------------------------------------------------------------------------------
 
 response.menu = [
-    (T('PC Info'), ('info' in request.function), URL('init', 'info', 'index'), []),
-    (T('PCMH 1'), ('1' in request.controller), URL('init', '1a', 'index'), []),
-    (T('PCMH 2'), ('2' in request.controller), URL('default', 'index'), []),
-    (T('PCMH 3'), ('3' in request.controller), URL('default', 'index'), []),
-    (T('PCMH 4'), ('4' in request.controller), URL('default', 'index'), []),
-    (T('PCMH 5'), ('5' in request.controller), URL('default', 'index'), []),
-    (T('PCMH 6'), ('6' in request.controller), URL('default', 'index'), []),
+    (T('Practice'), ('info' == request.controller), URL('init', 'info', 'index'), []),
+    (T('(1) Access'), ('1' == request.controller), URL('init', '1', 'a'), []),
+    (T('(2) Team'), ('2' == request.controller), URL('init', '2', 'a'), []),
+    (T('(3) Population'), ('3' == request.controller), URL('default', 'index'), []),
+    (T('(4) Management'), ('4' == request.controller), URL('default', 'index'), []),
+    (T('(5) Coordination'), ('5' == request.controller), URL('default', 'index'), []),
+    (T('(6) Performance'), ('6' == request.controller), URL('default', 'index'), []),
 ]
 
 DEVELOPMENT_MENU = False

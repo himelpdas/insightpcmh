@@ -6,24 +6,26 @@ _list_of_states = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "
 
 db.define_table("practice_info",
 Field("practice_name", requires=IS_NOT_EMPTY()),
-Field("practice_specialty", requires=IS_IN_SET(sorted(['Internal Medicine', 'Pediatrics', 'Family Medicine']), zero=None)),
+Field("practice_specialty", requires=IS_IN_SET(['Internal Medicine', 'Pediatrics', 'Family Medicine'], sort=True, zero=None)),
 Field("phone", requires=_telephone_field_validator),
-Field("extension", 'integer'),
+Field("extension", requires=IS_EMPTY_OR(_IS_DIGITS()), comment="Optional"),
 Field("address_line_1", requires=IS_NOT_EMPTY()),
-Field("address_line_2"),
+Field("address_line_2", comment="Optional"),
 Field("city", requires=IS_NOT_EMPTY()),
-Field("state_", label="State", requires=IS_IN_SET(filter(lambda e: e != "NY", _list_of_states), zero="NY")),
-Field("website", requires=IS_EMPTY_OR(IS_URL())),
+Field("state_", label="State", requires=IS_IN_SET(_list_of_states, zero=None)),
+Field("website", requires=IS_EMPTY_OR(IS_URL()), comment="Optional"),
 _note_field,
 )
+
+_practice = db(db.practice_info.id > 0).select().last() or Storage(practice_name="The practice")
 
 db.define_table("primary_contact",
 Field("first_name", requires=IS_NOT_EMPTY()),
 Field("last_name", requires=IS_NOT_EMPTY()),
 Field("email", requires=IS_EMAIL()),
-Field("phone", requires=_telephone_field_validator),
-Field("extension", 'integer'),
-Field("role", requires=IS_IN_SET(["MD", "PA", "MA", "Manager", "Other"], zero=None)),
+Field("phone", requires=IS_EMPTY_OR(_telephone_field_validator), comment="Leave blank if same as practice number"),
+Field("extension", requires=IS_EMPTY_OR(_IS_DIGITS()), comment="Optional"),
+Field("role", requires=IS_IN_SET(["MD", "PA", "MA", "Manager", "Other"], sort=True, zero=None)),
 _note_field,
 )
 
@@ -38,7 +40,8 @@ db.define_table("provider",
 Field("first_name", requires=IS_NOT_EMPTY()),
 Field("last_name", requires=IS_NOT_EMPTY()),
 Field("email", requires=IS_EMAIL()),
-Field("role", requires=IS_IN_SET(["MD", "DO", "NP", "PA"], zero=None)),
+Field("role", requires=IS_IN_SET(["MD", "DO", "NP", "PA"], sort=True, zero=None)),
+Field("is_billing_provider", 'boolean', comment=""),
 _days_of_week_field(label="Typical days", comment="Select the days when patients are usually seen by this provider"),
 _note_field,
 )

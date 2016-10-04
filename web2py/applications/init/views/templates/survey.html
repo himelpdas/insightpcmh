@@ -39,11 +39,11 @@
         "1":"abc",
         "2":"abcd",
     } }}
-    {{_pcmh = request.controller[0]}}
-    {{_element = request.controller[1]}}
+    {{_pcmh = request.controller}}
+    {{_element = request.function}}
     {{if _pcmh.isdigit():}}
         {{for l in _pcmh_info[_pcmh]:}}
-            <li role="presentation" {{if _element==l:}}class="active"{{pass}}><a href="{{=URL('init', _pcmh+l, 'index')}}">Element {{=l.upper()}}</a></li>
+            <li role="presentation" {{if _element==l:}}class="active"{{pass}}><a href="{{=URL('init', _pcmh, l)}}">Element {{=l.upper()}}</a></li>
         {{pass}}
     {{else:}}
         <li role="presentation" {{if request.function in ["index", "practice"]:}}class="active"{{pass}}><a href="{{=URL('init', 'info', 'index')}}">Practice</a></li>
@@ -57,7 +57,7 @@
 
 {{def QUESTION_PANEL(qna):}}
 {{if qna.show:}}
-<div class="panel panel-{{if qna.needs_answer():}}primary{{else:}}info{{pass}}">
+<div id="{{=qna.table_name}}" class="panel panel-{{if qna.needs_answer():}}primary{{else:}}info{{pass}}">
     <div class="panel-heading question-box-heading"><span class="pull-right glyphicon glyphicon-{{if not qna.needs_answer():}}check{{else:}}unchecked{{pass}}"></span><span class="question-box-title-done">{{if qna.needs_answer():}}[Needs Answer]{{else:}}[Answered]{{pass}} {{=qna.question}}</span></div>
     <div class="panel-body">
 
@@ -85,13 +85,11 @@
         show_generic = False
         if any(map(lambda e: e.needs_answer(), QNA.instances)):
             actions.append(XML(T("Please <b class='text-warning'>answer</b> one or more questions below.")))
-            show_generic = True
         pass
         if any(map(lambda e: e.has_warnings(), QNA.instances)):
             actions.append(XML(T("Please <b class='text-danger'>resolve</b> one or more questions below.")))
-            show_generic = True
         pass
-        if show_generic:
+        if actions:
             actions.append(XML(T("If you feel stuck at any point, please contact your trainer above.")))
         pass
         has_action = bool(actions)

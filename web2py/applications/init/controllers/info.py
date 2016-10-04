@@ -11,12 +11,12 @@ def index():
         3, False,
         True,
         'clinical_hour',
-        "What are the practice's office hours? Only include hours when patients are <u>actually seen</u>.",
+        "What are the practice's office hours? Only include days when patients are <u>actually seen</u>.",
         validator=_validate_start_end_time,
     )
 
     primary_contact = SingleQNA(
-        True,
+        practice_info.row,
         'primary_contact',
         "Enter the primary contact who is able to handle all inquiries regarding this PCMH project."
     )
@@ -37,7 +37,6 @@ def staff():
 
     days = providers
     providers.set_template("<b class='text-success'>{first_name} {last_name}, {role} <i class='weak-font'>{note}</i><br>&emsp;Usually in office on: {days_of_the_week}</b>")
-
 
     has_non_provider = SingleQNA(
         True,

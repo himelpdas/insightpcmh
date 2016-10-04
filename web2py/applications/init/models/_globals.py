@@ -1,4 +1,5 @@
 from string import Formatter
+from gluon.storage import Storage
 
 _telephone_field_validator = IS_MATCH("^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$", error_message="Enter telephone in this format (123) 123-1234")
 _note_field = Field("note", label=XML("<span class='text-muted'>Note to Trainer (Optional)</span>"))
@@ -170,7 +171,7 @@ class MultiQNA(QNA):
     def preprocess(self):
         # self.rows = db(self.table.id > 0).select(orderby=~db[self.table].id,limitby=(0,self.multi))  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
         self.rows = db(self.table.id > 0).select()  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
-        self.form = MultiSQLFORM(self.table_name, self.rows, self.multi)  # if limit, prevent submit
+        self.form = MultiSQLFORM(self.table_name, self.rows, self.multi, _action="#"+self.table_name)  # if limit, prevent submit
 
     @QNA.require_show  # returns False if we're not supposed to show this form
     def needs_answer(self):
@@ -203,7 +204,7 @@ class SingleQNA(QNA):
     def preprocess(self):
         """make form editable"""
         self.row = db(self.table.id > 0).select().last()
-        self.form = SingleSQLFORM(self.table_name, self.row)
+        self.form = SingleSQLFORM(self.table_name, self.row, _action="#"+self.table_name)
 
     @QNA.require_show
     def needs_answer(self):
