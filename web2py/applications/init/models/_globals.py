@@ -2,7 +2,7 @@ from string import Formatter
 from gluon.storage import Storage
 
 _telephone_field_validator = IS_MATCH("^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$", error_message="Enter telephone in this format (123) 123-1234")
-_note_field = Field("note", label=XML("<span class='text-muted'>Note to Trainer (Optional)</span>"))
+_note_field = Field("note", label=XML("<span class='text-muted'>Note to Trainer</span>"), comment="Optional")
 _yes_no_field_default = Field("please_choose", requires=IS_IN_SET([("Y", "Yes"), ("N", "No")]))
 
 _days_of_the_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
@@ -24,11 +24,6 @@ _days_of_week_field = lambda label=None, comment=None: \
     )
 
 _am_pm_time_validator = IS_TIME("Enter time as HH:MM [AM/PM]")
-
-
-
-def _validate_filename(form):
-    form.vars.filename = request.vars.upload.filename
 
 
 def _validate_start_end_time(form, start_field_name="start_time", end_field_name="end_time"):
@@ -138,7 +133,7 @@ class QNA(object):
     def process(self):
         if request.vars["delete"] == self.table_name:  # security to prevent SQL Injection attach
             db(db[self.table_name].id > 0).delete()  # change to active = False
-            session.flash = "deleted question %s"%self.table_name
+            session.flash = "deleted question %s" % self.table_name
             redirect(URL())
         self.preprocess()
         self._form_process()
@@ -161,9 +156,10 @@ class MultiQNA(QNA):
         """multi: integer of number required to be answered, OR needs answer if False
            limit: turn of form submit if limit is True and multi is reached
         """
-        super(self.__class__, self).__init__(*args, **kwargs)
+        super(MultiQNA, self).__init__(*args, **kwargs)
         self.multi = multi
         self.limit = limit
+
         self.template = None
 
         self.process()
@@ -182,7 +178,8 @@ class MultiQNA(QNA):
         return True
 
     def set_template(self, template):
-        self.template = template
+        self.template = "<span>Submitted on {created_on}</span><i class='text-info'>{note}</i>" \
+                        "<pre class='text-success'>%s</pre>" % template
 
     def render_template(self):
         for row in self.rows:
@@ -196,9 +193,9 @@ class MultiQNA(QNA):
 
 
 class SingleQNA(QNA):
-    def __init__(self, *args, **kwargs):
-        super(self.__class__, self).__init__(*args, **kwargs)
 
+    def __init__(self, *args, **kwargs):
+        super(SingleQNA, self).__init__(*args, **kwargs)
         self.process()
 
     def preprocess(self):
@@ -213,3 +210,19 @@ class SingleQNA(QNA):
         return True
 
 
+class CryptQNA(MultiQNA):
+
+    def __init__(self, *args, **kwargs):
+        super(CryptQNA, self).__init__(*args, **kwargs)
+
+    def preprocess(self):
+        # self.rows = db(self.table.id > 0).select(orderby=~db[self.table].id,limitby=(0,self.multi))  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
+        self.validator = _on_validation_crypt(self.table_name)
+
+        self.rows = db(self.table.id > 0).select()  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
+        self.form = SQLFORM.factory(*_fake_db[self.table_name])  # if limit, prevent submit
+
+
+    def set_template(self, template):
+        self.template = "<span>Encrypted on {created_on}</span>" \
+                        "<pre class='text-success'>%s</pre>" % template

@@ -105,7 +105,7 @@ def b():
         getattr(intake_form.row, "please_choose", None) == "Y",
         'intake_form_upload',
         "You said you have an intake form. Please upload a copy of this intake form here.",
-        validator=_validate_filename,
+        validator=_on_validation_filename,
     )
 
     intake_form_upload.set_template("<b><a href='%s'>{filename}</a></b>" % URL('download', args="{upload}",

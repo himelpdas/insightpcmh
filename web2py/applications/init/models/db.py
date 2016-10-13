@@ -90,13 +90,14 @@ plugins = PluginManager()
 # -------------------------------------------------------------------------
 # create all tables needed by auth if not custom tables
 # -------------------------------------------------------------------------
-auth.define_tables(username=False, signature=False)
+auth.define_tables(username=False, signature=True)
 
 # -------------------------------------------------------------------------
 # configure email
 # -------------------------------------------------------------------------
 mail = auth.settings.mailer
-mail.settings.server = 'logging' if request.is_local else myconf.get('smtp.server')
+#mail.settings.server = 'logging' if request.is_local else myconf.get('smtp.server')
+mail.settings.server = myconf.get('smtp.server')
 mail.settings.sender = myconf.get('smtp.sender')
 mail.settings.login = myconf.get('smtp.login')
 mail.settings.tls = myconf.get('smtp.tls') or False
