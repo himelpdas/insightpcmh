@@ -39,62 +39,6 @@ def d_tables():
             db(db[each].id > 0).delete()
     db.commit()
 
-
-class MixinSQLFORM(object):
-    def __init__(self, table_name):
-        self.buttons = []
-        self.table_name = table_name
-
-    def insert_clear_btn(self):
-        self.buttons.insert(0, TAG.button('Clear', _type="button", _class="btn btn-info pull-right",
-                                     _onClick="if(confirm('Clear entry?')){parent.location='%s'}" %
-                                              URL(vars=dict(delete=self.table_name))))  # confirm redirect
-
-
-class SingleSQLFORM(SQLFORM, MixinSQLFORM):
-    def __init__(self, table_name, row, *args, **kwargs):
-        MixinSQLFORM.__init__(self, table_name)
-
-        submit_label = "Submit Answer"
-        btn_class = "warning"
-
-        if bool(row):
-            submit_label = T("Change Answer")
-            btn_class = "primary"
-
-        self.buttons.append(TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right"%btn_class))
-
-        if bool(row):
-            self.insert_clear_btn()
-
-        super(self.__class__, self).__init__(db[table_name], record=row, buttons=self.buttons, showid=False, *args, **kwargs)
-
-
-class MultiSQLFORM(SQLFORM, MixinSQLFORM):
-    def __init__(self, table_name, rows, multi, *args, **kwargs):
-        MixinSQLFORM.__init__(self, table_name)
-
-        submit_label = "Add Answer"
-        if len(rows):
-            submit_label = T("Add Another")
-
-        if len(rows) < multi:
-            btn_class = "warning"
-        else:
-            btn_class = "primary"
-
-        self.buttons.append(TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right"%btn_class))
-
-        if len(rows):
-            self.insert_clear_btn()
-
-        super(self.__class__, self).__init__(db[table_name],
-            #record=row,
-            #submit_button=T('Change Answer') if bool(row) else T("Submit Answer"),
-            buttons=self.buttons,
-            showid=False, *args, **kwargs)
-
-
 class QNA(object):
     instances = []
 
@@ -119,14 +63,21 @@ class QNA(object):
         self.row = None
         self.rows = []
         self.warnings = []  #
+        self.form_buttons = []
+        self.clear_button = TAG.button(XML('<span class="glyphicon glyphicon-trash"></span>'), _type="button", _class="btn btn-info pull-right",
+                                     _onClick="if(confirm('Clear entry?')){parent.location='%s'}" %
+                                              URL(vars=dict(delete=self.table_name)))
 
     def _form_process(self):
-        if self.form.process(onvalidation=self.validator).accepted:
+        if self.form and self.form.process(onvalidation=self.validator).accepted:
             session.flash = "Answer saved!"
             redirect(URL())
 
     def preprocess(self):
         """Perform tasks related to Single or Multi forms before form_process"""
+        raise NotImplementedError
+
+    def set_form_buttons(self):
         raise NotImplementedError
 
     @require_show  # because __init__ was not yet called, self is not the first argument here
@@ -167,7 +118,14 @@ class MultiQNA(QNA):
     def preprocess(self):
         # self.rows = db(self.table.id > 0).select(orderby=~db[self.table].id,limitby=(0,self.multi))  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
         self.rows = db(self.table.id > 0).select()  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
-        self.form = MultiSQLFORM(self.table_name, self.rows, self.multi, _action="#"+self.table_name)  # if limit, prevent submit
+        if self.limit == 1:
+            self.row = self.rows.last()
+        self.set_form_buttons()
+        #self.form = MultiSQLFORM(self.table_name, self.rows, self.multi, _action="#"+self.table_name)  # if limit, prevent submit
+        if len(self.rows) < self.limit:
+            self.form = SQLFORM(self.table, buttons=self.form_buttons, showid=False, _action="#"+self.table_name)  # if limit, prevent submit
+        else:
+            self.form = ""
 
     @QNA.require_show  # returns False if we're not supposed to show this form
     def needs_answer(self):
@@ -178,8 +136,22 @@ class MultiQNA(QNA):
         return True
 
     def set_template(self, template):
-        self.template = "<span>Submitted on {created_on}</span><i class='text-info'>{note}</i>" \
+        self.template = "<span>Submitted on {created_on}</span>&emsp;<span class='text-muted'>{note}</span>" \
                         "<pre class='text-success'>%s</pre>" % template
+
+    def set_form_buttons(self):
+        submit_label = "Add Answer"
+        if len(self.rows):
+            submit_label = T("Add Another")
+        else:
+            self.clear_button = ""
+
+        if len(self.rows) < self.multi:
+            btn_class = "warning"
+        else:
+            btn_class = "primary"
+
+        self.form_buttons.append(TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right" % btn_class))
 
     def render_template(self):
         for row in self.rows:
@@ -201,7 +173,21 @@ class SingleQNA(QNA):
     def preprocess(self):
         """make form editable"""
         self.row = db(self.table.id > 0).select().last()
-        self.form = SingleSQLFORM(self.table_name, self.row, _action="#"+self.table_name)
+        self.set_form_buttons()
+        self.form = SQLFORM(self.table, record=self.row, buttons=self.form_buttons, showid=False, _action="#"+self.table_name)
+
+    def set_form_buttons(self):
+        submit_label = "Submit Answer"
+        btn_class = "warning"
+
+        if bool(self.row):
+            submit_label = T("Change Answer")
+            btn_class = "primary"
+        else:
+            self.clear_button = ""
+
+        self.form_buttons.append(TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right" % btn_class))
+
 
     @QNA.require_show
     def needs_answer(self):
@@ -220,8 +206,27 @@ class CryptQNA(MultiQNA):
         self.validator = _on_validation_crypt(self.table_name)
 
         self.rows = db(self.table.id > 0).select()  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
-        self.form = SQLFORM.factory(*_fake_db[self.table_name])  # if limit, prevent submit
 
+        self.set_form_buttons()
+
+        if len(self.rows) < self.limit:
+            self.form = SQLFORM.factory(*_fake_db[self.table_name], buttons=self.form_buttons)  # if limit, prevent submit
+        else:
+            self.form = ""
+
+    def set_form_buttons(self):
+        submit_label = "Add Answer"
+        if len(self.rows):
+            submit_label = T("Add Another")
+        else:
+            self.clear_button = ""
+
+        if len(self.rows) < self.multi:
+            btn_class = "warning"
+        else:
+            btn_class = "primary"
+
+        self.form_buttons.append(TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right" % btn_class))
 
     def set_template(self, template):
         self.template = "<span>Encrypted on {created_on}</span>" \

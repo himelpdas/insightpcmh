@@ -17,7 +17,7 @@ def a():
     )
 
     same_day_blocks = MultiQNA(
-        3, False,  # change the 3 to the number of days the practice is open from the info
+        3, float("inf"),  # change the 3 to the number of days the practice is open from the info
         getattr(same_day_appointments.row, "please_choose", None) == "Y",
         'same_day_block',
         "Enter your same-day time blocks. You must have same-day blocks for each day your practice sees patients.",
@@ -25,8 +25,8 @@ def a():
     )
 
     #same_day_block.add_formatted_time_fields()
-    same_day_blocks.set_template("<b class='text-success'>{day_of_the_week} {start_time:%I}:{start_time:%M} "
-                                "{start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}</b> <i>{note}</i>")
+    same_day_blocks.set_template("{day_of_the_week} {start_time:%I}:{start_time:%M} "
+                                "{start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}")
 
 
     after_hours = SingleQNA(
@@ -36,15 +36,15 @@ def a():
     )
 
     after_hour_blocks = MultiQNA(
-        1, False,
+        1, float("inf"),
         getattr(after_hours.row, "please_choose", None) == "Y",
         'after_hour_block',
         "You said you have after-hours. Please enter your after-hours here.",
         validator=_validate_start_end_time,
     )
 
-    after_hour_blocks.set_template("<b class='text-success'>{day_of_the_week} {start_time:%I}:{start_time:%M} "
-                                "{start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}</b> <i>{note}</i>")
+    after_hour_blocks.set_template("{day_of_the_week} {start_time:%I}:{start_time:%M} "
+                                "{start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}")
 
     walkin = SingleQNA(
         True,
@@ -53,13 +53,13 @@ def a():
     )
 
     next_available_appointments = MultiQNA(
-        1, False,
+        1, float("inf"),
         getattr(walkin.row, "please_choose", None) == "N",
         'next_available_appointment',
         "Aside from same-day appointments, what are your other appointment types and how long until their next available appointments?",
     )
 
-    next_available_appointments.set_template("<b class='text-success'>{appointment_type} available within {available_within} {unit}</b> <i>{note}</i>")
+    next_available_appointments.set_template("{appointment_type} available within {available_within} {unit}")
 
     return dict(documents={
         ("PCMH_1A_4.doc", URL("init", "policy", "PCMH_1A_4.doc"))
@@ -108,7 +108,7 @@ def b():
         validator=_on_validation_filename,
     )
 
-    intake_form_upload.set_template("<b><a href='%s'>{filename}</a></b>" % URL('download', args="{upload}",
+    intake_form_upload.set_template("<a href='%s'>{filename}</a>" % URL('download', args="{upload}",
                                                                                url_encode=False))  # encode escapes {}
 
     intake_form_patient_example = MultiQNA(
