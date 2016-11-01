@@ -90,6 +90,12 @@ plugins = PluginManager()
 # -------------------------------------------------------------------------
 # create all tables needed by auth if not custom tables
 # -------------------------------------------------------------------------
+
+auth.settings.extra_fields['auth_user'] = [
+    Field("contact_phone", requires=_telephone_field_validator),
+    Field("contact_phone_extension", requires=IS_EMPTY_OR(_IS_DIGITS()), comment="Optional"),
+    Field("is_insight", "boolean", label="Are you an Insight Management employee?"),
+]
 auth.define_tables(username=False, signature=True)
 
 # -------------------------------------------------------------------------

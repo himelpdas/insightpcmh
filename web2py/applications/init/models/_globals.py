@@ -1,9 +1,15 @@
 from string import Formatter
 from gluon.storage import Storage
 
+_list_of_states = ["NY", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
+                   "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+                   "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+                   "NM", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+                   "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
+
 _telephone_field_validator = IS_MATCH("^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$", error_message="Enter telephone in this format (123) 123-1234")
 _note_field = Field("note", label=XML("<span class='text-muted'>Note to Trainer</span>"), comment="Optional")
-_yes_no_field_default = Field("please_choose", requires=IS_IN_SET([("Y", "Yes"), ("N", "No")]))
+_yes_no_field_default = Field("please_choose", requires=IS_IN_SET(["Yes", "No"]))
 
 _days_of_the_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
@@ -96,7 +102,7 @@ class QNA(object):
     @require_show
     def add_warning(self, conditional, message):
         if conditional:
-            self.warnings.append(XML(message))
+            self.warnings.append(XML(T(message)))
             return True
 
     require_show = staticmethod(require_show)  # http://stackoverflow.com/questions/1263451/python-decorators-in-classes

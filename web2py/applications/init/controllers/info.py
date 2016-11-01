@@ -61,7 +61,7 @@ def staff():
 
     non_providers = MultiQNA(
         1, float("inf"),  # change the 3 to the number of days the practice is open from the info
-        getattr(has_non_provider.row, "please_choose", None) == "Y",
+        getattr(has_non_provider.row, "please_choose", None) == "Yes",
         'non_provider',
         "You said you have non-provider staff. Enter your non-provider staff here.",
     )
@@ -94,14 +94,14 @@ def emr():
     account_created.set_template(
         "{please_choose}")
 
-    account_created.add_warning(getattr(account_created.row, "please_choose", None) == "N",
+    account_created.add_warning(getattr(account_created.row, "please_choose", None) == "No",
                                 XML(T(
                                     "Please create provide an account that has provider or amdmin level access, then "
                                     "come back and change your answer.")))
 
     emr_credentials = CryptQNA(
         1, 1,  # change the 3 to the number of days the practice is open from the info
-        getattr(account_created.row, "please_choose", None) == "Y",
+        getattr(account_created.row, "please_choose", None) == "Yes",
         'emr_credentials',
         "Please provide the username and password to the account.",
     )
