@@ -1,12 +1,15 @@
 response.view = 'templates/survey_extend.html'  # http://stackoverflow.com/questions/8750723/is-it-possible-to-change-a-web2py-view-on-the-fly
 
 
+#@auth.requires(URL.verify(request, hash_vars=["app_id"], hmac_key=MY_KEY), requires_login=True)
 def a():
-    same_day_appointments = SingleQNA(
-        True,
+    same_day_appointments = MultiQNA(
+        1, 1, True,
         'same_day_appointments',
         "Does the practice reserve time every clinical day for same-day appointments?"
     )
+
+    same_day_appointments.set_template("{please_choose}")
 
     same_day_appointments.add_warning(
         getattr(same_day_appointments.row, "please_choose", None) == "No",
@@ -133,4 +136,4 @@ def b():
 
 
 def index():
-    return a()
+    redirect(URL("a", vars=request.vars))

@@ -1,5 +1,8 @@
+EMRS = [('ecw','eClinicalWorks'), ('mdland', 'MDLand'), ('healthfusion','HealthFusion'), ('generic','Other')]
+
 db.define_table("application",
-    Field("owner_id", db.auth_user),
+    Field("owner_id", db.auth_user, required=True, default=auth.user.id if auth.user else None,
+          writable=False, readable=False),
     Field('pps', label="PPS"),
     Field("application_type", requires=IS_IN_SET(["New", "Renewal"])),
     Field("application_size", requires=IS_IN_SET(["Single", "Corporate"]), comment='Choose "Corporate" if there are 3 or more sites under one owner or CEO. Otherwise the application should be treated as "Single."'),
@@ -17,20 +20,25 @@ db.define_table("application",
     Field("practice_address_line_1", requires=IS_NOT_EMPTY()),
     Field("practice_address_line_2", comment="Optional"),
     Field("practice_city", requires=IS_NOT_EMPTY()),
-    Field("practice_state", requires=IS_IN_SET(_list_of_states, zero=None))
+    Field("practice_zip", requires=IS_NOT_EMPTY()),
+    Field("practice_state", requires=IS_IN_SET(_list_of_states, zero=None)),
+    Field("practice_emr", label="Practice EMR", requires=IS_IN_SET(EMRS, sort=True, zero=None)),
 )
 
 db.application.pps.widget = SQLFORM.widgets.autocomplete(
-    request, db.auth_user.pps, limitby=(0, 10), min_length=0)
+    request, db.application.pps, limitby=(0, 10), min_length=0, distinct=True)  # http://bit.ly/2ex3oxE
 db.application.corporate_name.widget = SQLFORM.widgets.autocomplete(
-    request, db.auth_user.corporate_name, limitby=(0, 10), min_length=0)
+    request, db.application.corporate_name, limitby=(0, 10), min_length=0, distinct=True)
 
-_application_id = db(db.application.id == request.vars["application_id"]).select.last()
+#_application_id = db(db.application.id == request.vars["application_id"]).select.last()
 
-def initialize_app(form):
-    if not auth.user.is_insight:
+def _initialize_app(form):
+    if not form.vars.is_insight:
         application = db(db.application.owner_id == auth.user).select().last()
         if not application:
-            redirect(URL('application'))
+            redirect(URL('new_application'))
 
-auth.settings.login_onvalidation.append(initialize_app)
+auth.settings.login_onaccept.append(_initialize_app)
+auth.settings.register_onaccept.append(_initialize_app)
+
+MY_KEY="Himel"

@@ -29,14 +29,27 @@ response.google_analytics_id = None
 # ----------------------------------------------------------------------------------------------------------------------
 
 response.menu = [
-    (T('Practice'), ('info' == request.controller), URL('init', 'info', 'index'), []),
-    (T('(1) Access'), ('1' == request.controller), URL('init', '1', 'a'), []),
-    (T('(2) Team'), ('2' == request.controller), URL('init', '2', 'a'), []),
-    (T('(3) Population'), ('3' == request.controller), URL('default', 'index'), []),
-    (T('(4) Management'), ('4' == request.controller), URL('default', 'index'), []),
-    (T('(5) Coordination'), ('5' == request.controller), URL('default', 'index'), []),
-    (T('(6) Performance'), ('6' == request.controller), URL('default', 'index'), []),
+    (T('Dashboard'), ('default' == request.controller and 'index' == request.function), URL('default', 'index'), []),
 ]
+
+APP_ID = request.vars["app_id"]
+
+if APP_ID:
+
+    print auth.requires_membership('application_'+APP_ID)(lambda: 1)()
+
+    response.menu += [
+        (T('(0) Practice'), ('0' == request.controller), URL('0', 'index', vars=request.vars), []),
+        (T('(1) Access'), ('1' == request.controller), URL('1', 'index', vars=request.vars), []),
+        (T('(2) Team'), ('2' == request.controller), URL('2', 'index', vars=request.vars), []),
+        (T('(3) Population'), ('3' == request.controller), URL('default', 'index'), []),
+        (T('(4) Management'), ('4' == request.controller), URL('default', 'index'), []),
+        (T('(5) Coordination'), ('5' == request.controller), URL('default', 'index'), []),
+        (T('(6) Performance'), ('6' == request.controller), URL('default', 'index'), []),
+    ]
+else:
+    if request.controller in list("0123456"):
+        auth.requires(False, requires_login=True)(lambda: 1)()()
 
 DEVELOPMENT_MENU = False
 

@@ -72,12 +72,14 @@ class QNA(object):
         self.form_buttons = []
         self.clear_button = TAG.button(XML('<span class="glyphicon glyphicon-trash"></span>'), _type="button", _class="btn btn-info pull-right",
                                      _onClick="if(confirm('Clear entry?')){parent.location='%s'}" %
-                                              URL(vars=dict(delete=self.table_name)))
+                                              URL(
+                                                  vars=dict([('delete',self.table_name)]+request.get_vars.items())
+                                              ))
 
     def _form_process(self):
         if self.form and self.form.process(onvalidation=self.validator).accepted:
             session.flash = "Answer saved!"
-            redirect(URL())
+            redirect(URL(vars=request.get_vars))
 
     def preprocess(self):
         """Perform tasks related to Single or Multi forms before form_process"""
@@ -88,10 +90,10 @@ class QNA(object):
 
     @require_show  # because __init__ was not yet called, self is not the first argument here
     def process(self):
-        if request.vars["delete"] == self.table_name:  # security to prevent SQL Injection attach
+        if request.get_vars["delete"] == self.table_name:  # security to prevent SQL Injection attach
             db(db[self.table_name].id > 0).delete()  # change to active = False
             session.flash = "deleted question %s" % self.table_name
-            redirect(URL())
+            redirect(URL(request.controller, request.function, vars=request.get_vars))  # TODO
         self.preprocess()
         self._form_process()
 

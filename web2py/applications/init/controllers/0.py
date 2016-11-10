@@ -2,6 +2,11 @@ response.view = 'templates/survey_extend.html'  # http://stackoverflow.com/quest
 
 
 def index():
+    redirect(URL("practice", vars=request.vars))
+
+
+def practice():
+    """
     practice_info = MultiQNA(
         1,1,
         True,
@@ -12,6 +17,7 @@ def index():
     practice_info.set_template("Practice: {practice_name} ({practice_specialty})<br>Phone: {phone} {extension}"
                                "<br>Address 1: {address_line_1}<br>Address 2: {address_line_2}<br>City: {city}<br>"
                                "State: {state_}<br>Web: {website}")
+    """
 
     clincial_hours = MultiQNA(
         3, float("inf"),
@@ -24,6 +30,7 @@ def index():
     clincial_hours.set_template("{day_of_the_week} {start_time:%I}:{start_time:%M} "
                                 "{start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}")
 
+    """
     primary_contact = MultiQNA(
         1, 1,
         practice_info.row,
@@ -32,7 +39,7 @@ def index():
     )
 
     primary_contact.set_template("{first_name} {last_name} ({role})<br>{email}<br>{phone} {extension}")
-
+    """
     return dict(documents={})
 
 
