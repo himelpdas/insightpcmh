@@ -98,6 +98,8 @@ auth.settings.extra_fields['auth_user'] = [
 ]
 auth.define_tables(username=False, signature=True)
 
+
+
 # -------------------------------------------------------------------------
 # configure email
 # -------------------------------------------------------------------------

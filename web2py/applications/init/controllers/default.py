@@ -10,6 +10,8 @@
 
 @auth.requires_login()
 def index():
+    if not IS_STAFF and not db(db.application.owner_id == auth.user.id).select().last():
+        redirect(URL("new_application"))
     # web2py performs inner joins automatically and transparently when the query links two or more tables
     my_app_memberships = db((db.auth_membership.user_id == auth.user.id) &
                  (db.auth_group.id == db.auth_membership.group_id) &  # inner join
@@ -58,8 +60,15 @@ def new_application():
     form = SQLFORM(db.application)
     if form.process(detect_record_change=True, onvalidation=set_application_id).accepted:
         response.flash = "Application information created!"
-        app_gid = auth.add_group("application_%s" % form.vars.id, "users allowed to edit application_%s" % form.vars.id)
-        auth.add_membership(group_id=app_gid, user_id=auth.user.id)
+        new_app_gid = auth.add_group("application_%s" % form.vars.id, "users allowed to edit application_%s" % form.vars.id)
+        auth.add_membership(group_id=new_app_gid, user_id=auth.user.id)
+        # TODO add all admins to group
+        admins = db(
+            (db.auth_membership.user_id == auth.user.id) &
+            (db.auth_membership.group_id == auth.id_group("admin"))
+        ).select()
+        for admin in admins:
+            auth.add_membership(group_id=new_app_gid, user_id=admin.auth_user.id)
 
         URL('index', vars=dict(app_id=form.vars.id), hmac_key=MY_KEY)
         redirect(URL("index"))

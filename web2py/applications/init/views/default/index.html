@@ -7,20 +7,23 @@
     vertical-align: middle;
 }
 </style>
+<header style="text-align: center;">
+    <h2>{{=auth.user.first_name}}'s PCMH Dashboard</h2>
+</header>
 {{end}}
 
 {{if auth.has_membership(user_id=auth.user.id, role="admin"):}}
-<h2>
+<h3>
     Edit Trainers
-</h2>
-<h2>
+</h3>
+<h3>
     Edit Managers
-</h2>
+</h3>
 {{pass}}
 
-<h2>
+<h3>
 {{if auth.has_membership(user_id=auth.user.id, role="admin"):}}Edit{{else:}}My{{pass}} PCMH Applications
-</h2>
+</h3>
 
 <div class="container">
     <div class="row">

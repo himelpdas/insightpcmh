@@ -57,8 +57,9 @@
 
 {{def QUESTION_PANEL(qna):}}
 {{if qna.show:}}
-<div id="{{=qna.table_name}}" class="panel panel-{{if qna.needs_answer():}}primary{{else:}}info{{pass}}">
-    <div class="panel-heading question-box-heading"><span class="pull-right glyphicon glyphicon-{{if not qna.needs_answer():}}check{{else:}}unchecked{{pass}}"></span><span class="question-box-title-done">{{if qna.needs_answer():}}[Needs Answer]{{else:}}[Answered]{{pass}} {{=qna.question}}</span></div>
+<div id="{{=qna.table_name}}" class="panel panel-{{if qna.needs_answer():}}info{{elif qna.has_warnings():}}warning{{else:}}primary{{pass}}">
+    <div class="panel-heading question-box-heading"><span class="pull-right">&emsp;<span class="glyphicon glyphicon-{{if qna.needs_answer():}}unchecked{{elif qna.has_warnings():}}edit{{else:}}check{{pass}}"></span></span>
+        <span class="question-box-title-done"> {{=qna.question}}</span></div>
     <div class="panel-body">
     {{for warning in qna.warnings:}}
         <blockquote class="text-danger">{{=warning}}</blockquote>
@@ -85,10 +86,10 @@
         actions = []
         show_generic = False
         if any(map(lambda e: e.needs_answer(), QNA.instances)):
-            actions.append(XML(T("Please <b class='text-warning'>answer</b> one or more questions below.")))
+            actions.append(XML(T("Please <b class='text-info'>answer</b> one or more questions below.")))
         pass
         if any(map(lambda e: e.has_warnings(), QNA.instances)):
-            actions.append(XML(T("Please <b class='text-danger'>resolve</b> one or more questions below.")))
+            actions.append(XML(T("Please <b class='text-warning'>resolve</b> one or more questions below.")))
         pass
         if actions:
             actions.append(XML(T("If you feel stuck at any point, please contact your trainer above.")))

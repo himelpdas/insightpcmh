@@ -32,6 +32,7 @@ db.application.corporate_name.widget = SQLFORM.widgets.autocomplete(
 
 #_application_id = db(db.application.id == request.vars["application_id"]).select.last()
 
+
 def _initialize_app(form):
     if not form.vars.is_insight:
         application = db(db.application.owner_id == auth.user).select().last()
@@ -42,3 +43,19 @@ auth.settings.login_onaccept.append(_initialize_app)
 auth.settings.register_onaccept.append(_initialize_app)
 
 MY_KEY="Himel"
+
+if not auth.id_group("admins"):
+    auth.add_group("admins", "Handles assigning trainers and app managers to applications. Automatically should given"
+                      "membership to all applications")
+
+if not auth.id_group("trainers"):
+    auth.add_group("trainers", "Handles many applications. Has some additional responsibilites from app managers")
+
+if not auth.id_group("app_managers"):
+    auth.add_group("app_managers", "Handles data gathering.")
+
+
+#IS_NOT_STAFF = not auth.has_membership(user_id=getattr(auth.user, "id", None), role="trainers") and \
+#not auth.has_membership(user_id=getattr(auth.user, "id", None), role="admins")
+
+IS_STAFF = bool(getattr(auth.user, "is_insight", None))

@@ -70,11 +70,12 @@ class QNA(object):
         self.rows = []
         self.warnings = []  #
         self.form_buttons = []
-        self.clear_button = TAG.button(XML('<span class="glyphicon glyphicon-trash"></span>'), _type="button", _class="btn btn-info pull-right",
-                                     _onClick="if(confirm('Clear entry?')){parent.location='%s'}" %
-                                              URL(
-                                                  vars=dict([('delete',self.table_name)]+request.get_vars.items())
-                                              ))
+        self.clear_button = TAG.button(XML('<span class="glyphicon glyphicon-trash"></span>'), _type="button",
+            _class="btn btn-primary pull-right",
+            _onClick="if(confirm('Clear entry?')){parent.location='%s'}" %
+            URL(
+            vars=dict([('delete',self.table_name)]+request.get_vars.items())
+    ))
 
     def _form_process(self):
         if self.form and self.form.process(onvalidation=self.validator).accepted:
@@ -91,6 +92,7 @@ class QNA(object):
     @require_show  # because __init__ was not yet called, self is not the first argument here
     def process(self):
         if request.get_vars["delete"] == self.table_name:  # security to prevent SQL Injection attach
+            del request.get_vars["delete"]
             db(db[self.table_name].id > 0).delete()  # change to active = False
             session.flash = "deleted question %s" % self.table_name
             redirect(URL(request.controller, request.function, vars=request.get_vars))  # TODO
@@ -144,8 +146,12 @@ class MultiQNA(QNA):
         return True
 
     def set_template(self, template):
-        self.template = "<span>Submitted on {created_on}</span>&emsp;<span class='text-muted'>{note}</span>" \
-                        "<pre class='text-success'>%s</pre>" % template
+        self.template = "<span>Submitted on {created_on}&mdash;{created_by} </span>&emsp;<span class='text-muted'>" \
+                        "{note}</span><pre class='text-success'>" \
+                        "<span class='text-danger pull-right'>" \
+                        "&emsp;<span class='glyphicon glyphicon-trash'></span>" \
+                        "</span>" \
+                        "%s</pre>" % template
 
     def set_form_buttons(self):
         submit_label = "Add Answer"
@@ -164,14 +170,28 @@ class MultiQNA(QNA):
     def render_template(self):
         for row in self.rows:
             keys = filter(lambda key: key, [i[1] for i in Formatter().parse(self.template)])  #filter because we get Nones # http://stackoverflow.com/questions/13037401/get-keys-from-template
+
+            def _if_auth_user(func):  # FIXME: Possible source of infinite loop, for some reason it acts weird when using {created_by} (reference object)
+                def inner(key):
+                    if key in ["created_by", "modified_by"]:
+                        auth_user = db(db.auth_user.id == row[key]).select().last()
+                        return key, "%s %s" % (auth_user.first_name.capitalize(), auth_user.last_name.capitalize())
+                    return func(key)
+                return inner
+
+            @_if_auth_user
+            def _comma_list(key):  #join with commas if object is list-like (python 2 only) http://stackoverflow.com/questions/1835018/python-check-if-an-object-is-a-list-or-tuple-but-not-string
+                if not hasattr(row[key], '__iter__'):
+                    return key, row[key]
+                else:
+                    return key, ", ".join(row[key])
+
             yield XML(self.template.format(
                 **dict(
-                    map(lambda key: (key,
-                                     row[key] if not hasattr(row[key], '__iter__') else ", ".join(row[key])  #join with commas if object is list-like (python 2 only) http://stackoverflow.com/questions/1835018/python-check-if-an-object-is-a-list-or-tuple-but-not-string
-                                     ), keys)  #
+                    map(_comma_list, keys)  #
                 )))  # would look like self.template.format(name="Jon", ...)
 
-
+'''
 class SingleQNA(QNA):
 
     def __init__(self, *args, **kwargs):
@@ -202,7 +222,7 @@ class SingleQNA(QNA):
         if self.row:
             return False
         return True
-
+'''
 
 class CryptQNA(MultiQNA):
 
@@ -237,5 +257,5 @@ class CryptQNA(MultiQNA):
         self.form_buttons.append(TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right" % btn_class))
 
     def set_template(self, template):
-        self.template = "<span>Encrypted on {created_on}</span>" \
+        self.template = "<span>Encrypted on {created_on}&mdash;{created_by}</span>" \
                         "<pre class='text-success'>%s</pre>" % template
