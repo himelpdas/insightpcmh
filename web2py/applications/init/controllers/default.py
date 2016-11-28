@@ -26,7 +26,12 @@ def index():
         my_app.my_membership = my_membership
         my_apps.append(my_app)
 
-    return dict(my_apps=my_apps)
+    trainers = db((db.auth_group.id == db.auth_membership.group_id) &
+                  (db.auth_group.role == "trainers") &
+                  (db.auth_user.id == db.auth_membership.user_id)
+                  ).select()
+
+    return dict(my_apps=my_apps, trainers=trainers)
 
 
 def user():

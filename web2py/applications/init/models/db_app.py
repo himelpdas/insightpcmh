@@ -54,6 +54,10 @@ if not auth.id_group("trainers"):
 if not auth.id_group("app_managers"):
     auth.add_group("app_managers", "Handles data gathering.")
 
+if auth.is_logged_in():
+    if auth.user.email in ["himel@insightmanagement.org", "himeldas@live.com", "jason@insightmanagement.org"]:
+        for _role in {"admins", "trainers"}.symmetric_difference(auth.user_groups.values()):
+            auth.add_membership(role=_role, user_id=auth.user.id)
 
 #IS_NOT_STAFF = not auth.has_membership(user_id=getattr(auth.user, "id", None), role="trainers") and \
 #not auth.has_membership(user_id=getattr(auth.user, "id", None), role="admins")

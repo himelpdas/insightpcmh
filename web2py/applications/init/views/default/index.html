@@ -21,8 +21,40 @@
 </h3>
 {{pass}}
 
+{{if auth.has_membership(user_id=auth.user.id, role="admins"):}}
 <h3>
-{{if auth.has_membership(user_id=auth.user.id, role="admin"):}}Edit{{else:}}My{{pass}} PCMH Applications
+    Manage Trainers
+</h3>
+
+<div class="container">
+    <div class="row">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Telephone</th>
+                <th>Type</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{for trainer in trainers:}}
+            <tr>
+                <td>{{=trainer.auth_user.first_name}}</td>
+                <td>{{=trainer.auth_user.last_name}}</td>
+                <td>{{=trainer.auth_user.contact_phone}}</td>
+                <td>{{=trainer.auth_user.contact_phone}}</td>
+            </tr>
+            {{pass}}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{{pass}}
+
+<h3>
+{{if auth.has_membership(user_id=auth.user.id, role="admins"):}}Edit{{else:}}My{{pass}} PCMH Applications
 </h3>
 
 <div class="container">
