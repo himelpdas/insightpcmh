@@ -36,7 +36,9 @@ APP_ID = request.vars["app_id"]
 
 if APP_ID:
 
-    auth.requires_membership('application_'+APP_ID)(lambda: 1)()
+    #auth.requires_membership('application_'+APP_ID)(lambda: 1)()
+    if not auth.has_membership("admins"):
+        auth.requires_permission('manage', 'application', APP_ID)(lambda: 1)()
 
     response.menu += [
         (T('(0) Practice'), ('0' == request.controller), URL('0', 'index', vars=request.vars), []),

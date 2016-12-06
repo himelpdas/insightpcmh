@@ -7,31 +7,114 @@
 # - user is required for authentication and authorization
 # - download is for downloading files uploaded in the db (does streaming)
 # -------------------------------------------------------------------------
+from collections import OrderedDict
 
+def _disable_rbac_fields(func):
+    def inner():  # http://stackoverflow.com/questions/19673284/how-do-i-get-list-of-field-objects-in-a-table-in-web2py
+        for rbac in [db.auth_membership, db.auth_permission, db.auth_group]:
+            for field in rbac:
+                field.readable = False
+                field.writable = False
+        return func
+    return inner()
+
+
+@_disable_rbac_fields
 @auth.requires_login()
 def index():
-    if not IS_STAFF and not db(db.application.owner_id == auth.user.id).select().last():
+    if not IS_STAFF and not db(db.application.owner_id == auth.user.id).select().last():  # if not staff and has no app
         redirect(URL("new_application"))
     # web2py performs inner joins automatically and transparently when the query links two or more tables
-    my_app_memberships = db((db.auth_membership.user_id == auth.user.id) &
-                 (db.auth_group.id == db.auth_membership.group_id) &  # inner join
-                 (db.auth_group.role.contains("application_"))).select()
-    my_apps = []
-    for my_membership in my_app_memberships:
-        my_membership_app_id = my_membership.auth_group.role.split("_")[-1]
-        my_app = db((db.application.id == my_membership_app_id)).select().last()
-        members_of_my_app = db((db.auth_membership.group_id == my_membership.auth_membership.group_id) &
-                               (db.auth_user.id == db.auth_membership.user_id)).select()
-        my_app.members_of_my_app = members_of_my_app
-        my_app.my_membership = my_membership
-        my_apps.append(my_app)
 
+    return dict()
+
+
+@_disable_rbac_fields
+@auth.requires_signature()
+def load_apps_grid():
+    links = [dict(header='',  # header is col title
+                  body=lambda row:
+                  A(SPAN(_class="glyphicon glyphicon-play-circle"),
+                    _class="btn btn-success",
+                    _href=URL('init', "0", 'index.html',  # table may or may not be joined
+                              vars=dict(app_id=getattr(row, "application", row).id))))]
+
+    if auth.has_membership("admins"):
+        my_apps = db((db.application.id > 0))
+        onvalidation = None
+        db.application.owner_id.readable = True
+        db.application.owner_id.writable = True
+
+        trainers = db((db.auth_group.id == db.auth_membership.group_id) &
+                      (db.auth_group.role == "trainers") &
+                      (db.auth_user.id == db.auth_membership.user_id)
+                      ).select()
+        options = OrderedDict()
+        for trainer in trainers:
+            name = "%s%s" % (trainer.auth_user.first_name.capitalize()[0],
+                             trainer.auth_user.last_name.capitalize()[0])
+            i = 1
+            while 1:
+                if not name in options:
+                    name = "%s%s" % (name, i)
+                    i += 1
+                else:
+                    break
+            options[name] = trainer.auth_user.id
+        def trainer_select(row):
+            color = "warning" if auth.has_permission("manage", "application", getattr(row, "application", row).id) else "danger"
+            DIV(*[BUTTON(each, _class="btn btn-" + color, _type="button") for each in options],
+            _class="btn-group", _style="display:flex"  # https://github.com/twbs/bootstrap/issues/9939
+        )
+        links.append(dict(
+            header="Trainer(s)",
+            body=trainer_select
+        ))
+    else:
+        my_group_id = auth.id_group("user_%s" % auth.user.id)
+        my_apps = db((db.application.id == db.auth_permission.record_id) &
+                     (db.auth_permission.name == "manage") &
+                     (db.auth_permission.group_id == my_group_id))
+        onvalidation = _app_onvalidation
+
+    app_grid = SQLFORM.grid(my_apps,
+                            onvalidation=onvalidation,
+                            oncreate=_app_oncreate,
+                            formname="load_apps_grid",
+                            links=links,
+                            links_placement='left')
+
+    return dict(app_grid=app_grid)
+
+
+@_disable_rbac_fields
+@auth.requires_signature()
+def load_admins_grid():
+    admins = db((db.auth_group.id == db.auth_membership.group_id) &
+                (db.auth_group.role == "admins") &
+                (db.auth_user.id == db.auth_membership.user_id)
+                )
+
+    admin_grid = SQLFORM.grid(admins,
+                              formname="load_admins_grid")
+
+    return dict(admin_grid=admin_grid)
+
+
+@_disable_rbac_fields
+@auth.requires_signature()
+def load_trainers_grid():
+    # the index page checks for permissions, then generates this sig, so that we don't have to keep checking permissions
     trainers = db((db.auth_group.id == db.auth_membership.group_id) &
                   (db.auth_group.role == "trainers") &
                   (db.auth_user.id == db.auth_membership.user_id)
-                  ).select()
+                  )
 
-    return dict(my_apps=my_apps, trainers=trainers)
+    trainer_grid = SQLFORM.grid(trainers,
+                                formname="load_trainers_grid",  # must change formname or else form will save as another
+                                links_placement="left")
+
+    return dict(trainer_grid=trainer_grid)
 
 
 def user():
@@ -53,32 +136,19 @@ def user():
     return dict(form=auth())
 
 
-@auth.requires(not auth.has_membership(user_id=getattr(auth.user, "id", None), role="trainers") and
-               not auth.has_membership(user_id=getattr(auth.user, "id", None), role="admins")
-               , requires_login=True)
-def new_application():
-    response.view = "default/application.html"
+#auth.requires(not auth.has_membership(user_id=getattr(auth.user, "id", None), role="trainers") and
+#               not auth.has_membership(user_id=getattr(auth.user, "id", None), role="admins")
+#               , requires_login=True)
+def _app_onvalidation(form):
+    form.vars.owner_id = auth.user.id
 
-    def set_application_id(form):
-        form.vars.owner_id = auth.user.id
 
-    form = SQLFORM(db.application)
-    if form.process(detect_record_change=True, onvalidation=set_application_id).accepted:
-        response.flash = "Application information created!"
-        new_app_gid = auth.add_group("application_%s" % form.vars.id, "users allowed to edit application_%s" % form.vars.id)
-        auth.add_membership(group_id=new_app_gid, user_id=auth.user.id)
-        # TODO add all admins to group
-        admins = db(
-            (db.auth_membership.user_id == auth.user.id) &
-            (db.auth_membership.group_id == auth.id_group("admin"))
-        ).select()
-        for admin in admins:
-            auth.add_membership(group_id=new_app_gid, user_id=admin.auth_user.id)
-
-        URL('index', vars=dict(app_id=form.vars.id), hmac_key=MY_KEY)
-        redirect(URL("index"))
-
-    return dict(form=form)
+def _app_oncreate(form):
+    app_id = form.vars.id
+    auth.add_permission(0, "manage", 'application', app_id)  # 0 means user_1
+    auth.add_permission(auth.id_group("admins"), "manage", 'application', app_id)
+    # app_url = URL('application', vars=dict(app_id=form.vars.id), hmac_key=MY_KEY)
+    #redirect(URL(0, "index.html", vars=dict(app_id=form.vars.id)))  # redir user to his app
 
 
 @cache.action()

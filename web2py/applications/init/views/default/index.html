@@ -1,112 +1,31 @@
 {{extend 'layout.html'}}
 
 {{block head}}
-<style>
-.table tbody>tr>td.vert-align
-{
-    vertical-align: middle;
-}
-</style>
-<header style="text-align: center;">
-    <h2>{{=auth.user.first_name}}'s PCMH Dashboard</h2>
-</header>
 {{end}}
 
-{{if auth.has_membership(user_id=auth.user.id, role="admin"):}}
-<h3>
-    Edit Trainers
-</h3>
-<h3>
-    Edit Managers
-</h3>
-{{pass}}
+<div class="alert alert-info">
+    <span class="glyphicon glyphicon-list-alt"></span> Manage PCMH Applications
+</div>
+<div class="container">
+    {{=LOAD('default', 'load_apps_grid.load', ajax=True, user_signature=True)}}  {{# keep signature so we don't have to check for permission again to allow access to this grid}}
+</div>
+<hr><h1>&nbsp;</h1>
 
 {{if auth.has_membership(user_id=auth.user.id, role="admins"):}}
-<h3>
-    Manage Trainers
-</h3>
-
+<div class="alert alert-info"><span class="glyphicon glyphicon-king"></span> Manage Admins</div>
 <div class="container">
-    <div class="row">
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Telephone</th>
-                <th>Type</th>
-            </tr>
-            </thead>
-            <tbody>
-            {{for trainer in trainers:}}
-            <tr>
-                <td>{{=trainer.auth_user.first_name}}</td>
-                <td>{{=trainer.auth_user.last_name}}</td>
-                <td>{{=trainer.auth_user.contact_phone}}</td>
-                <td>{{=trainer.auth_user.contact_phone}}</td>
-            </tr>
-            {{pass}}
-            </tbody>
-        </table>
-    </div>
+    {{=LOAD('default', 'load_admins_grid.load', ajax=True, user_signature=True)}}  {{# keep signature so we don't have to check for permission again to allow access to this grid}}
 </div>
+<hr><h1>&nbsp;</h1>
 
+<div class="alert alert-info"><span class="glyphicon glyphicon-knight"></span> Manage Trainers</div>
+<div class="container">
+{{=LOAD('default', 'load_trainers_grid.load', ajax=True, user_signature=True)}}  {{# keep signature so we don't have to check for permission again to allow access to this grid}}
+</div>
+<hr><h1>&nbsp;</h1>
+
+<div class="alert alert-info"><span class="glyphicon glyphicon-pawn"></span> Manage Users</div>
+<div class="container">
+</div>
+<hr><h1>&nbsp;</h1>
 {{pass}}
-
-<h3>
-{{if auth.has_membership(user_id=auth.user.id, role="admins"):}}Edit{{else:}}My{{pass}} PCMH Applications
-</h3>
-
-<div class="container">
-    <div class="row">
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th>App ID</th>
-                <th>Practice Name</th>
-                <th>PPS</th>
-                <th>Type</th>
-                <th>Size</th>
-                <th>Speciality</th>
-                <th>EMR</th>
-                <th>Trainers</th>
-                <th>Managers</th>
-            </tr>
-            </thead>
-            <tbody>
-            {{for my_app in my_apps:}}
-            <tr>
-                <td class="vert-align"><strong><a href="{{=URL("0", 'index', vars=dict(app_id=my_app.id))}}">#{{=my_app.id}}</a></strong></td>
-                <td class="vert-align"><a href="#" onclick="return false;" data-toggle="popover" title="Practice Information"
-                       data-html="true" data-placement="top"
-                       data-content="<pre>{{_marker="<span class='glyphicon glyphicon-map-marker'></span>"}}{{=_marker}} {{=my_app.practice_address_line_1}}{{if my_app.practice_address_line_2:}}<br>{{=_marker}} {{=my_app.practice_address_line_2}}{{pass}}<br>{{=_marker}} {{=my_app.practice_city}}<br>{{=_marker}} {{=my_app.practice_state}}, {{=my_app.practice_zip}}<br><span class='glyphicon glyphicon-earphone'></span> {{=my_app.practice_phone}}<br><span class='glyphicon glyphicon-print'></span> {{=my_app.practice_fax}}</pre>">{{=my_app.practice_name}}</a>
-                </td>
-                <td class="vert-align">{{=my_app.pps}}</td>
-                <td class="vert-align">{{=my_app.application_type}}</td>
-                <td class="vert-align">{{=my_app.application_size}}</td>
-                <td class="vert-align">{{=my_app.practice_specialty}}</td>
-                <td class="vert-align">{{=dict(EMRS)[my_app.practice_emr]}}</td>
-                <td class="vert-align">{{for member in my_app.members_of_my_app:}}
-                        {{="EP"}}
-                    {{pass}}
-                </td>
-                <td class="vert-align">{{for member in my_app.members_of_my_app:}}
-                        {{_first_initial=member.auth_user.first_name[0].upper()}}
-                        {{_last_initial=member.auth_user.last_name[0].upper()}}
-                        {{="%s%s"%(_first_initial, _last_initial)}}
-                    {{pass}}
-                </td>
-            </tr>
-            {{pass}}
-            </tbody>
-        </table>
-    </div>
-</div>
-
-{{block page_js}}
-<script>
-    $(function () {
-        $('[data-toggle="popover"]').popover({container: 'body'})
-    })
-</script>
-{{end}}
