@@ -3,7 +3,9 @@
 
 APP_ID = request.vars["app_id"]
 INSIGHT_ADDR = "660 Whiteplains Rd, Tarrytown, NY 10591"
-IS_STAFF = bool(getattr(auth.user, "is_insight", None))
+IS_STAFF = auth.has_membership(group_id=auth.id_group("trainers")) or \
+           auth.has_membership(group_id=auth.id_group("admins")) or \
+           auth.has_membership(group_id=auth.id_group("app_managers"))
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Customize your APP title, subtitle and menus here

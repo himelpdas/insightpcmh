@@ -5,42 +5,42 @@
 <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/css/bootstrap-multiselect.css"/>
 <style>
     .alert.alert-default {
-        border: 1px dotted #ccc;
+        border: 1px dashed #ccc;
     }
 </style>
 {{end}}
 
-<div class="alert text-muted alert-default">
-    <span class="glyphicon glyphicon-list-alt"></span> Manage PCMH Applications
+<div class="alert text-strong alert-default">
+    <strong><span class="glyphicon glyphicon-list-alt"></span> Manage PCMH Applications</strong>
+    <span class="pull-right text-muted">
+        <span class="text-danger">&#9632;</span> Trainer&emsp;
+        <span class="text-warning">&#9632;</span> App Manager&emsp;
+        <span class="text-success">&#9632;</span> Contributor&emsp;
+    </span>
 </div>
     {{=LOAD('default', 'load_apps_grid.load', ajax=True, user_signature=True)}}  {{# keep signature so we don't have to check for permission again to allow access to this grid}}
-<hr><h1>&nbsp;</h1>
+<hr><br>
 
 {{if auth.has_membership(user_id=auth.user.id, role="admins"):}}
-<div class="alert text-muted alert-default"><span class="glyphicon glyphicon-king"></span> Manage Admins</div>
+<div class="alert alert-default">
+    <strong><span class="glyphicon glyphicon-king"></span> Manage Admins</strong>
+</div>
     {{=LOAD('default', 'load_admins_grid.load', ajax=True, user_signature=True)}}  {{# keep signature so we don't have to check for permission again to allow access to this grid}}
-<hr><h1>&nbsp;</h1>
+<hr><br>
 
-<div class="alert text-muted alert-default"><span class="glyphicon glyphicon-knight"></span> Manage Trainers</div>
+<div class="alert alert-default">
+    <strong><span class="glyphicon glyphicon-knight"></span> Manage Trainers</strong>
+</div>
 {{=LOAD('default', 'load_trainers_grid.load', ajax=True, user_signature=True)}}  {{# keep signature so we don't have to check for permission again to allow access to this grid}}
-<hr><h1>&nbsp;</h1>
+<hr><br>
 
-<div class="alert text-muted alert-default"><span class="glyphicon glyphicon-pawn"></span> Manage Users</div>
-<hr><h1>&nbsp;</h1>
+<div class="alert alert-default">
+    <strong><span class="glyphicon glyphicon-pawn"></span> Manage Users</strong>
+</div>
+<hr><br>
 {{pass}}
 
-<script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/js/bootstrap-multiselect.min.js"></script>
-<script>
-    $(document).ajaxComplete(function() {
-        $(document).ready(function() {
-            $("[multiple='multiple']").multiselect();
-
-            $('#application_pps').addClass('form-control');
-        {{#$( "input[name^='_autocomplete_']" ).addClass('form-control');}}  {{#starts with selector https://api.jquery.com/attribute-starts-with-selector/}}
-            $("input[autocomplete='off']").each(function (i, obj) {
-                        $(obj).addClass('form-control');
-                    }
-            ); {{#starts with selector https://api.jquery.com/attribute-starts-with-selector/}}
-        })
-    })
-</script>
+{{block page_js}}
+{{super}}
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/js/bootstrap-multiselect.min.js"></script>
+{{end}}

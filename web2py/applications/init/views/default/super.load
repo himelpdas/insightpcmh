@@ -33,6 +33,13 @@ even if the function is called via ajax.
 
 {{block load_js}}
 <script>
-    $("[multiple='multiple']").multiselect("refresh");
+    $(".web2py_htmltable").css({'min-height': "22em", 'background-color': "#FDF9FF"});
+    $("[multiple='multiple'][class!='autocomplete']").multiselect("refresh");  {{# select all multi widgets, but not with those hidden autocomplete dropdowns (also has multiple=multiple attr))}}
+
+    {{#$( "input[name^='_autocomplete_']" ).addClass('form-control');}}  {{#starts with selector https://api.jquery.com/attribute-starts-with-selector/}}
+    $("input[autocomplete='off']").each(function (i, obj) {
+                $(obj).addClass('form-control');
+            }
+    ); {{#starts with selector https://api.jquery.com/attribute-starts-with-selector/}}
 </script>
 {{end}}
