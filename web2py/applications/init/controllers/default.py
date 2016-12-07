@@ -22,8 +22,6 @@ def _disable_rbac_fields(func):
 @_disable_rbac_fields
 @auth.requires_login()
 def index():
-    if not IS_STAFF and not db(db.application.owner_id == auth.user.id).select().last():  # if not staff and has no app
-        redirect(URL("new_application"))
     # web2py performs inner joins automatically and transparently when the query links two or more tables
 
     return dict()
@@ -35,11 +33,16 @@ def load_apps_grid():
     links = [dict(header='',  # header is col title
                   body=lambda row:
                   A(SPAN(_class="glyphicon glyphicon-play-circle"),
-                    _class="btn btn-success",
+                    _class="btn btn-sm btn-success",
                     _href=URL('init', "0", 'index.html',  # table may or may not be joined
                               vars=dict(app_id=getattr(row, "application", row).id))))]
 
     if auth.has_membership("admins"):
+        links.append(dict(
+            header=SPAN("Assigned", _class="text-success"),
+            body=lambda e: ""
+        ))
+
         my_apps = db((db.application.id > 0))
         onvalidation = None
         db.application.owner_id.readable = True
@@ -51,25 +54,45 @@ def load_apps_grid():
                       ).select()
         options = OrderedDict()
         for trainer in trainers:
-            name = "%s%s" % (trainer.auth_user.first_name.capitalize()[0],
-                             trainer.auth_user.last_name.capitalize()[0])
-            i = 1
-            while 1:
-                if not name in options:
-                    name = "%s%s" % (name, i)
-                    i += 1
-                else:
-                    break
+            name = "%s%s%s" % (trainer.auth_user.first_name.capitalize()[0],
+                               trainer.auth_user.last_name.capitalize()[0],
+                               trainer.auth_user.id)
             options[name] = trainer.auth_user.id
-        def trainer_select(row):
-            color = "warning" if auth.has_permission("manage", "application", getattr(row, "application", row).id) else "danger"
-            DIV(*[BUTTON(each, _class="btn btn-" + color, _type="button") for each in options],
-            _class="btn-group", _style="display:flex"  # https://github.com/twbs/bootstrap/issues/9939
-        )
+
+        def _trainer_select(row):
+            #return DIV(*[BUTTON(each, _class="btn btn-sm btn-warning", _type="button") for each in options],
+            #_class="btn-group", _style="display:flex"  # https://github.com/twbs/bootstrap/issues/9939
+            return DIV(SELECT(OPTION("hello", _value="1"),OPTION("hello", _value="2"), _multiple="multiple"),
+                       _style="display:flex")
+
+
         links.append(dict(
-            header="Trainer(s)",
-            body=trainer_select
+            header=SPAN("Available Trainers", _class="text-warning"),
+            body=_trainer_select
         ))
+
+        # app managers
+        app_managers = db((db.auth_group.id == db.auth_membership.group_id) &
+                          (db.auth_group.role == "app_managers") &
+                          (db.auth_user.id == db.auth_membership.user_id)
+                          ).select()
+        options = OrderedDict()
+        for app_manager in app_managers:
+            name = "%s%s%s" % (app_manager.auth_user.first_name.capitalize()[0],
+                           app_manager.auth_user.last_name.capitalize()[0],
+                           app_manager.auth_user.id)
+            options[name] = app_manager.auth_user.id
+
+        def _app_manager_select(row):
+            return DIV(*[BUTTON(each, _class="btn btn-sm btn-danger", _type="button") for each in options],
+                       _class="btn-group", _style="display:flex"  # https://github.com/twbs/bootstrap/issues/9939
+                       )
+
+        links.append(dict(
+            header=SPAN("Available Managers", _class="text-danger"),
+            body=_app_manager_select
+        ))
+
     else:
         my_group_id = auth.id_group("user_%s" % auth.user.id)
         my_apps = db((db.application.id == db.auth_permission.record_id) &

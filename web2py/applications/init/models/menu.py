@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 # this file is released under public domain and you can use without limitations
 
+APP_ID = request.vars["app_id"]
+INSIGHT_ADDR = "660 Whiteplains Rd, Tarrytown, NY 10591"
+IS_STAFF = bool(getattr(auth.user, "is_insight", None))
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Customize your APP title, subtitle and menus here
 # ----------------------------------------------------------------------------------------------------------------------
 
 response.logo = A(B('Insight', SPAN("PCMH")), XML('&trade;&nbsp;'),
-                  _class="navbar-brand", _href="http://www.web2py.com/",
+                  _class="navbar-brand", _href=URL('default', 'index'),
                   _id="web2py-logo")
 response.title = request.application.replace('_', ' ').title()
 response.subtitle = ''
@@ -32,7 +36,6 @@ response.menu = [
     (T('Dashboard'), ('default' == request.controller and 'index' == request.function), URL('default', 'index'), []),
 ]
 
-APP_ID = request.vars["app_id"]
 
 if APP_ID:
 

@@ -7,28 +7,33 @@
 {{block head}}
     {{super}}
     <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/css/bootstrap-multiselect.css"/>
-
-    <style>
-        #web2py-logo {
-           color: #BA55D3;
-           text-shadow: 2px 2px #000000;
-        }
-        .web2py-menu-active {
-            background-color: #BA55D3;
-        }
-    </style>
 {{end}}
 
 {{block header}}
 <header style="text-align: center; padding-bottom:1px;">
     {{# <h3>A. Spencer MD (MDLand)</h3>  {{#practice}}
-    <h3>Ebony Proudfoot <span class="text-muted">(Your Trainer)</span></h3>  {{#practice}}
-    <h4><span class="glyphicon glyphicon-map-marker"></span> <a href="http://maps.google.com/?q={{=urllib.urlencode({'q':'660 White Plains Rd #325, Tarrytown, NY 10573'})}}">660 White Plains Rd #325, Tarrytown, NY 10573</a></h4>  {{#address}} {{# http://bit.ly/2a59inp}}
+    {{app_row = db((db.application.id == APP_ID) & (db.application.owner_id == db.auth_user.id)).select().last()}}
+    <h3>{{=app_row.application.practice_name}}</h3>  {{#practice}}
+    <h4>
+        {{_practice_address = "%s%s, %s, %s %s" % (app_row.application.practice_address_line_1,
+                                                   ", %s" % app_row.application.practice_address_line_2 if app_row.application.practice_address_line_2 else "",
+                                                   app_row.application.practice_city,
+                                                   app_row.application.practice_state,
+                                                   app_row.application.practice_zip,
+                                                  )
+          if not IS_STAFF:
+            _map_query = urllib.urlencode({'q':'660 White Plains Rd #325, Tarrytown, NY 10573'})
+          else:
+            _map_query = urllib.urlencode({'f':'d', 'saddr': INSIGHT_ADDR, 'daddr':_practice_address})
+          pass
+        }}
+        <span class="glyphicon glyphicon-map-marker"></span> <a href="http://maps.google.com/?{{=_map_query}}">{{=_practice_address}}</a>  {{#}}
+    </h4>  {{#address}} {{# http://bit.ly/2a59inp}}
     <h5>
-    <span class="glyphicon glyphicon-earphone"></span> (914) 524-0500 <span style="opacity:0.2">|</span>
-    <span class="glyphicon glyphicon-print"></span> (914) 524-0501 <span style="opacity:0.2">|</span>
+    <span class="glyphicon glyphicon-earphone"></span> {{=app_row.application.practice_telephone}} <span style="opacity:0.2">|</span>
+    <span class="glyphicon glyphicon-print"></span> app_row.application.practice_city <span style="opacity:0.2">|</span>
     {{# <span class="glyphicon glyphicon-envelope"></span> <a href="mailto:allison@insightmanagement.org">allison@insightmanagement.org</a>}}
-    <span class="glyphicon glyphicon-envelope"></span> <a href="mailto:ebony@insightmanagement.org">ebony@insightmanagement.org</a>
+    <span class="glyphicon glyphicon-envelope"></span> <a href="mailto:ebony@insightmanagement.org" class="text-capitalize">{{=app_row.auth_user.first_name}} {{=app_row.auth_user.last_name}} (primary contact)</a>
     </h5>
 </header>
 {{end}}
@@ -76,7 +81,6 @@
         <br>
     {{pass}}
     {{=qna.form}}
-    {{=qna.clear_button}}
     </div>
 </div>
 {{pass}}
@@ -86,7 +90,7 @@
         actions = []
         show_generic = False
         if any(map(lambda e: e.needs_answer(), QNA.instances)):
-            actions.append(XML(T("Please <b class='text-info'>answer</b> one or more questions below.")))
+            actions.append(XML(T("Please <b class='text-info'>answer</b> one or more questions below. Note, some questions need more than one answer to be considered complete.")))
         pass
         if any(map(lambda e: e.has_warnings(), QNA.instances)):
             actions.append(XML(T("Please <b class='text-warning'>resolve</b> one or more questions below.")))

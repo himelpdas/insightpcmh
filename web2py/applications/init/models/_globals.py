@@ -1,15 +1,15 @@
 from string import Formatter
 from gluon.storage import Storage
+import logging
+import os
+
+logger = logging.getLogger("web2py.app.pcmh")
 
 _list_of_states = ["NY", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
                    "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
                    "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
                    "NM", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
                    "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
-
-_telephone_field_validator = IS_MATCH("^(\([0-9]{3}\) |[0-9]{3}-)[0-9]{3}-[0-9]{4}$", error_message="Enter telephone in this format (123) 123-1234")
-_note_field = Field("note", label=XML("<span class='text-muted'>Note to Trainer</span>"), comment="Optional")
-_yes_no_field_default = Field("please_choose", requires=IS_IN_SET(["Yes", "No"]))
 
 _days_of_the_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
@@ -70,12 +70,6 @@ class QNA(object):
         self.rows = []
         self.warnings = []  #
         self.form_buttons = []
-        self.clear_button = TAG.button(XML('<span class="glyphicon glyphicon-trash"></span>'), _type="button",
-            _class="btn btn-primary pull-right",
-            _onClick="if(confirm('Clear entry?')){parent.location='%s'}" %
-            URL(
-            vars=dict([('delete',self.table_name)]+request.get_vars.items())
-    ))
 
     def _form_process(self):
         if self.form and self.form.process(onvalidation=self.validator).accepted:
@@ -91,10 +85,11 @@ class QNA(object):
 
     @require_show  # because __init__ was not yet called, self is not the first argument here
     def process(self):
-        if request.get_vars["delete"] == self.table_name:  # security to prevent SQL Injection attach
-            del request.get_vars["delete"]
-            db(db[self.table_name].id > 0).delete()  # change to active = False
-            session.flash = "deleted question %s" % self.table_name
+        if request.get_vars["delete"] and URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT or "", hash_vars=["delete", "app_id"]):  # security to prevent SQL Injection attack
+            table_name, id = request.get_vars["delete"].rsplit("_", 1)  # will split table_name_1 to [table_name, 1]
+            del request.get_vars["delete"]  # http://bit.ly/2gyvlqs # get rid of delete to prevent inf loop when redirecting with vars=request.get_vars
+            db(db[table_name].id == id).delete()  # change to active = False
+            session.flash = "Deleted answer (%s) question from question #%s" % (id, table_name)
             redirect(URL(request.controller, request.function, vars=request.get_vars))  # TODO
         self.preprocess()
         self._form_process()
@@ -146,10 +141,10 @@ class MultiQNA(QNA):
         return True
 
     def set_template(self, template):
-        self.template = "<span>Submitted on {created_on}&mdash;{created_by} </span>&emsp;<span class='text-muted'>" \
+        self.template = "<span>Submitted on {created_on}&mdash;<i>{created_by}</i> </span>&emsp;<span class='text-muted'>" \
                         "{note}</span><pre class='text-success'>" \
                         "<span class='text-danger pull-right'>" \
-                        "&emsp;<span class='glyphicon glyphicon-trash'></span>" \
+                        "&emsp;{delete_table_row}" \
                         "</span>" \
                         "%s</pre>" % template
 
@@ -171,24 +166,43 @@ class MultiQNA(QNA):
         for row in self.rows:
             keys = filter(lambda key: key, [i[1] for i in Formatter().parse(self.template)])  #filter because we get Nones # http://stackoverflow.com/questions/13037401/get-keys-from-template
 
-            def _if_auth_user(func):  # FIXME: Possible source of infinite loop, for some reason it acts weird when using {created_by} (reference object)
+            logger.warn("Possible source of infinite loop, for some reason it acts weird when using {created_by}"
+                        " (reference object)")  # fixme
+
+            def _print_row_delete_icon(func):
                 def inner(key):
-                    if key in ["created_by", "modified_by"]:
-                        auth_user = db(db.auth_user.id == row[key]).select().last()
-                        return key, "%s %s" % (auth_user.first_name.capitalize(), auth_user.last_name.capitalize())
+                    if key == "delete_table_row":
+                        return key, A(SPAN(_class="glyphicon glyphicon-trash"), _class="text-danger",
+                                      _href="#",
+                                      _onClick="if(confirm('Clear entry?')){parent.location='%s'}" %
+                                                URL(vars=dict([('delete', self.table_name+"_%s" % row.id)] +
+                                                              request.get_vars.items()),
+                                                    hmac_key=MY_KEY, salt=session.MY_SALT or "",
+                                                    hash_vars=["delete", "app_id"]),
+                                      )
                     return func(key)
                 return inner
 
-            @_if_auth_user
-            def _comma_list(key):  #join with commas if object is list-like (python 2 only) http://stackoverflow.com/questions/1835018/python-check-if-an-object-is-a-list-or-tuple-but-not-string
+            def _print_auth_user(func):
+                def inner(key):
+                    if key in ["created_by", "modified_by"]:
+                        auth_user = db(db.auth_user.id == row[key]).select().last()
+                        return key, "%s %s (%s)" % (auth_user.first_name.capitalize(), auth_user.last_name.capitalize(),
+                                                  auth_user.id)
+                    return func(key)
+                return inner
+
+            @_print_row_delete_icon
+            @_print_auth_user
+            def _print_comma_list(key):  #join with commas if object is list-like (python 2 only) http://stackoverflow.com/questions/1835018/python-check-if-an-object-is-a-list-or-tuple-but-not-string
                 if not hasattr(row[key], '__iter__'):
-                    return key, row[key]
+                    return key, row[key]  # needed to do **vars for string.format
                 else:
                     return key, ", ".join(row[key])
 
             yield XML(self.template.format(
                 **dict(
-                    map(_comma_list, keys)  #
+                    map(_print_comma_list, keys)  #
                 )))  # would look like self.template.format(name="Jon", ...)
 
 '''
@@ -257,5 +271,9 @@ class CryptQNA(MultiQNA):
         self.form_buttons.append(TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right" % btn_class))
 
     def set_template(self, template):
-        self.template = "<span>Encrypted on {created_on}&mdash;{created_by}</span>" \
-                        "<pre class='text-success'>%s</pre>" % template
+        self.template = "<span>Encrypted on {created_on}&mdash;<i>{created_by}</i></span>" \
+                        "<pre class='text-success'>" \
+                        "<span class='text-danger pull-right'>" \
+                        "&emsp;{delete_table_row}" \
+                        "</span>" \
+                        "%s</pre>" % template

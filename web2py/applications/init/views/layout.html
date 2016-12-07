@@ -34,7 +34,17 @@
         <![endif]-->
     <!-- Favicons -->
 {{include 'web2py_ajax.html'}} <!-- this includes jquery.js, calendar.js/.css and web2py.js -->
-{{block head}}{{end}}
+{{block head}}
+    <style>
+        #web2py-logo {
+           color: #BA55D3;
+           text-shadow: 2px 2px #000000;
+        }
+        .web2py-menu-active {
+            background-color: #BA55D3;
+        }
+    </style>
+{{end}}
 {{
 # using sidebars need to know what sidebar you want to use
 mc0 = 'col-md-12'
