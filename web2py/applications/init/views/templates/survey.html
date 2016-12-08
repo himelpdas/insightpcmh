@@ -125,16 +125,32 @@
 
 {{block page_js}}
 {{super}}
-    <script>
-        $(".panel-body").each(function(){
-            $(this).hide();
-            $(this).fadeIn(500);
-        })
-    </script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/js/bootstrap-multiselect.min.js"></script>
-    <script type="text/javascript">
-        $(document).ready(function() {
-            $("[multiple='multiple'][class!='autocomplete']").multiselect();
-        });
-    </script>
+<script>
+    $(".panel-body").each(function(){
+        $(this).hide();
+        $(this).fadeIn(500);
+    })
+</script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/js/bootstrap-multiselect.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("[multiple='multiple'][class!='autocomplete']").multiselect();
+    });
+</script>
+
+<!--Start of Tawk.to Script-->
+
+<script type="text/javascript">
+    var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+    (function () {
+        var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+        s1.async = true;
+        s1.src = 'https://embed.tawk.to/580000caa420952046850bff/default';
+        s1.charset = 'UTF-8';
+        s1.setAttribute('crossorigin', '*');
+        s0.parentNode.insertBefore(s1, s0);
+    })();
+</script>
+
+<!--End of Tawk.to Script-->
 {{end page_js}}

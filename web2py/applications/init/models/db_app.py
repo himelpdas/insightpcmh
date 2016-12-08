@@ -23,6 +23,7 @@ db.define_table("application",
     Field("practice_zip", label="Zip", requires=IS_NOT_EMPTY()),
     Field("practice_state", label="State", requires=IS_IN_SET(_list_of_states, zero=None)),
     Field("website", requires=IS_EMPTY_OR(IS_URL()), comment="Optional"),
+    auth.signature
 )
 
 db.application.owner_id.widget = SQLFORM.widgets.autocomplete(
@@ -57,10 +58,17 @@ if not auth.id_group("admins"):
 if not auth.id_group("trainers"):
     auth.add_group("trainers", "Handles many applications. Has some additional responsibilites from app managers")
 
+if not auth.id_group("masters"):
+    auth.add_group("masters", "Like admin, but bypasses permission")
+
+if not auth.id_group("contributors"):
+    auth.add_group("contributors", "The employees of a clinic that represent its corresponding application")
+
 if not auth.id_group("app_managers"):
-    auth.add_group("app_managers", "Handles data gathering.")
+    auth.add_group("app_managers", "Handles data gathering")
 
 if auth.is_logged_in():
-    if auth.user.email in ["himel@insightmanagement.org", "himeldas@live.com", "jason@insightmanagement.org"]:
-        for _role in {"admins", "trainers", "app_managers"}.symmetric_difference(auth.user_groups.values()):
+    """Himel's role in Insight"""
+    if auth.user.email in ["himel@insightmanagement.org", "himeldas@live.com"]:  # "jason@insightmanagement.org"]:
+        for _role in {"masters", "admins", "trainers", "app_managers"}.symmetric_difference(auth.user_groups.values()):
             auth.add_membership(role=_role, user_id=auth.user.id)

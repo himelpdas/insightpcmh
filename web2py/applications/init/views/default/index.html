@@ -23,20 +23,9 @@
 
 {{if auth.has_membership(user_id=auth.user.id, role="admins"):}}
 <div class="alert alert-default">
-    <strong><span class="glyphicon glyphicon-king"></span> Manage Admins</strong>
+    <strong><span class="glyphicon glyphicon-user"></span> Manage Users</strong>
 </div>
-    {{=LOAD('default', 'load_admins_grid.load', ajax=True, user_signature=True)}}  {{# keep signature so we don't have to check for permission again to allow access to this grid}}
-<hr><br>
-
-<div class="alert alert-default">
-    <strong><span class="glyphicon glyphicon-knight"></span> Manage Trainers</strong>
-</div>
-{{=LOAD('default', 'load_trainers_grid.load', ajax=True, user_signature=True)}}  {{# keep signature so we don't have to check for permission again to allow access to this grid}}
-<hr><br>
-
-<div class="alert alert-default">
-    <strong><span class="glyphicon glyphicon-pawn"></span> Manage Users</strong>
-</div>
+    {{=LOAD('default', 'load_users_grid.load', ajax=True, user_signature=True)}}  {{# keep signature so we don't have to check for permission again to allow access to this grid}}
 <hr><br>
 {{pass}}
 

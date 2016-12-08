@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # this file is released under public domain and you can use without limitations
 
-APP_ID = request.vars["app_id"]
+APP_ID = request.post_vars["app_id"]
 INSIGHT_ADDR = "660 Whiteplains Rd, Tarrytown, NY 10591"
 IS_STAFF = auth.has_membership(group_id=auth.id_group("trainers")) or \
            auth.has_membership(group_id=auth.id_group("admins")) or \
@@ -38,12 +38,23 @@ response.menu = [
     (T('Dashboard'), ('default' == request.controller and 'index' == request.function), URL('default', 'index'), []),
 ]
 
+@auth.requires(False, requires_login=False)
+def ACCESS_DENIED():
+    pass
 
 if APP_ID:
 
-    #auth.requires_membership('application_'+APP_ID)(lambda: 1)()
-    if not auth.has_membership("admins"):
-        auth.requires_permission('manage', 'application', APP_ID)(lambda: 1)()
+    # auth.requires_membership('application_'+APP_ID)(lambda: 1)()
+    if not auth.has_membership("masters"):
+        if not (auth.has_membership("trainers") or
+            auth.has_membership("app_managers") or
+            auth.has_membership("contributors") or
+            auth.has_membership("admins")) and (auth.has_permission('manage', 'application', APP_ID) or
+            auth.has_permission('train', 'application', APP_ID) or
+            auth.has_permission('manage', 'application', APP_ID) or
+            auth.has_permission('administrate', 'application', APP_ID)):
+
+            ACCESS_DENIED()
 
     response.menu += [
         (T('(0) Practice'), ('0' == request.controller), URL('0', 'index', vars=request.vars), []),
