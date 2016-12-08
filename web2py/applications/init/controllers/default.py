@@ -8,6 +8,7 @@
 # - download is for downloading files uploaded in the db (does streaming)
 # -------------------------------------------------------------------------
 from collections import OrderedDict
+import json
 
 def _disable_rbac_fields(func):
     def inner():  # http://stackoverflow.com/questions/19673284/how-do-i-get-list-of-field-objects-in-a-table-in-web2py
@@ -24,9 +25,20 @@ def _disable_rbac_fields(func):
 @auth.requires_login()
 def index():
     # web2py performs inner joins automatically and transparently when the query links two or more tables
-
+    response.title = "PCMH Dashboard"
     return dict()
 
+
+def assign_user():
+    if not URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT or "", hash_vars=["assign_employee", "assign_as"]):
+        raise HTTP(403)
+    else:
+        del request.get_vars["assign_employee"]
+        del request.get_vars["assign_as"]
+
+
+
+    redirect(URL("index.html", *request.args, **request.get_vars))
 
 def _assigned_column(row):
     contributors = db(
@@ -48,8 +60,9 @@ def _assigned_column(row):
             c_email=contributor.auth_user.email,
         )
         base.update(
-            c_name="%s %s %s (%s)" % (base['c_fn'], base['c_ln'], base['c_email'], base['c_id']),
-            c_name_html="%s %s <span class='text-muted'>%s (%s)</span>" % (base['c_fn'], base['c_ln'], base['c_email'], base['c_id']),
+            c_posessive="%s's" % base["c_fn"],
+            c_name="%s %s (%s)" % (base['c_fn'], base['c_ln'], base['c_id']),
+            c_name_html="%s %s <span class='text-muted'>(%s)</span>" % (base['c_fn'], base['c_ln'], base['c_id']),
             c_acronym="%s%s%s" % (contributor.auth_user.first_name.capitalize()[0],
                                   contributor.auth_user.last_name.capitalize()[0],
                                   contributor.auth_user.id),
@@ -61,29 +74,65 @@ def _assigned_column(row):
                                             " <span class='text-danger'>(Trainer)</span>", **base))
         if auth.has_membership(user_id=contributor.auth_user.id, role="app_managers"):
             contributor_widgets.append(dict(color="warning", title="app_manager",
-                                            c_title=base['c_name']+" (app_manager)",
+                                            c_title=base['c_name']+" (App Manager)",
                                             c_title_html=base['c_name_html'] +
-                                            " <span class='text-warning'>(app_manager)</span>", **base))  # it is possible to be two roles
+                                            " <span class='text-warning'>(App Manager)</span>", **base))  # it is possible to be two roles
         if not contributor_widgets:  # if neither trainer or app manager
             contributor_widgets.append(dict(color="success", title="contributor",
-                                            c_title=base['c_name']+" (contributor)",
+                                            c_title=base['c_name']+" (Contributor)",
                                             c_title_html=base['c_name_html'] +
-                                            " <span class='text-success'>(contributor)</span>", **base))
+                                            " <span class='text-success'>(Contributor)</span>", **base))
 
     for contributor_widget in contributor_widgets:
+        widget_id = "assigned_%s_%s" % (contributor_widget["title"], contributor_widget["c_id"])
+        widget_script = """{select}<script>$('#{widget_id}').val('').multiselect({{nonSelectedText: '{c_acronym}',
+            buttonClass: 'btn btn-sm btn-{color}', enableHTML: true}});</script>"""
+
         contributor_widget.update(dict(
-            widget=BUTTON(contributor_widget['c_acronym'],
-                          _class="btn btn-sm btn-"+contributor_widget["color"],
-                          _type="button"))
+            widget=XML(widget_script.format(
+                c_acronym=contributor_widget["c_acronym"],
+                widget_id=widget_id,
+                color=contributor_widget["color"],
+                select=SELECT(OPTGROUP(OPTION("Revoke %s access to this application" % contributor_widget['c_posessive']),
+                                       _label=contributor_widget['c_title_html']+":"),
+                              _id=widget_id)
+            ))
+        ))
 
-        )
-
-    employees_widgets = filter(lambda e: e['title'] in ["trainer", "app_mananger"], contributor_widgets)
+    employees_widgets = filter(lambda e: e['title'] in ["trainer", "app_manager"], contributor_widgets)
     employee_options = []
+    assign_urls = {}
     for employees_widget in employees_widgets:
-        employee_options.append(OPTION(employees_widget["c_title_html"], _value=employees_widget["c_id"]))
+        assign_id = "%s_%s" % (employees_widget["title"], employees_widget["c_id"])
+        assign_urls[assign_id] = URL("assign_user.html", vars=dict(assign_employee=employees_widget["c_id"],
+                                               assign_as=employees_widget["title"],
+                                               **request.get_vars),
+                                     hmac_key=MY_KEY, salt=session.MY_SALT or "",
+                                     hash_vars=["delete", "app_id"]
+                                     )
+        employee_options.append(OPTION(employees_widget["c_title_html"], _value=assign_id))
 
-    employee_assign = SELECT(OPTGROUP(*employee_options, _label="Add a user to manage this app:"), _class="assign_employee")  # , _multiple="multiple")  # only one choice
+    employee_assign = XML(
+        """{select}<script>
+                $(document).ready(function(){{
+                urls = {urls};
+                $("#assign_employee_{row_id}").val('').multiselect({{
+                    nonSelectedText: '<span class="glyphicon glyphicon-plus"></span>',
+                    onChange: function(option, checked, select) {{
+                        window.location = urls[$(option).val()];
+                    }},
+                    buttonClass: 'btn btn-sm',disableIfEmpty: true,enableHTML: true}});
+                }})
+            </script>""".format(  #http://bit.ly/2g9PyCl select remove default choice, then style with multiselect
+            select=SELECT(
+                OPTGROUP(*employee_options, _label="Add user to manage app:"),
+                _id="assign_employee_%s" % row.id,
+                _class="assign_employees",
+            ),
+            row_id=row.id,
+            urls=json.dumps(assign_urls)
+        )
+    )  # , _multiple="multiple")  # only one choice
     container = DIV(*map(lambda e: e['widget'], contributor_widgets)+[employee_assign], _style="display:flex")
     return container
 

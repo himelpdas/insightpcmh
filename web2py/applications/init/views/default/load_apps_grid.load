@@ -2,14 +2,6 @@
 {{block load_js}}
 {{super}}
 <script>
-    $("#assign_employee").val('').multiselect({
-            nonSelectedText: '<span class="glyphicon glyphicon-plus"></span>',
-            buttonClass: 'btn btn-sm',
-            disableIfEmpty: true,
-            enableHTML: true
-        });  {{#http://bit.ly/2g9PyCl select remove default choice, then style with multiselect}}
-</script>
-<script>
   /**
  * Created by Himel on 12/1/2016.
  */
