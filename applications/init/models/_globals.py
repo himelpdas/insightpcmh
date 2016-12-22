@@ -1,10 +1,10 @@
+if not request.is_local:  # True if the client is localhost, False otherwise. Should work behind a proxy if the proxy supports http_x_forwarded_for.
+    request.requires_https()  # prevents further code execution if the request is not over HTTPS and redirects the visitor to the current page over HTTPS.
+
 from string import Formatter
 from gluon.storage import Storage
 import logging
 import os
-
-if not os.name == 'nt':
-    request.requires_https()
 
 logger = logging.getLogger("web2py.app.pcmh")
 

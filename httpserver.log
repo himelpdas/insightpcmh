@@ -22398,3 +22398,11 @@
 127.0.0.1, 2016-12-22 04:03:27, GET, /init/default/load_apps_grid.load, HTTP/1.1, 200, 0.287000
 127.0.0.1, 2016-12-22 04:03:28, GET, /init/default/load_users_grid.load, HTTP/1.1, 200, 0.457000
 127.0.0.1, 2016-12-22 05:15:21, GET, /init/default/index, HTTP/1.1, 303, 0.041000
+127.0.0.1, 2016-12-22 05:18:09, GET, /init/default/index, HTTP/1.1, 200, 0.217000
+127.0.0.1, 2016-12-22 05:18:10, GET, /init/static/home/css/stylish-portfolio.css, HTTP/1.1, 304, 0.001000
+127.0.0.1, 2016-12-22 05:18:10, GET, /init/static/home/img/portfolio-1.jpg, HTTP/1.1, 304, 0.000000
+127.0.0.1, 2016-12-22 05:18:10, GET, /init/static/home/img/portfolio-2.jpg, HTTP/1.1, 304, 0.001000
+127.0.0.1, 2016-12-22 05:18:10, GET, /init/static/home/img/portfolio-3.jpg, HTTP/1.1, 304, 0.001000
+127.0.0.1, 2016-12-22 05:18:10, GET, /init/static/home/img/portfolio-4.jpg, HTTP/1.1, 304, 0.000000
+127.0.0.1, 2016-12-22 05:18:12, GET, /init/static/home/img/callout.jpg, HTTP/1.1, 304, 0.000000
+127.0.0.1, 2016-12-22 05:21:14, GET, /init/default/index, HTTP/1.1, 200, 0.163000
