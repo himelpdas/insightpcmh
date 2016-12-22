@@ -26,7 +26,7 @@ def _disable_rbac_fields(func):
 
 def index():
     # web2py performs inner joins automatically and transparently when the query links two or more tables
-    response.title = "PCMH Dashboard"
+    response.title = "Insight PCMH"
     return dict()
 
 
