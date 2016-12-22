@@ -311,28 +311,32 @@ def load_apps_grid():
     if IS_MASTER or IS_ADMIN:
         db.application.owner_id.writable = True
     if IS_MASTER:  # remove not after testing non-master mode
-        my_apps = db(db.application.id > 0)
+        my_apps_grid = db(db.application.id > 0)
     else:
         my_group_id = auth.id_group("user_%s" % auth.user.id)
-        my_apps = db((db.application.id == db.auth_permission.record_id) &  # same application id will show up twice
-                     # because multiple permissions of same user can be set for the same application (i.e. when you see
-                     # HD1 XXX HD1 in master mode *WARNING*
+        my_apps_disinct = db((db.application.id == db.auth_permission.record_id) &  # same application id will show up
+                             # twice because multiple permissions of same user can be set for the same application (i.e.
+                             # when you see HD1 XXX HD1 in master mode *WARNING*
                      (db.auth_permission.name.belongs(["manage", "contribute", "administrate", "train"])) &
-                     (db.auth_permission.group_id == my_group_id))
+                     (db.auth_permission.group_id == my_group_id)).select(distinct=db.application.id)  # or you can use
+        # groupby http://bit.ly/2h0Ou3Z
 
-        logger.info(my_apps.select())
+        logger.info(my_apps_disinct)
+
+        my_apps_grid = db.application.id.belongs(map(lambda r: r.application.id, my_apps_disinct))  # will have to
+        # double query because grid does not have distinct and groupby disables CUD
 
     links.append(dict(
         header="Participants",  # can use SPAN
         body=_assigned_column
     ))
 
-    app_grid = SQLFORM.grid(my_apps,
+    app_grid = SQLFORM.grid(my_apps_grid,
                             onvalidation=onvalidation,
                             oncreate=_app_oncreate,
                             formname="load_apps_grid",
                             links=links,
-                            groupby=db.application.id,  # groupby by itself behaves like distinct http://bit.ly/2h0Ou3Z
+                            # groupby=db.application.id,  # groupby by itself behaves like distinct http://bit.ly/2h0Ou3Z
                             field_id=db.application.id,
                             links_placement='left')
 
