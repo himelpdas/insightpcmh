@@ -74,8 +74,8 @@ response.google_analytics_id = None
 # ----------------------------------------------------------------------------------------------------------------------
 
 response.menu = [
-    (SPAN(_class="glyphicon glyphicon-home"),
-     ('default' == request.controller and 'index' == request.function), URL('default', 'dash'), []),
+    (SPAN(_class="glyphicon glyphicon-th-list"),
+     ('default' == request.controller and 'dash' == request.function), URL('default', 'dash'), []),
 ]
 
 @auth.requires(False, requires_login=False)
