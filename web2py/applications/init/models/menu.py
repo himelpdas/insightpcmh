@@ -1,18 +1,57 @@
 # -*- coding: utf-8 -*-
 # this file is released under public domain and you can use without limitations
 
-APP_ID = request.post_vars["app_id"]
+MY_KEY = "Himel123"
+if not session.MY_SALT:
+    session.MY_SALT = os.urandom(8)
+
+if not auth.id_group("admins"):
+    auth.add_group("admins", "Handles assigning trainers and app managers to applications. Automatically should given"
+                      "membership to all applications")
+
+if not auth.id_group("trainers"):
+    auth.add_group("trainers", "Handles many applications. Has some additional responsibilites from app managers")
+
+if not auth.id_group("masters"):
+    auth.add_group("masters", "Like admin, but bypasses permission")
+
+if not auth.id_group("contributors"):
+    auth.add_group("contributors", "The employees of a clinic that represent its corresponding application")
+
+if not auth.id_group("app_managers"):
+    auth.add_group("app_managers", "Handles data gathering")
+
+if auth.is_logged_in():
+    """Himel's role in Insight"""
+    if auth.user.email in ["himel@insightmanagement.org", "himeldas@live.com"]:  # "jason@insightmanagement.org"]:
+        if not auth.user.is_insight:
+            db(db.auth_user.id == auth.user.id).select().last().update_record(is_insight=True)
+        for _role in {"masters", "admins", "trainers", "app_managers"}.symmetric_difference(auth.user_groups.values()):
+            auth.add_membership(role=_role, user_id=auth.user.id)
+
+APP_ID = request.get_vars["app_id"]
 INSIGHT_ADDR = "660 Whiteplains Rd, Tarrytown, NY 10591"
-IS_STAFF = auth.has_membership(group_id=auth.id_group("trainers")) or \
-           auth.has_membership(group_id=auth.id_group("admins")) or \
-           auth.has_membership(group_id=auth.id_group("app_managers"))
+IS_MASTER = auth.has_membership("masters")
+IS_ADMIN = auth.has_membership("admins")
+IS_MANAGER = auth.has_membership("app_managers")
+IS_TRAINER = auth.has_membership("trainers")
+IS_CONTRIB = auth.has_membership("contributors")
+IS_STAFF = IS_TRAINER or IS_MANAGER or IS_ADMIN
+IS_TEAM = IS_STAFF or IS_CONTRIB
+
+if IS_MASTER or IS_ADMIN:
+    db.auth_user.is_insight.readable = True
+    db.auth_user.is_insight.writable = True
+else:
+    db.auth_user.is_insight.readable = False  # make sure new users can't set this
+    db.auth_user.is_insight.writable = False
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Customize your APP title, subtitle and menus here
 # ----------------------------------------------------------------------------------------------------------------------
 
 response.logo = A(B('Insight', SPAN("PCMH")), XML('&trade;&nbsp;'),
-                  _class="navbar-brand", _href=URL('default', 'index'),
+                  _class="navbar-brand", _href=URL('default', 'dash'),
                   _id="web2py-logo")
 response.title = request.application.replace('_', ' ').title()
 response.subtitle = ''
@@ -35,7 +74,8 @@ response.google_analytics_id = None
 # ----------------------------------------------------------------------------------------------------------------------
 
 response.menu = [
-    (T('Dashboard'), ('default' == request.controller and 'index' == request.function), URL('default', 'index'), []),
+    (SPAN(_class="glyphicon glyphicon-home"),
+     ('default' == request.controller and 'index' == request.function), URL('default', 'dash'), []),
 ]
 
 @auth.requires(False, requires_login=False)
@@ -43,31 +83,37 @@ def ACCESS_DENIED():
     pass
 
 if APP_ID:
-
     # auth.requires_membership('application_'+APP_ID)(lambda: 1)()
     if not auth.has_membership("masters"):
-        if not (auth.has_membership("trainers") or
-            auth.has_membership("app_managers") or
-            auth.has_membership("contributors") or
-            auth.has_membership("admins")) and (auth.has_permission('manage', 'application', APP_ID) or
-            auth.has_permission('train', 'application', APP_ID) or
-            auth.has_permission('manage', 'application', APP_ID) or
-            auth.has_permission('administrate', 'application', APP_ID)):
-
+        if not (IS_STAFF or IS_CONTRIB) or not \
+                (auth.has_permission('manage', 'application', APP_ID) or
+                     auth.has_permission('train', 'application', APP_ID) or
+                     auth.has_permission('contribute', 'application', APP_ID) or
+                     auth.has_permission('administrate', 'application', APP_ID)):
             ACCESS_DENIED()
 
     response.menu += [
         (T('(0) Practice'), ('0' == request.controller), URL('0', 'index', vars=request.vars), []),
         (T('(1) Access'), ('1' == request.controller), URL('1', 'index', vars=request.vars), []),
         (T('(2) Team'), ('2' == request.controller), URL('2', 'index', vars=request.vars), []),
-        (T('(3) Population'), ('3' == request.controller), URL('default', 'index'), []),
-        (T('(4) Management'), ('4' == request.controller), URL('default', 'index'), []),
-        (T('(5) Coordination'), ('5' == request.controller), URL('default', 'index'), []),
-        (T('(6) Performance'), ('6' == request.controller), URL('default', 'index'), []),
+        (T('(3) Population'), ('3' == request.controller), URL('default', 'dash'), []),
+        (T('(4) Care'), ('4' == request.controller), URL('default', 'dash'), []),
+        (T('(5) Coordination'), ('5' == request.controller), URL('default', 'dash'), []),
+        (T('(6) Performance'), ('6' == request.controller), URL('default', 'dash'), []),
     ]
-else:
-    if request.controller in list("0123456"):
-        auth.requires(False, requires_login=True)(lambda: 1)()()
+elif request.controller in list("0123456"):
+    ACCESS_DENIED()
+
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
 
 DEVELOPMENT_MENU = False
 

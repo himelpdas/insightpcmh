@@ -64,7 +64,7 @@
 {{if qna.show:}}
 <div id="{{=qna.table_name}}" class="panel panel-{{if qna.needs_answer():}}info{{elif qna.has_warnings():}}warning{{else:}}primary{{pass}}">
     <div class="panel-heading question-box-heading"><span class="pull-right">&emsp;<span class="glyphicon glyphicon-{{if qna.needs_answer():}}unchecked{{elif qna.has_warnings():}}edit{{else:}}check{{pass}}"></span></span>
-        <span class="question-box-title-done"> {{=qna.question}}</span></div>
+        <span class="glyphicon glyphicon-asterisk"></span>&nbsp;{{=qna.question}}</div>
     <div class="panel-body">
     {{for warning in qna.warnings:}}
         <blockquote class="text-danger">{{=warning}}</blockquote>
@@ -90,7 +90,8 @@
         actions = []
         show_generic = False
         if any(map(lambda e: e.needs_answer(), QNA.instances)):
-            actions.append(XML(T("Please <b class='text-info'>answer</b> one or more questions below. Note, some questions need more than one answer to be considered complete.")))
+            actions.append(XML(T("Please <b class='text-info'>answer</b> one or more questions below.")))
+            actions.append(XML(T("Note, some questions need more than one answer in order to be considered complete.")))
         pass
         if any(map(lambda e: e.has_warnings(), QNA.instances)):
             actions.append(XML(T("Please <b class='text-warning'>resolve</b> one or more questions below.")))

@@ -5,6 +5,21 @@ import os
 
 logger = logging.getLogger("web2py.app.pcmh")
 
+"""
+The numeric values of logging levels are given in the following table.
+These are primarily of interest if you want to define your own levels,
+and need them to have specific values relative to the predefined levels.
+If you define a level with the same numeric value,
+it overwrites the predefined value; the predefined name is lost.
+Level 	Numeric value
+CRITICAL 	50
+ERROR 	40
+WARNING 	30
+INFO 	20
+DEBUG 	10
+NOTSET 	0
+"""
+
 _list_of_states = ["NY", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
                    "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
                    "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",

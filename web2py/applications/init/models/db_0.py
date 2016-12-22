@@ -16,7 +16,7 @@ db.define_table("practice_info",
                 Field("state_", label="State", requires=IS_IN_SET(_list_of_states, zero=None)),
                 Field("website", requires=IS_EMPTY_OR(IS_URL()), comment="Optional"),
                 _note_field,
-                auth.signature
+                # auth.signature  # not needed because db._common_fields.append(auth.signature)
                 )
 
 _practice = db(db.practice_info.id > 0).select().last() or Storage(practice_name="The practice")
@@ -30,7 +30,7 @@ db.define_table("primary_contact",
                 Field("extension", requires=IS_EMPTY_OR(_IS_DIGITS()), comment="Optional"),
                 Field("role", requires=IS_IN_SET(["MD", "PA", "MA", "Manager", "Other"], sort=True, zero=None)),
                 _note_field,
-                auth.signature
+                # auth.signature  # not needed because db._common_fields.append(auth.signature)
                 )
 
 db.define_table("clinical_hour",
@@ -38,7 +38,7 @@ db.define_table("clinical_hour",
                 Field("start_time", "time", label="Opens"),
                 Field("end_time", "time", label="Closes"),
                 _note_field,
-                auth.signature
+                # auth.signature  # not needed because db._common_fields.append(auth.signature)
                 )
 
 db.define_table("provider",
@@ -50,7 +50,7 @@ db.define_table("provider",
                 _days_of_week_field(label="Typical days",
                                     comment="Select the days when patients are usually seen by this provider"),
                 _note_field,
-                auth.signature
+                # auth.signature  # not needed because db._common_fields.append(auth.signature)
                 )
 
 db.define_table("has_non_provider",

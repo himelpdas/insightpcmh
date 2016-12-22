@@ -94,17 +94,19 @@ plugins = PluginManager()
 auth.settings.extra_fields['auth_user'] = [
     Field("contact_phone", requires=_telephone_field_validator),
     Field("contact_phone_extension", requires=IS_EMPTY_OR(_IS_DIGITS()), comment="Optional"),
-    Field("is_insight", "boolean", label="Insight Employee?", comment="Are you an Insight Management employee?"),
+    Field("is_insight", "boolean", default=False, label="Insight Employee?",
+          comment="Are you an Insight Management employee?"),
 ]
-auth.define_tables(username=False, signature=True)
+auth.define_tables(username=False, signature=True)  # Setting signature=True adds user and date stamping to auth tables,
+# to track modifications.
 
-
+db._common_fields.append(auth.signature)  # instead of having to add the auth.signature to every table
 
 # -------------------------------------------------------------------------
 # configure email
 # -------------------------------------------------------------------------
 mail = auth.settings.mailer
-#mail.settings.server = 'logging' if request.is_local else myconf.get('smtp.server')
+# mail.settings.server = 'logging' if request.is_local else myconf.get('smtp.server')
 mail.settings.server = myconf.get('smtp.server')
 mail.settings.sender = myconf.get('smtp.sender')
 mail.settings.login = myconf.get('smtp.login')

@@ -9,6 +9,7 @@
 # -------------------------------------------------------------------------
 from collections import OrderedDict
 import json
+import datetime
 
 
 def _disable_rbac_fields(func):
@@ -22,13 +23,18 @@ def _disable_rbac_fields(func):
     return inner()
 
 
-@_disable_rbac_fields
-@auth.requires_login()
 def index():
     # web2py performs inner joins automatically and transparently when the query links two or more tables
     response.title = "PCMH Dashboard"
     return dict()
 
+
+@_disable_rbac_fields
+@auth.requires_login()
+def dash():
+    # web2py performs inner joins automatically and transparently when the query links two or more tables
+    response.title = "PCMH Dashboard"
+    return dict()
 
 @auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT or "",
                           hash_vars=["revoke_participant", "permission", "row_id"]))
@@ -46,7 +52,7 @@ def revoke_user():
     auth.del_permission(auth.id_group("user_%s" % e), p, "application", r)  # 0 means user_1
 
     session.flash = "Revoked user from application ID%s" % r
-    redirect(URL("index.html", args=request.args, vars=request.get_vars))
+    redirect(URL("dash.html", args=request.args, vars=request.get_vars))
 
 
 @auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT or "",
@@ -64,10 +70,14 @@ def assign_user():
     auth.add_permission(auth.id_group("user_%s" % e), p, "application", r)  # 0 means user_1
 
     session.flash = "Assigned user to application ID%s" % r
-    redirect(URL("index.html", args=request.args, vars=request.get_vars))
+    redirect(URL("dash.html", args=request.args, vars=request.get_vars))
 
 
 def _assigned_column(row):
+    row.id = getattr(row, 'id', None) or getattr(row.application, 'id', None)  # can be from join or regular query
+
+    assert row.id, "expected row.id"
+
     participators = db(
         # JOIN SECTION
         (db.auth_group.id == db.auth_membership.group_id) &  # join auth_group and auth_membership
@@ -79,6 +89,7 @@ def _assigned_column(row):
         (db.auth_permission.name.belongs("manage", "train", "contribute"))  # trainers app mgrs and users
     ).select()
     #
+    #print participators
     participator_widgets = []
     for participator in participators:
         base = dict(
@@ -196,7 +207,7 @@ def _assigned_column(row):
             e_title = e_name + " (App Mananger)"
             e_title_html = e_name_html + " <span class='text-warning'>(App Manager)</span>"
 
-        assign_id = "%s_%s" % (e_title, e_id)
+        assign_id = "%s_%s" % (title, e_id)
         assign_urls[assign_id] = URL("assign_user.html",
                                      vars=dict(
                                          assign_participant=e_id,
@@ -212,8 +223,9 @@ def _assigned_column(row):
 
     employees_and_participants = set(map(lambda e: e.auth_user.id, employees) + map(lambda e: e.auth_user.id, 
                                                                                     participators))
-    recent = db(db.auth_user.id > 0).select(orderby=~db.auth_user.id, limitby=(0, 5))
-    recent.exclude(lambda r: r.id in employees_and_participants)
+    # a_week_ago = request.now - datetime.timedelta(days=7)
+    recent = db(db.auth_user.created_on > 0).select(orderby=~db.auth_user.modified_on, limitby=(0, 5))
+    recent.exclude(lambda r: r.id in employees_and_participants or r.is_insight)
     recent_options = []
     
     for new in recent:
@@ -236,16 +248,16 @@ def _assigned_column(row):
         recent_options.append(OPTION(n_name_html, _value=assign_id))
 
     employee_optgroup = OPTGROUP(*employee_options, _label="Assign an employee:")
-    recent_optgroup = OPTGROUP(*recent_options, _label="Assign a recent registrant:")
+    recent_optgroup = OPTGROUP(*recent_options, _label="Assign a recent contributor:")
 
     assign_optgroups = []
     enable_participant_assign_select = True
-    if auth.has_membership("admins") or auth.has_membership("masters"):
+    if IS_ADMIN or IS_MASTER:
         if recent_options:
             assign_optgroups.append(recent_optgroup)
         if employee_options:
             assign_optgroups.append(employee_optgroup)
-    elif auth.has_membership("trainers") or auth.has_membership("app_managers"):
+    elif IS_TRAINER or IS_MANAGER:  # let trainers assign a recent user
         assign_optgroups.append(recent_optgroup)
     else:
         enable_participant_assign_select = False
@@ -255,11 +267,11 @@ def _assigned_column(row):
     if enable_participant_assign_select:
         all_widgets.append(XML("""{select}<script>
                     $(document).ready(function(){{
-                    urls = {urls};
+                    urls_{row_id} = {urls};
                     $("#assign_participant_{row_id}").val('').multiselect({{
                         nonSelectedText: '<span class="glyphicon glyphicon-plus"></span>',
                         onChange: function(option, checked, select) {{
-                            window.location = urls[$(option).val()];
+                            window.location = urls_{row_id}[$(option).val()];
                         }},
                         buttonClass: 'btn btn-sm', disableIfEmpty: true, enableHTML: true}});
                     }})
@@ -278,7 +290,7 @@ def _assigned_column(row):
 
 
 @_disable_rbac_fields
-@auth.requires_signature()
+# @auth.requires_signature()
 def load_apps_grid():
     # db.application.modified_by.readable = True
     # db.application.created_by.readable = True
@@ -289,23 +301,26 @@ def load_apps_grid():
                   body=lambda row:
                   A(SPAN(_class="glyphicon glyphicon-play"),
                     _class="btn btn-sm btn-default",
+                    _title="Start",
                     _href=URL('init', "0", 'index.html',  # table may or may not be joined
                               vars=dict(app_id=getattr(row, "application", row).id))))]
 
-    if auth.has_membership("masters") or auth.has_membership("admins") or auth.has_membership("app_managers") or \
-            auth.has_membership("trainers"):
-        onvalidation = None
-    if auth.has_membership("masters") or auth.has_membership("admins"):
+    onvalidation = None
+    if not IS_TEAM:  # add contributor
+        onvalidation = _app_onvalidation  # indicates new app owner
+    if IS_MASTER or IS_ADMIN:
         db.application.owner_id.writable = True
-    if auth.has_membership("masters"):
-        my_apps = db((db.application.id > 0))
-
+    if IS_MASTER:  # remove not after testing non-master mode
+        my_apps = db(db.application.id > 0)
     else:
         my_group_id = auth.id_group("user_%s" % auth.user.id)
-        my_apps = db((db.application.id == db.auth_permission.record_id) &
+        my_apps = db((db.application.id == db.auth_permission.record_id) &  # same application id will show up twice
+                     # because multiple permissions of same user can be set for the same application (i.e. when you see
+                     # HD1 XXX HD1 in master mode *WARNING*
                      (db.auth_permission.name.belongs(["manage", "contribute", "administrate", "train"])) &
                      (db.auth_permission.group_id == my_group_id))
-        onvalidation = _app_onvalidation
+
+        logger.info(my_apps.select())
 
     links.append(dict(
         header="Participants",  # can use SPAN
@@ -317,6 +332,8 @@ def load_apps_grid():
                             oncreate=_app_oncreate,
                             formname="load_apps_grid",
                             links=links,
+                            groupby=db.application.id,  # groupby by itself behaves like distinct http://bit.ly/2h0Ou3Z
+                            field_id=db.application.id,
                             links_placement='left')
 
     return dict(app_grid=app_grid)
@@ -346,9 +363,13 @@ def add_remove_user():
         word = "removed"
         direction = "from"
     session.flash = '%s was %s %s the group "%s"' % (user.first_name.capitalize(), word, direction, g.replace("_"," "))
-    redirect(URL("index.html", args=request.args, vars=request.get_vars))
+    redirect(URL("dash.html", args=request.args, vars=request.get_vars))
+
 
 def _employee_group_links(row):
+    _p = SPAN(_class="glyphicon glyphicon-plus")  # plus or minus
+    _m = SPAN(_class="glyphicon glyphicon-minus")
+
     if row.is_insight:
         groups = [("admins", "info"), ("app_managers", "warning"), ("trainers", "danger")]
     else:
@@ -356,26 +377,30 @@ def _employee_group_links(row):
     all_links = []
     for each in groups:
         group = each[0]
+        group_name = group.capitalize().replace("_", " ")
         color = each[1]
         action = "-" if auth.has_membership(role=group, user_id=row.id) else "+"
-        word = "%s %s" % (action.capitalize(), group[:-1].capitalize().replace("_", " "))
-        all_links.append(A(word, _class="btn btn-sm %s" % (("btn-%s" % color) if action != "+" else "btn-default"),
+        sign = _m if action == "-" else _p
+        label = XML("%s %s" % (sign, group_name[:-1]))  # take out the s at the end
+        all_links.append(A(label, _class="btn btn-sm %s" % (("btn-%s" % color) if action != "+" else "btn-default"),
                            _href=URL("add_remove_user.html",
                                      vars=dict(
                                          user_id=row.id,
-                                        group=group,
-                                        action=action,
-                                        **request.get_vars),
+                                         group=group,
+                                         action=action,
+                                         **request.get_vars),
                                      hmac_key=MY_KEY, salt=session.MY_SALT or "",
                                      hash_vars=["user_id", "group", "action"]
-                                     )
+                                     ),
+                           _title=(("Remove %s from " if action == "-" else "Add %s to ")
+                                   % row.first_name.capitalize()) + group_name
                            )
                          )
     return DIV(*all_links, _style="display:flex")
 
 
 @_disable_rbac_fields
-@auth.requires_signature()
+# @auth.requires_signature()
 def load_users_grid():
     links = []
 
@@ -384,12 +409,14 @@ def load_users_grid():
         body=_employee_group_links
     ))
 
-
     users_grid = SQLFORM.grid(db.auth_user,
                               formname="load_users_grid",
                               links=links,
                               onupdate=_user_onupdate,
                               oncreate=_user_oncreate,
+                              orderby=~db.auth_user.is_insight | db.auth_user.id,  # show insight first
+                              field_id=db.auth_user.id,
+                              #user_signature=False,  # this is handled by the controller
                               links_placement='left')
 
     return dict(users_grid=users_grid)
@@ -421,16 +448,30 @@ def _app_onvalidation(form):
     form.vars.owner_id = auth.user.id
 
 
-def _user_onupdate(form):
+def _user_onupdate(form):  # todo revoke all permissions
+    id = form.vars.id
+    self_group = auth.id_group("user_%s" % id)
+    # auth.del_permission(auth.id_group("user_%s" % e), p, "application", r)  # 0 means user_1
     if not form.vars.is_insight:
-        groups = ["admins", "app_managers", "trainers", "masters"]
+        groups = [("admins", "administrate"), ("app_managers", "manage"), ("trainers", "train"), ("masters", None)]
         for group in groups:
-            auth.del_membership(role=group, user_id=form.vars.id)
+            role = group[0]
+            permission = group[1]
+            auth.del_membership(role=role, user_id=id)
+            if permission:
+                db((db.auth_permission.group_id == self_group &
+                    (db.auth_permission.name == permission))
+                   ).delete()
+    else:
+        auth.del_membership(role="contributors", user_id=id)
+        db((db.auth_permission.group_id == self_group &
+            (db.auth_permission.name == "contribute"))
+           ).delete()
 
 
 def _user_oncreate(form):
     id = form.vars.id
-    self_group = "user_" % id
+    self_group = "user_%s" % id
     auth.add_group(self_group, description="Group for user %s. Created in admin panel" % self_group)
     auth.add_membership(role=self_group, user_id=id)
 
@@ -445,11 +486,10 @@ def _app_oncreate(form):
     admins = db((db.auth_group.id == db.auth_membership.group_id) &
                 (db.auth_group.role == "admins") &
                 (db.auth_user.id == db.auth_membership.user_id)
-                )
+                ).select()
 
     for admin in admins:
-        auth.add_permission("user_%s" % admin.auth_user.id, "contribute", 'application', app_id)  # 0 means user_1
-
+        auth.add_permission(auth.id_group("user_%s" % admin.auth_user.id), "contribute", 'application', app_id)  # 0 means user_1
     #auth.add_permission(auth.id_group("masters"), "administrate", 'application', app_id)
     # app_url = URL('application', vars=dict(app_id=form.vars.id), hmac_key=MY_KEY)
     #redirect(URL(0, "index.html", vars=dict(app_id=form.vars.id)))  # redir user to his app
