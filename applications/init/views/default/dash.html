@@ -2,7 +2,7 @@
 
 {{block head}}
 {{super}}
-<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/css/bootstrap-multiselect.css"/>
+<link rel="stylesheet" href="{{=URL('static','css/bootstrap-multiselect.css')}}"/>
 <style>
     .alert.alert-default {
         border: 1px dashed #ccc;
@@ -31,6 +31,5 @@
 
 {{block page_js}}
 {{super}}
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/js/bootstrap-multiselect.min.js">
-    </script>
+    <script src="{{=URL('static','js/bootstrap-multiselect.js')}}"></script>
 {{end}}
