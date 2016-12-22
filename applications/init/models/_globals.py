@@ -3,6 +3,9 @@ from gluon.storage import Storage
 import logging
 import os
 
+if not os.name == 'nt':
+    request.requires_https()
+
 logger = logging.getLogger("web2py.app.pcmh")
 
 """
