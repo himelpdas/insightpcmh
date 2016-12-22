@@ -319,7 +319,7 @@ def load_apps_grid():
                              # twice because multiple permissions of same user can be set for the same application (i.e.
                              # when you see HD1 XXX HD1 in master mode *WARNING*
                      (db.auth_permission.name.belongs(["manage", "contribute", "administrate", "train"])) &
-                     (db.auth_permission.group_id == my_group_id)).select(distinct=db.application.id)  # or you can use
+                     (db.auth_permission.group_id == my_group_id)).select(groupby=db.application.id)  # distinct gives near "ON" operational error, just use groupby http://bit.ly/2h0Ou3Z
         # groupby http://bit.ly/2h0Ou3Z
 
         logger.info(my_apps_disinct)
