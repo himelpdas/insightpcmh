@@ -51,7 +51,7 @@ else:
 # ----------------------------------------------------------------------------------------------------------------------
 
 response.logo = A(B('Insight', IMG(_src=URL('static','home/img/favicon.png', vars=dict(no_cache=os.urandom(9))),
-                                   _width="25", _height="25"), SPAN("PCMH")), XML('<sup>&reg;</sup>&nbsp;'),
+                                   _style="width: 1.5em; height: 1.5em"), SPAN("PCMH")), XML('<sup>&reg;</sup>&nbsp;'),
                   _class="navbar-brand", _href=URL('default', 'index'),
                   _id="web2py-logo")
 response.title = request.application.replace('_', ' ').title()
