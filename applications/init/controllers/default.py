@@ -443,6 +443,7 @@ def user():
     to decorate functions that need access control
     also notice there is http://..../[app]/appadmin/manage/auth to allow administrator to manage users
     """
+    response.title = (request.args(0) or request.function).capitalize().replace("_", " ")
     return dict(form=auth())
 
 

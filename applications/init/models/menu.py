@@ -50,7 +50,8 @@ else:
 # Customize your APP title, subtitle and menus here
 # ----------------------------------------------------------------------------------------------------------------------
 
-response.logo = A(B('Insight', SPAN("PCMH")), XML('&trade;&nbsp;'),
+response.logo = A(B('Insight', IMG(_src=URL('static','home/img/favicon.png', vars=dict(no_cache=os.urandom(9))),
+                                   _width="25", _height="25"), SPAN("PCMH")), XML('<sup>&reg;</sup>&nbsp;'),
                   _class="navbar-brand", _href=URL('default', 'index'),
                   _id="web2py-logo")
 response.title = request.application.replace('_', ' ').title()

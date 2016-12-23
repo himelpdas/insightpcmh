@@ -10,6 +10,9 @@
     <meta name="author" content="Insight Management">
 
     <title>{{=response.title}}</title>
+    <link rel="icon"
+          type="image/png"
+          href="{{=URL('static','home/img/favicon.png', vars=dict(no_cache=os.urandom(9)))}}"> {{# http://bit.ly/2h8Wgcg}}
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="{{=URL('static','home/css/bootstrap.min.css')}}"/>
@@ -39,19 +42,16 @@
     <ul class="sidebar-nav">
         <a id="menu-close" href="#" class="btn btn-light btn-lg pull-right toggle"><i class="fa fa-times"></i></a>
         <li class="sidebar-brand">
-            <a href="#top" onclick=$("#menu-close").click();>Insight PCMH®</a>
+            <a href="#top" onclick=$("#menu-close").click();>Insight<img {{'''#class="img-portfolio img-responsive" style="display: inline;"'''}} src="{{=URL('static','home/img/favicon.png', vars=dict(no_cache=os.urandom(9)))}}" width="25" height="25">PCMH®</a>
         </li>
         <li>
             <a href="{{=URL("dash")}}">Login</a>
         </li>
         <li>
-            <a href="#top" onclick=$("#menu-close").click();>Home</a>
-        </li>
-        <li>
             <a href="#about" onclick=$("#menu-close").click();>About</a>
         </li>
         <li>
-            <a href="#services" onclick=$("#menu-close").click();>Services</a>
+            <a href="#services" onclick=$("#menu-close").click();>Process</a>
         </li>
         <li>
             <a href="#portfolio" onclick=$("#menu-close").click();>Portfolio</a>
@@ -392,7 +392,7 @@
         that.on('click', onMapClickHandler);
         that.off('mouseleave', onMapMouseleaveHandler);
         that.find('iframe').css("pointer-events", "none");
-    }
+    };
     var onMapClickHandler = function (event) {
         var that = $(this);
         // Disable the click handler until the user leaves the map area
@@ -401,7 +401,7 @@
         that.find('iframe').css("pointer-events", "auto");
         // Handle the mouse leave event
         that.on('mouseleave', onMapMouseleaveHandler);
-    }
+    };
     // Enable map zooming with mouse scroll when the user clicks the map
     $('.map').on('click', onMapClickHandler);
 </script>
