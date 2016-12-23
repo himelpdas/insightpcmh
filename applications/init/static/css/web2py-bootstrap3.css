@@ -94,9 +94,10 @@ select.autocomplete {
 }
 #web2py-logo b>span {
     font-size: 22px;
-    color: #FFF;
+    /*color: #FFF;*CUSTOM*/
+    color: #d1d1d1;
 }
-#web2py-logo:hover {
+#web2py-logo:hover, #web2py-logo:hover b>span {  /*CUSTOM*/
     color: #FFF;
 }
 .footer > .container-fluid {

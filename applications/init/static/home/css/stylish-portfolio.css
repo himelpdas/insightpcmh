@@ -101,11 +101,16 @@ hr.small {
     color: #999;
 }
 
-.sidebar-nav li a:hover {
+.sidebar-nav li a:hover, .sidebar-nav li a:hover span {
     text-decoration: none;
     color: #fff;
-    background: rgba(255,255,255,0.2);
+    /*background: rgba(255,255,255,0.2);*/
 }
+/*CUSTOM BA55D3*/
+.sidebar-nav li a span {
+    color: #BA55D3;
+}
+/**/
 
 .sidebar-nav li a:active,
 .sidebar-nav li a:focus {
