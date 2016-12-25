@@ -1,6 +1,6 @@
 {{# place in views/<controller>.html if you're customizing}}
 
-{{extend 'templates\survey.html'}}
+{{extend os.path.join("templates", "survey.html")}}
 
 {{for qna in reversed(QNA.instances):}}
 
