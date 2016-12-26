@@ -69,6 +69,8 @@ def assign_user():
     del request.get_vars["_signature"]
 
     auth.add_permission(auth.id_group("user_%s" % e), p, "application", r)  # 0 means user_1
+    if not auth.has_membership(role="contributors", user_id=e):
+        auth.add_membership(role="contributors", user_id=e)
 
     session.flash = "Assigned user to application ID%s" % r
     redirect(URL("dash.html", args=request.args, vars=request.get_vars))
@@ -249,7 +251,7 @@ def _assigned_column(row):
         recent_options.append(OPTION(n_name_html, _value=assign_id))
 
     employee_optgroup = OPTGROUP(*employee_options, _label="Assign an employee:")
-    recent_optgroup = OPTGROUP(*recent_options, _label="Assign a recent contributor:")
+    recent_optgroup = OPTGROUP(*recent_options, _label="Assign a recent visitor:")
 
     assign_optgroups = []
     enable_participant_assign_select = True

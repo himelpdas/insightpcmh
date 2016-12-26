@@ -2,7 +2,7 @@ response.view = os.path.join("templates", "survey_extend.html")  # http://stacko
 response.title = "PCMH Info"
 
 def index():
-    redirect(URL("practice", vars=request.vars))
+    redirect(URL("practice", vars=request.get_vars))
 
 
 def practice():

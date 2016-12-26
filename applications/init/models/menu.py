@@ -2,6 +2,7 @@
 # this file is released under public domain and you can use without limitations
 
 MY_KEY = "Himel123"
+TALK_TO_API_KEY = "e3730573ebe8f86994e9a07e49f1b0fe5a0fe2af"
 if not session.MY_SALT:
     session.MY_SALT = os.urandom(8)
 

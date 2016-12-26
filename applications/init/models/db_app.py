@@ -2,7 +2,7 @@ EMRS = [('#ecw', 'eClinicalWorks'), ('#mdland', 'MDLand'), ('#healthfusion', 'He
 
 db.define_table("application",
     Field("practice_name", requires=IS_NOT_EMPTY()),
-    Field("owner_id", db.auth_user, label="Primary Contact", required=True, writable=False, readable=False),
+    Field("owner_id", db.auth_user, comment="Enter primary contact's email address", label="Primary Contact", required=True, writable=False, readable=False),
     Field('pps', label="PPS"),
     Field("application_type", requires=IS_IN_SET(["Initial", "Renewal"])),
     Field("application_size", requires=IS_IN_SET(["Single", "Corporate"]), comment='Choose "Corporate" if there are 3 or more sites under one owner or CEO. Otherwise the application should be treated as "Single."'),

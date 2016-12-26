@@ -32,15 +32,17 @@ even if the function is called via ajax.
 {{include}}
 
 {{block load_js}}
-<script>
+<script>  {{#http://bit.ly/2itgFxG}}
+$(document).ajaxStop(function() {  {{#http://bit.ly/2itnmzG - call when all outstanding ajax complete, no need to call same code for each table}}
     $('[title]').tooltip({'html': true});
-    $(".web2py_htmltable").css({'min-height': "40em", 'background-color': "#FDF9FF"});
+    $(".web2py_htmltable").animate({'min-height': "33em", 'background-color': "#FBF9FF"});  {{# http://bit.ly/2ithnuW}}
     $("[multiple='multiple'][class!='autocomplete']").multiselect("refresh");  {{# select all multi widgets, but not with those hidden autocomplete dropdowns (also has multiple=multiple attr))}}
 
-    {{#$( "input[name^='_autocomplete_']" ).addClass('form-control');}}  {{#starts with selector https://api.jquery.com/attribute-starts-with-selector/}}
+{{#$( "input[name^='_autocomplete_']" ).addClass('form-control');}}  {{#starts with selector https://api.jquery.com/attribute-starts-with-selector/}}
     $("input[autocomplete='off']").each(function (i, obj) {
                 $(obj).addClass('form-control');
             }
     ); {{#starts with selector https://api.jquery.com/attribute-starts-with-selector/}}
+})
 </script>
 {{end}}

@@ -205,8 +205,15 @@ class MultiQNA(QNA):
                 def inner(key):
                     if key in ["created_by", "modified_by"]:
                         auth_user = db(db.auth_user.id == row[key]).select().last()
-                        return key, "%s %s (%s)" % (auth_user.first_name.capitalize(), auth_user.last_name.capitalize(),
-                                                  auth_user.id)
+                        memberships = ", ".join(map(lambda m: m.auth_group.role.capitalize().replace("_", " ")[:-1],
+                                                    db((db.auth_membership.user_id == auth_user.id) &
+                                                       (db.auth_membership.group_id == db.auth_group.id) &
+                                                       (db.auth_group.role.belongs(["admins", "app_managers",
+                                                                                    "trainers", "contributors"]))
+                                                       ).select()))
+                        return key, "%s %s (%s) (%s)" % (auth_user.first_name.capitalize(),
+                                                         auth_user.last_name.capitalize(),
+                                                         auth_user.id, memberships)
                     return func(key)
                 return inner
 

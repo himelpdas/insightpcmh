@@ -2,7 +2,7 @@
 
 {{block head}}
 {{super}}
-<link rel="stylesheet" href="{{=URL('static','css/bootstrap-multiselect.css')}}"/>
+<link rel="stylesheet" href="{{=URL('static','css/custom/bootstrap-multiselect.css')}}"/>
 <style>
     .alert.alert-default {
         border: 1px dashed #ccc;
@@ -31,5 +31,6 @@
 
 {{block page_js}}
 {{super}}
-    <script src="{{=URL('static','js/bootstrap-multiselect.js')}}"></script>
+    <script src="{{=URL('static','js/custom/bootstrap-multiselect.js')}}"></script>
+    <script src="{{=URL('static','js/custom/jquery.color.js')}}"></script>  {{# http://bit.ly/2itnmzG}}
 {{end}}

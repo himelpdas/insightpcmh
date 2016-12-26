@@ -6,7 +6,7 @@
 
 {{block head}}
     {{super}}
-    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/css/bootstrap-multiselect.css"/>
+    <link rel="stylesheet" href="{{=URL('static','css/custom/bootstrap-multiselect.css')}}"/>
 {{end}}
 
 {{block header}}
@@ -128,11 +128,12 @@
 {{super}}
 <script>
     $(".panel-body").each(function(){
-        $(this).hide();
-        $(this).fadeIn(500);
+        $(this).css({visibility: hidden});
+        $(this).animate({visibility:visible});
     })
 </script>
-<script src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/js/bootstrap-multiselect.min.js"></script>
+
+<script src="{{=URL('static','js/custom/bootstrap-multiselect.js')}}"></script>
 <script type="text/javascript">
     $(document).ready(function() {
         $("[multiple='multiple'][class!='autocomplete']").multiselect();
@@ -140,9 +141,16 @@
 </script>
 
 <!--Start of Tawk.to Script-->
-
+{{import hashlib, hmac}}
 <script type="text/javascript">
     var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+    <!--Set Talk.to variables-->
+    Tawk_API.visitor  = {  {{# go to admin > property settings > enable secure js api > ok to always force secure mode}}
+        'name': '{{="%s (%s)"%(auth.user.first_name.capitalize(), app_row.application.practice_name)}}',
+        'email': '{{=auth.user.email}}', {{# secure mode ensures that an evil script did not change the username}}
+        'hash': '{{=hmac.new(TALK_TO_API_KEY, msg=auth.user.email, digestmod=hashlib.sha256).hexdigest()}}',
+        'app id': '{{=app_row.application.id}}'
+    };
     (function () {
         var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
         s1.async = true;
