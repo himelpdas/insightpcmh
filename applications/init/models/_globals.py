@@ -87,7 +87,10 @@ class QNA(object):
         self.row = None
         self.rows = []
         self.warnings = []  #
-        self.form_buttons = []
+        self.form_buttons = [TAG.button(SPAN(_class='glyphicon glyphicon-user'),
+                                        _title="Leave a question or comment regarding #%s" % self.table_name,
+                                        _class="btn btn-info pull-right", _type="button",  # button needed else submit
+                                        _onclick="askForHelp('%s');" % self.table_name)]
 
     def _form_process(self):
         if self.form and self.form.process(onvalidation=self.validator).accepted:
@@ -170,8 +173,6 @@ class MultiQNA(QNA):
         submit_label = "Add Answer"
         if len(self.rows):
             submit_label = T("Add Another")
-        else:
-            self.clear_button = ""
 
         if len(self.rows) < self.multi:
             btn_class = "warning"
@@ -225,6 +226,8 @@ class MultiQNA(QNA):
                 else:
                     return key, ", ".join(row[key])
 
+            logger.warning("can get value error invalid conversion specification due to None type datetime")
+            # x=map(_print_comma_list, keys)
             yield XML(self.template.format(
                 **dict(
                     map(_print_comma_list, keys)  #
@@ -282,18 +285,18 @@ class CryptQNA(MultiQNA):
             self.form = ""
 
     def set_form_buttons(self):
-        submit_label = "Add Answer"
+        lock_icon = "<span class='glyphicon glyphicon-lock'></span>"
+        submit_label = XML("%s Add Answer" % lock_icon)
         if len(self.rows):
-            submit_label = T("Add Another")
-        else:
-            self.clear_button = ""
+            submit_label = XML("%s Add Another" % lock_icon)
 
         if len(self.rows) < self.multi:
             btn_class = "warning"
         else:
             btn_class = "primary"
 
-        self.form_buttons.append(TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right" % btn_class))
+        self.form_buttons.append(TAG.button(submit_label, _title="This answer will be GPG encrypted",
+                                            _type="submit", _class="btn btn-%s pull-right" % btn_class))
 
     def set_template(self, template):
         self.template = "<span>Encrypted on {created_on}&mdash;<i>{created_by}</i></span>" \

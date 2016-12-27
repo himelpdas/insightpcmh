@@ -35,8 +35,8 @@ db.define_table("primary_contact",
 
 db.define_table("clinical_hour",
                 _day_of_week_field(),
-                Field("start_time", "time", label="Opens"),
-                Field("end_time", "time", label="Closes"),
+                Field("start_time", "time", requires=_am_pm_time_validator, label="Opens"),
+                Field("end_time", "time", requires=_am_pm_time_validator, label="Closes"),
                 _note_field,
                 # auth.signature  # not needed because db._common_fields.append(auth.signature)
                 )

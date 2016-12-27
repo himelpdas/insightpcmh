@@ -63,7 +63,7 @@
 {{def QUESTION_PANEL(qna):}}
 {{if qna.show:}}
 <div id="{{=qna.table_name}}" class="panel panel-{{if qna.needs_answer():}}info{{elif qna.has_warnings():}}warning{{else:}}primary{{pass}}">
-    <div class="panel-heading question-box-heading"><span class="pull-right">&emsp;<span class="glyphicon glyphicon-{{if qna.needs_answer():}}unchecked{{elif qna.has_warnings():}}edit{{else:}}check{{pass}}"></span></span>
+    <div class="panel-heading question-box-heading"><span class="pull-right">&emsp;<span class="glyphicon glyphicon-{{if qna.needs_answer():}}unchecked{{elif qna.has_warnings():}}edit{{else:}}check{{pass}}" title="{{if qna.needs_answer():}}Incomplete{{elif qna.has_warnings():}}Needs Attention{{else:}}Answered{{pass}}"></span></span>
         <span class="glyphicon glyphicon-asterisk"></span>&nbsp;{{=qna.question}}</div>
     <div class="panel-body">
     {{for warning in qna.warnings:}}
@@ -140,16 +140,20 @@
     });
 </script>
 
+<!--set tooltip-->
+<script>
+    $('[title]').tooltip({'html': true});
+</script>
+
 <!--Start of Tawk.to Script-->
 {{import hashlib, hmac}}
 <script type="text/javascript">
     var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
     <!--Set Talk.to variables-->
     Tawk_API.visitor  = {  {{# go to admin > property settings > enable secure js api > ok to always force secure mode}}
-        'name': '{{="%s (%s)"%(auth.user.first_name.capitalize(), app_row.application.practice_name)}}',
+        'name': '{{="%s from %s"%(auth.user.first_name.capitalize(), app_row.application.practice_name)}}',
         'email': '{{=auth.user.email}}', {{# secure mode ensures that an evil script did not change the username}}
-        'hash': '{{=hmac.new(TALK_TO_API_KEY, msg=auth.user.email, digestmod=hashlib.sha256).hexdigest()}}',
-        'app id': '{{=app_row.application.id}}'
+        'hash': '{{=hmac.new(TALK_TO_API_KEY, msg=auth.user.email, digestmod=hashlib.sha256).hexdigest()}}'
     };
     (function () {
         var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
@@ -159,6 +163,22 @@
         s1.setAttribute('crossorigin', '*');
         s0.parentNode.insertBefore(s1, s0);
     })();
+</script>
+
+<script>
+    function askForHelp(tablename){
+        Tawk_API.setAttributes({
+            'question-id': tablename,
+            'practice-name': "{{=app_row.application.practice_name}}",
+            'app-id': "{{=APP_ID}}",
+            'pcmh': "{{=request.controller}}", {{#todo}}
+            'element': "{{=request.function}}"
+        }, function(error){if (error){alert("Chat error:\n"+error);}});
+        Tawk_API.popup();
+    }
+    Tawk_API.onBeforeLoad = function(){
+        askForHelp('none');
+    };
 </script>
 
 <!--End of Tawk.to Script-->
