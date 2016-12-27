@@ -87,10 +87,7 @@ class QNA(object):
         self.row = None
         self.rows = []
         self.warnings = []  #
-        self.form_buttons = [TAG.button(SPAN(_class='glyphicon glyphicon-user'),
-                                        _title="Leave a question or comment regarding #%s" % self.table_name,
-                                        _class="btn btn-info pull-right", _type="button",  # button needed else submit
-                                        _onclick="askForHelp('%s');" % self.table_name)]
+        self.form_buttons = []
 
     def _form_process(self):
         if self.form and self.form.process(onvalidation=self.validator).accepted:

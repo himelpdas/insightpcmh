@@ -81,6 +81,11 @@
         <br>
     {{pass}}
     {{=qna.form}}
+    {{=TAG.button(SPAN(_class='glyphicon glyphicon-comment', _style="color: #BA55D3"),
+        _title="Leave a question or comment regarding #%s" % qna.table_name,
+        _class="btn btn-sm btn-secondary pull-right", _type="button",  # button needed else submit
+        _onclick="askForHelp('%s');" % qna.table_name)
+    }}
     </div>
 </div>
 {{pass}}
@@ -151,7 +156,7 @@
     var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
     <!--Set Talk.to variables-->
     Tawk_API.visitor  = {  {{# go to admin > property settings > enable secure js api > ok to always force secure mode}}
-        'name': '{{="%s from %s"%(auth.user.first_name.capitalize(), app_row.application.practice_name)}}',
+        'name': '{{="%s %s"%(auth.user.first_name.capitalize(), auth.user.last_name.capitalize())}}',
         'email': '{{=auth.user.email}}', {{# secure mode ensures that an evil script did not change the username}}
         'hash': '{{=hmac.new(TALK_TO_API_KEY, msg=auth.user.email, digestmod=hashlib.sha256).hexdigest()}}'
     };
@@ -168,13 +173,14 @@
 <script>
     function askForHelp(tablename){
         Tawk_API.setAttributes({
-            'question-id': tablename,
+            'last-question-id': tablename,
             'practice-name': "{{=app_row.application.practice_name}}",
             'app-id': "{{=APP_ID}}",
+            'user-id': "{{=auth.user.id}}",
             'pcmh': "{{=request.controller}}", {{#todo}}
             'element': "{{=request.function}}"
         }, function(error){if (error){alert("Chat error:\n"+error);}});
-        Tawk_API.popup();
+        Tawk_API.maximize();
     }
     Tawk_API.onBeforeLoad = function(){
         askForHelp('none');
