@@ -534,7 +534,7 @@ def _app_oncreate(form):
                 ).select()
 
     for admin in admins:
-        auth.add_permission(auth.id_group("user_%s" % admin.auth_user.id), "contribute", 'application', app_id)  # 0 means user_1
+        auth.add_permission(auth.id_group("user_%s" % admin.auth_user.id), "administrate", 'application', app_id)  # 0 means user_1
     #auth.add_permission(auth.id_group("masters"), "administrate", 'application', app_id)
     # app_url = URL('application', vars=dict(app_id=form.vars.id), hmac_key=MY_KEY)
     #redirect(URL(0, "index.html", vars=dict(app_id=form.vars.id)))  # redir user to his app
