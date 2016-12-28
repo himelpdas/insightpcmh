@@ -304,7 +304,6 @@ def load_apps_grid():
     # db.application.created_on.readable = True
     # db.application.modified_on.readable = True
 
-    db.application.owner_id.readable = True  # so that it's not visible on register
     db.application.modified_by.readable = True
     db.application.modified_on.readable = True
 
@@ -319,8 +318,12 @@ def load_apps_grid():
     onvalidation = None
     if not IS_TEAM:  # add contributor
         onvalidation = _app_onvalidation  # indicates new app owner
-    if IS_MASTER or IS_ADMIN:
+    if IS_STAFF:
+        db.application.owner_id.readable = True
         db.application.owner_id.writable = True
+    else:
+        db.application.owner_id.readable = False  # so that it's not visible on register
+        db.application.owner_id.writable = False  # so that it's not visible on register
     if IS_MASTER:  # remove not after testing non-master mode
         my_apps_grid = db(db.application.id > 0)
     else:
@@ -525,7 +528,7 @@ def _app_oncreate(form):
     app_id = form.vars.id
     auth.add_permission(0, "contribute", 'application', app_id)  # 0 means user_1
 
-    if not auth.has_membership("admins"):
+    if not IS_ADMIN:
         auth.add_membership(role="contributor", user_id=auth.user_id)
 
     admins = db((db.auth_group.id == db.auth_membership.group_id) &
