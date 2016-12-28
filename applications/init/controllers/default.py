@@ -143,8 +143,7 @@ def _assigned_column(row):
                 buttonClass: 'btn btn-sm btn-{color}', disableIfEmpty: true, enableHTML: true}});
             }})
         </script>"""
-        widget = None
-        widget_a = XML("<button class='btn btn-sm btn-{color}' title='{c_email}'>{c_acronym}</button>".format(
+        widget = widget_a = XML("<button class='btn btn-sm btn-{color}' title='{c_email}'>{c_acronym}</button>".format(
                 color=participator_widget["color"],
                 c_acronym=participator_widget["c_acronym"],
                 c_email=participator_widget["c_email"],  # todo change to popover
@@ -316,14 +315,10 @@ def load_apps_grid():
                               vars=dict(app_id=getattr(row, "application", row).id))))]
 
     onvalidation = None
-    if not IS_TEAM:  # add contributor
+    if not IS_TEAM or IS_CONTRIB:  # add contributor
         onvalidation = _app_onvalidation  # indicates new app owner
-    if IS_STAFF:
-        db.application.owner_id.readable = True
+    if IS_MASTER or IS_ADMIN:
         db.application.owner_id.writable = True
-    else:
-        db.application.owner_id.readable = False  # so that it's not visible on register
-        db.application.owner_id.writable = False  # so that it's not visible on register
     if IS_MASTER:  # remove not after testing non-master mode
         my_apps_grid = db(db.application.id > 0)
     else:
@@ -348,6 +343,7 @@ def load_apps_grid():
     app_grid = SQLFORM.grid(my_apps_grid,
                             onvalidation=onvalidation,
                             oncreate=_app_oncreate,
+                            create=IS_ADMIN or IS_MASTER or IS_CONTRIB,
                             formname="load_apps_grid",
                             links=links,
                             # groupby=db.application.id,  # groupby by itself behaves like distinct http://bit.ly/2h0Ou3Z
