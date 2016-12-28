@@ -423,6 +423,7 @@ def load_logs_grid():
         db.logging.owner_id.readable = True
         query = db(db.logging.id > 0)
     else:
+        db.logging.owner_id.readable = False
         query = db((db.logging.owner_id == db.auth_user.id) & (db.auth_user.id == auth.user.id))
 
     logs_grid = SQLFORM.grid(query,
