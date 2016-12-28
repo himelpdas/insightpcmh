@@ -93,9 +93,9 @@ if APP_ID:
                      auth.has_permission('contribute', 'application', APP_ID) or
                      auth.has_permission('administrate', 'application', APP_ID)):
             ACCESS_DENIED()
-
+    """
     response.menu += [
-        (T('(0) Practice'), ('0' == request.controller), URL('0', 'index', vars=request.vars), []),
+        (T('(0) Practice'), ('0' == request.controller), URL('0', 'index', vars=request.get_vars), []),
         (T('(1) Access'), ('1' == request.controller), URL('1', 'index', vars=request.vars), []),
         (T('(2) Team'), ('2' == request.controller), URL('2', 'index', vars=request.vars), []),
         (T('(3) Population'), ('3' == request.controller), URL('default', 'dash'), []),
@@ -103,6 +103,7 @@ if APP_ID:
         (T('(5) Coordination'), ('5' == request.controller), URL('default', 'dash'), []),
         (T('(6) Performance'), ('6' == request.controller), URL('default', 'dash'), []),
     ]
+    """
 elif request.controller in list("0123456"):
     ACCESS_DENIED()
 

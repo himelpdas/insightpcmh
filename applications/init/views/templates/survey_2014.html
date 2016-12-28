@@ -40,22 +40,12 @@
 
 {{block left_sidebar}}
 <ul class="nav nav-pills nav-stacked">
-    {{_pcmh_info = {
-        "1":"abc",
-        "2":"abcd",
-    } }}
-    {{_pcmh = request.controller}}
-    {{_element = request.function}}
-    {{if _pcmh in "123456":}}
-        {{for l in _pcmh_info[_pcmh]:}}
-            <li role="presentation" {{if _element==l:}}class="active"{{pass}}><a href="{{=URL(_pcmh, l, vars=request.vars)}}">Element {{=l.upper()}}</a></li>
-        {{pass}}
-    {{else:}}
-        <li role="presentation" {{if request.function == "practice":}}class="active"{{pass}}><a href="{{=URL('0', 'practice', vars=request.vars)}}">Practice</a></li>
-        <li role="presentation" {{if request.function == "staff":}}class="active"{{pass}}><a href="{{=URL('0', 'staff', vars=request.vars)}}">Staff</a></li>
-        <li role="presentation" {{if request.function == "emr":}}class="active"{{pass}}><a href="{{=URL('0', 'emr', vars=request.vars)}}">EMR</a></li>
-        <li role="presentation"><a href="#">Credentials</a></li>
-        <li role="presentation"><a href="#">NCQA</a></li>  {{# credit card http://stackoverflow.com/questions/1146810/taking-credit-card-information-online-without-processing-how-best-to-do-so}}
+    {{_pcmh = request.nav.get_pcmh_from_request()
+    _element = request.nav.get_element_from_request()
+    _elements = request.nav[_pcmh]['elements']}}
+    {{for e in _elements:}}
+        {{e_storage = _elements[e]}}
+        <li role="presentation" {{if _element==e:}}class="active"{{pass}}><a href="{{=e_storage.url}}">{{=e_storage.description}}</a></li> {{# credit card http://stackoverflow.com/questions/1146810/taking-credit-card-information-online-without-processing-how-best-to-do-so}}
     {{pass}}
 </ul>
 {{end}}
@@ -81,6 +71,7 @@
         <br>
     {{pass}}
     {{=qna.form}}
+    <small class="text-muted pull-left text-uppercase"><i>#{{=qna.table_name}}</i></small>
     {{=TAG.button(SPAN(_class='glyphicon glyphicon-comment', _style="color: #BA55D3"),
         _title="Leave a question or comment regarding #%s" % qna.table_name,
         _class="btn btn-sm btn-secondary pull-right", _type="button",  # button needed else submit
@@ -108,7 +99,7 @@
 }}
 
 <div class="panel panel-primary panel-{{if has_action:}}danger{{else:}}success{{pass}}">
-    <div class="panel-heading question-box-heading" style="text-transform: none; font-size:17px"><span class="pull-right glyphicon glyphicon-{{if not has_action:}}ok-sign{{else:}}exclamation-sign{{pass}}"></span>{{if has_action:}}Action{{="s" if len(actions)>1 else ""}} needed...{{else:}}Success!{{pass}}</div>
+    <div class="panel-heading question-box-heading" style="text-transform: none; font-size:17px"><span class="pull-right glyphicon glyphicon-{{if not has_action:}}ok-sign{{else:}}exclamation-sign{{pass}}"></span><span class="glyphicon glyphicon-pushpin"></span> {{if has_action:}}Action{{="s" if len(actions)>1 else ""}} needed...{{else:}}Success!{{pass}}</div>
     <div class="panel-body">
         <ul>
             {{for action in actions:}}
@@ -124,7 +115,11 @@
     </div>
 </div>
 
-{{include}}
+{{for qna in reversed(QNA.instances):}}
+
+    {{QUESTION_PANEL(qna)}}
+
+{{pass}}
 
 {{block right_sidebar}}
 {{end}}

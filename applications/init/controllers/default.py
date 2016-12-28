@@ -27,6 +27,7 @@ def _disable_rbac_fields(func):
 def index():
     # web2py performs inner joins automatically and transparently when the query links two or more tables
     response.title = "Insight PCMH"
+    response.subtitle = " - Patient-Centered Medical Home Transformation for Practices"
     return dict()
 
 
@@ -251,7 +252,7 @@ def _assigned_column(row):
         recent_options.append(OPTION(n_name_html, _value=assign_id))
 
     employee_optgroup = OPTGROUP(*employee_options, _label="Assign an employee:")
-    recent_optgroup = OPTGROUP(*recent_options, _label="Assign a recent visitor:")
+    recent_optgroup = OPTGROUP(*recent_options, _label="Assign a recent registrant:")
 
     assign_optgroups = []
     enable_participant_assign_select = True
@@ -305,7 +306,7 @@ def load_apps_grid():
                   A(SPAN(_class="glyphicon glyphicon-play"),
                     _class="btn btn-sm btn-default",
                     _title="Start",
-                    _href=URL('init', "0", 'index.html',  # table may or may not be joined
+                    _href=URL("2014", 'index.html', args=[0],  # todo- set 2014/2017 standards here table may or may not be joined
                               vars=dict(app_id=getattr(row, "application", row).id))))]
 
     onvalidation = None

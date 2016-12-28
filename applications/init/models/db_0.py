@@ -33,6 +33,7 @@ db.define_table("primary_contact",
                 # auth.signature  # not needed because db._common_fields.append(auth.signature)
                 )
 
+
 db.define_table("clinical_hour",
                 _day_of_week_field(),
                 Field("start_time", "time", requires=_am_pm_time_validator, label="Opens"),
@@ -40,6 +41,7 @@ db.define_table("clinical_hour",
                 _note_field,
                 # auth.signature  # not needed because db._common_fields.append(auth.signature)
                 )
+
 
 db.define_table("provider",
                 Field("first_name", requires=IS_NOT_EMPTY()),
@@ -53,11 +55,13 @@ db.define_table("provider",
                 # auth.signature  # not needed because db._common_fields.append(auth.signature)
                 )
 
+
 db.define_table("has_non_provider",
                 _yes_no_field_default,
                 _note_field,
                 auth.signature
                 )
+
 
 db.define_table("non_provider",
                 Field("first_name", requires=IS_NOT_EMPTY()),
@@ -71,6 +75,7 @@ db.define_table("non_provider",
                 auth.signature
                 )
 
+
 ######EMR######
 db.define_table("emr",
                 Field("name",
@@ -79,37 +84,16 @@ db.define_table("emr",
                 auth.signature
                 )
 
+
 db.define_table("account_created",
                 _yes_no_field_default,
                 _note_field,
                 auth.signature
                 )
 
-"""
-db.define_table("account_capabilities",
-_yes_no_field_default,
-_note_field,
-)
-
-
-_crypt_field = lambda field_name: Field(field_name, requires=CRYPT(),
-                                        comment="In order to meet industry security standards and/or best practices "
-                                                "(i.e. HIPAA, PCI DSS, etc.), this field is not stored on the server, "
-                                                "but rather protected via asymmetric encryption (S/MIME) and directly "
-                                                "emailed via secure channels (TLS) to only the authorized individual(s) "
-                                                "at Insight Management.",
-                                        widget=SQLFORM.widgets.password.widget
-                                        )
-
-db.define_table("emr_credentials",
-_crypt_field("username"),
-_crypt_field("password"),
-auth.signature,
-_note_field,
-)
-"""
 
 _fake_db = {}
+
 
 _fake_db.update({"emr_credentials": [
     Field("username", requires=IS_NOT_EMPTY()),
@@ -121,7 +105,8 @@ _fake_db.update({"emr_credentials": [
     auth.signature
 ]})
 
+
 db.define_table("emr_credentials",
-                Field("gpg_encrypted", "text"),
-                auth.signature
-                )
+    Field("gpg_encrypted", "text"),
+    auth.signature
+)

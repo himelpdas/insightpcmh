@@ -1,9 +1,0 @@
-{{# place in views/<controller>.html if you're customizing}}
-
-{{extend os.path.join("templates", "survey.html")}}
-
-{{for qna in reversed(QNA.instances):}}
-
-    {{QUESTION_PANEL(qna)}}
-
-{{pass}}

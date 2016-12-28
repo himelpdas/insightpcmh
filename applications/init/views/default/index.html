@@ -6,10 +6,11 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Patient Centered Medical Home (PCMH) consulting for New York State and New York City">
+    <meta name="description" content="We specialize in Patient-Centered Medical Home Practice Transformation, EMR Solutions, and PPACA Compliance Consulting.  We have led PCMH transformation, Meaningful use certification, and EMR integration of over 1500 practices. PCMH Certification. Patient-Centered Medical Home (PCMH) Recognition Program, free EMR Solutions.">
+    <meta name="keywords" content="Medical Home, Medical Home Certification, Medical Home Incentives, Patient Centered Medical Home, Patient Centered Medical Home Incentives,EMR Solutions, EMR Consulting, Compliance Consulting, PPACA Compliance consulting, Meaningful Use Certification, Meaningful Use Incentives, NCQA certified">
     <meta name="author" content="Insight Management">
 
-    <title>{{=response.title}}</title>
+    <title>{{=response.title + (response.subtitle or "")}} - InsightPCMH.com</title>
     <link rel="icon"
           type="image/png"
           href="{{=URL('static','home/img/favicon.png', vars=dict(no_cache=os.urandom(9)))}}"> {{# http://bit.ly/2h8Wgcg}}
@@ -312,7 +313,7 @@
                     <br>Tarrytown, NY 10573</p>
                 <ul class="list-unstyled">
                     <li><i class="fa fa-phone fa-fw"></i> (914) 524-0500 <span class="text-muted">|</span> <i class="fa fa-fax fa-fw"></i> (914) 290-6718</li>
-                    <li><i class="fa fa-envelope-o fa-fw"></i> <a href="mailto:info@insightmanagement.org">info@insightmanagement.org</a>
+                    <li><i class="fa fa-envelope-o fa-fw"></i> <a href="http://www.google.com/recaptcha/mailhide/d?k=014rTVw6e3l11t46MKy1sqPA==&amp;c=BuX1yBreBPe4xmCQ9uvNsrfLl5-3NwtKDrhG14CtEGo=" onclick="window.open('http://www.google.com/recaptcha/mailhide/d?k\x3d014rTVw6e3l11t46MKy1sqPA\x3d\x3d\x26c\x3dBuX1yBreBPe4xmCQ9uvNsrfLl5-3NwtKDrhG14CtEGo\x3d', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;" title="Reveal this e-mail address">i...@insightpcmh.com</a>
                     </li>
                 </ul>
                 <br>
@@ -422,6 +423,11 @@ s0.parentNode.insertBefore(s1,s0);
 })();
 </script>
 <!--End of Tawk.to Script-->
+
+<!--enable tooltip-->
+<script>
+    $('[title]').tooltip();
+</script>
 
 </body>
 

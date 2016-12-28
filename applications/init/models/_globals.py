@@ -2,7 +2,7 @@ if not request.is_local:  # True if the client is localhost, False otherwise. Sh
     request.requires_https()  # prevents further code execution if the request is not over HTTPS and redirects the visitor to the current page over HTTPS.
 
 from string import Formatter
-from gluon.storage import Storage
+from gluon.storage import List, Storage
 import logging
 import os
 
@@ -169,12 +169,13 @@ class MultiQNA(QNA):
     def set_form_buttons(self):
         submit_label = "Add Answer"
         if len(self.rows):
-            submit_label = T("Add Another")
+            submit_label = "Add Another"
 
         if len(self.rows) < self.multi:
-            btn_class = "warning"
+            btn_class = "default"
         else:
-            btn_class = "primary"
+            btn_class = "secondary"
+            submit_label += " (If Needed)"
 
         self.form_buttons.append(TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right" % btn_class))
 
@@ -282,15 +283,17 @@ class CryptQNA(MultiQNA):
             self.form = ""
 
     def set_form_buttons(self):
-        lock_icon = "<span class='glyphicon glyphicon-lock'></span>"
-        submit_label = XML("%s Add Answer" % lock_icon)
+        submit_label = "Encrypt Answer"
         if len(self.rows):
-            submit_label = XML("%s Add Another" % lock_icon)
+            submit_label = "Encrypt Another"
 
         if len(self.rows) < self.multi:
-            btn_class = "warning"
+            btn_class = "default"
         else:
-            btn_class = "primary"
+            btn_class = "secondary"
+            submit_label += " (If Needed)"
+
+        submit_label = SPAN(SPAN(_class='glyphicon glyphicon-lock'), " ", submit_label)
 
         self.form_buttons.append(TAG.button(submit_label, _title="This answer will be GPG encrypted",
                                             _type="submit", _class="btn btn-%s pull-right" % btn_class))
