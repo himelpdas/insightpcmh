@@ -1,4 +1,4 @@
-EMRS = [('#ecw', 'eClinicalWorks'), ('#mdland', 'MDLand'), ('#healthfusion', 'HealthFusion'), ('#generic', 'Other')]
+EMRS = ['eClinicalWorks','MDLand','HealthFusion','Other']
 
 db.define_table("application",
     Field("practice_name", requires=IS_NOT_EMPTY()),

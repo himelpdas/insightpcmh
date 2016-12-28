@@ -12,16 +12,17 @@ import json
 import datetime
 
 
-def _disable_rbac_fields(func):
-    """when displaying a grid with something joined, sometimes the auth tables joined are not necessary"""
-    def inner():  # http://stackoverflow.com/questions/19673284/how-do-i-get-list-of-field-objects-in-a-table-in-web2py
-        for rbac in [db.auth_membership, db.auth_permission, db.auth_group]:
-            for field in rbac:
-                field.readable = False
-                field.writable = False
-        db.application.owner_id.readable = True
-        return func
-    return inner()
+def _disable_rbac_fields(*args):
+    def _decorator(func):
+        """when displaying a grid with something joined, sometimes the auth tables joined are not necessary"""
+        def inner():  # http://stackoverflow.com/questions/19673284/how-do-i-get-list-of-field-objects-in-a-table-in-web2py
+            for rbac in args:
+                for field in rbac:
+                    field.readable = False
+                    field.writable = False
+            return func
+        return inner()
+    return _decorator
 
 
 def index():
@@ -31,7 +32,7 @@ def index():
     return dict()
 
 
-@_disable_rbac_fields
+@_disable_rbac_fields(db.auth_membership, db.auth_permission, db.auth_group)
 @auth.requires_login()
 def dash():
     # web2py performs inner joins automatically and transparently when the query links two or more tables
@@ -293,6 +294,8 @@ def _assigned_column(row):
     return container
 
 
+
+
 #@_disable_rbac_fields
 # @auth.requires_signature()
 def load_apps_grid():
@@ -300,6 +303,10 @@ def load_apps_grid():
     # db.application.created_by.readable = True
     # db.application.created_on.readable = True
     # db.application.modified_on.readable = True
+
+    db.application.owner_id.readable = True  # so that it's not visible on register
+    db.application.modified_by.readable = True
+    db.application.modified_on.readable = True
 
     links = [dict(header='',  # header is col title
                   body=lambda row:
@@ -407,7 +414,35 @@ def _employee_group_links(row):
     return DIV(*all_links, _style="display:flex")
 
 
-@_disable_rbac_fields
+def load_logs_grid():
+    db.logging.owner_id.default=auth.user.id
+    db.logging.owner_id.writable=False
+    db.logging.created_on.readable=True
+    db.logging.created_by.readable=True
+    if IS_MASTER or IS_ADMIN:
+        db.logging.owner_id.readable = True
+        query = db(db.logging.id > 0)
+    else:
+        query = db((db.logging.owner_id == db.auth_user.id) & (db.auth_user.id == auth.user.id))
+
+    logs_grid = SQLFORM.grid(query,
+                              formname="load_logs_grid",
+                              deletable=False if not IS_MASTER else True,
+                              editable=False if not IS_MASTER else True,
+                              fields=[db.logging.id, db.logging.application, db.logging.difficulty, db.logging.description,
+                                      db.logging.created_by, db.logging.created_on],
+                              #links=links,
+                              #onupdate=_user_onupdate,
+                              #oncreate=_user_oncreate,
+                              orderby=~db.logging.id,  # show latest first
+                              field_id=db.logging.id,
+                              # user_signature=False,  # this is handled by the controller
+                              links_placement='left')
+
+
+    return dict(logs_grid=logs_grid)
+
+#@_disable_rbac_fields
 # @auth.requires_signature()
 def load_users_grid():
     links = []

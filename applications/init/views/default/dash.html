@@ -29,6 +29,14 @@
 <hr><br>
 {{pass}}
 
+{{if auth.user.is_insight:}}
+<div class="alert alert-default">
+    <strong><span class="glyphicon glyphicon-user"></span> My Log</strong>
+</div>
+    {{=LOAD('default', 'load_logs_grid.load', ajax=True, user_signature=True)}}  {{# keep signature so we don't have to check for permission again to allow access to this grid}}
+<hr><br>
+{{pass}}
+
 {{block page_js}}
 {{super}}
     <script src="{{=URL('static','js/custom/bootstrap-multiselect.js')}}"></script>

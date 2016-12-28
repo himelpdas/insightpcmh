@@ -173,6 +173,7 @@ class MultiQNA(QNA):
 
         if len(self.rows) < self.multi:
             btn_class = "default"
+            submit_label += " (Need %s%s)" % (self.multi, " or more" if self.limit > self.multi else "")
         else:
             btn_class = "secondary"
             submit_label += " (If Needed)"
@@ -180,6 +181,7 @@ class MultiQNA(QNA):
         self.form_buttons.append(TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right" % btn_class))
 
     def render_template(self):
+        assert self.template, "template was not set for #%s" % self.table_name
         for row in self.rows:
             keys = filter(lambda key: key, [i[1] for i in Formatter().parse(self.template)])  #filter because we get Nones # http://stackoverflow.com/questions/13037401/get-keys-from-template
 
@@ -189,7 +191,7 @@ class MultiQNA(QNA):
             def _print_row_delete_icon(func):
                 def inner(key):
                     if key == "delete_table_row":
-                        return key, A(SPAN(_class="glyphicon glyphicon-trash"), _class="text-danger",
+                        return key, A(SPAN(_class="glyphicon glyphicon-trash hidden-print"), _class="text-danger",
                                       _href="#",
                                       _onClick="if(confirm('Clear entry?')){parent.location='%s'}" %
                                                 URL(vars=dict([('delete', self.table_name+"_%s" % row.id)] +
@@ -204,15 +206,15 @@ class MultiQNA(QNA):
                 def inner(key):
                     if key in ["created_by", "modified_by"]:
                         auth_user = db(db.auth_user.id == row[key]).select().last()
-                        memberships = ", ".join(map(lambda m: m.auth_group.role.capitalize().replace("_", " ")[:-1],
-                                                    db((db.auth_membership.user_id == auth_user.id) &
-                                                       (db.auth_membership.group_id == db.auth_group.id) &
-                                                       (db.auth_group.role.belongs(["admins", "app_managers",
-                                                                                    "trainers", "contributors"]))
-                                                       ).select()))
-                        return key, "%s %s (%s) (%s)" % (auth_user.first_name.capitalize(),
+                        # memberships = ", ".join(map(lambda m: m.auth_group.role.capitalize().replace("_", " ")[:-1],
+                        #                             db((db.auth_membership.user_id == auth_user.id) &
+                        #                                (db.auth_membership.group_id == db.auth_group.id) &
+                        #                                (db.auth_group.role.belongs(["admins", "app_managers",
+                        #                                                             "trainers", "contributors"]))
+                        #                                ).select()))
+                        return key, "%s %s (%s)" % (auth_user.first_name.capitalize(),
                                                          auth_user.last_name.capitalize(),
-                                                         auth_user.id, memberships)
+                                                         auth_user.id)
                     return func(key)
                 return inner
 
@@ -231,38 +233,38 @@ class MultiQNA(QNA):
                     map(_print_comma_list, keys)  #
                 )))  # would look like self.template.format(name="Jon", ...)
 
-'''
-class SingleQNA(QNA):
-
-    def __init__(self, *args, **kwargs):
-        super(SingleQNA, self).__init__(*args, **kwargs)
-        self.process()
-
-    def preprocess(self):
-        """make form editable"""
-        self.row = db(self.table.id > 0).select().last()
-        self.set_form_buttons()
-        self.form = SQLFORM(self.table, record=self.row, buttons=self.form_buttons, showid=False, _action="#"+self.table_name)
-
-    def set_form_buttons(self):
-        submit_label = "Submit Answer"
-        btn_class = "warning"
-
-        if bool(self.row):
-            submit_label = T("Change Answer")
-            btn_class = "primary"
-        else:
-            self.clear_button = ""
-
-        self.form_buttons.append(TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right" % btn_class))
-
-
-    @QNA.require_show
-    def needs_answer(self):
-        if self.row:
-            return False
-        return True
-'''
+# '''
+# class SingleQNA(QNA):
+#
+#     def __init__(self, *args, **kwargs):
+#         super(SingleQNA, self).__init__(*args, **kwargs)
+#         self.process()
+#
+#     def preprocess(self):
+#         """make form editable"""
+#         self.row = db(self.table.id > 0).select().last()
+#         self.set_form_buttons()
+#         self.form = SQLFORM(self.table, record=self.row, buttons=self.form_buttons, showid=False, _action="#"+self.table_name)
+#
+#     def set_form_buttons(self):
+#         submit_label = "Submit Answer"
+#         btn_class = "warning"
+#
+#         if bool(self.row):
+#             submit_label = T("Change Answer")
+#             btn_class = "primary"
+#         else:
+#             self.clear_button = ""
+#
+#         self.form_buttons.append(TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right" % btn_class))
+#
+#
+#     @QNA.require_show
+#     def needs_answer(self):
+#         if self.row:
+#             return False
+#         return True
+# '''
 
 class CryptQNA(MultiQNA):
 
@@ -283,12 +285,13 @@ class CryptQNA(MultiQNA):
             self.form = ""
 
     def set_form_buttons(self):
-        submit_label = "Encrypt Answer"
+        submit_label = "Add Answer"
         if len(self.rows):
-            submit_label = "Encrypt Another"
+            submit_label = "Add Another"
 
         if len(self.rows) < self.multi:
             btn_class = "default"
+            submit_label += " (Need %s%s)" % (self.multi, " or more" if self.limit > self.multi else "")
         else:
             btn_class = "secondary"
             submit_label += " (If Needed)"

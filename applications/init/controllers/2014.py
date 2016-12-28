@@ -75,7 +75,7 @@ class Navigator:
                 pcmh = int(func_name_split[1])
                 element = func_name_split[2]
 
-                label = element.capitalize().replace("_", " ")
+                label = element.capitalize().replace("_", " → ", 1).replace("_", ", ")
                 assert func.__doc__, "missing doc strings for function %s" % func_name
                 description = func.__doc__ if pcmh == 0 else "Element " + label + ": " + func.__doc__
                 pcmh_dict = self.all_questions(pcmh)
@@ -86,7 +86,7 @@ class Navigator:
                     pcmh_dict["elements"] = OrderedDict()
                     self.all_questions.append(pcmh_dict)
 
-                element_dict = {element: Storage(description=description, func=func, done=False,
+                element_dict = {element: Storage(description=description, element=element, func=func, done=False,
                                               url=URL('2014', func_name, vars=request.get_vars))}
                 pcmh_dict["elements"].update(element_dict)
 
@@ -96,7 +96,16 @@ class Navigator:
 
 def pcmh_0_credit_card():
     """Credit Card (To Purchase ISS Tool)"""
-    pass
+    cc = CryptQNA(
+        1, 1,
+        True,
+        'credit_card',
+        "Please enter your credit card in order to purchase the ISS survey tool. The NCQA store accepts American "
+        "Express, Discover, Master Card and Visa."
+    )
+    cc.set_template(
+        "{gpg_encrypted}")
+    return dict(documents={})
 
 
 def pcmh_0_hours():
@@ -126,11 +135,11 @@ def pcmh_0_hours():
 
 
 def pcmh_0_staff():
-    """Clinical Staff"""
+    """Practice Staff"""
     providers = MultiQNA(
         1, float("inf"),  # change the 3 to the number of days the practice is open from the info
         True,
-        'provider',
+        'billing_provider',
         "Enter your providers here.",
     )
 
@@ -138,24 +147,25 @@ def pcmh_0_staff():
     providers.set_template(
         "<b class='text-success'>{first_name} {last_name}, {role}<br>&emsp;Usually in office on: {days_of_the_week}</b>")
 
-    has_non_provider = MultiQNA(
+    has_staff = MultiQNA(
         1, 1,
         True,
-        'has_non_provider',
-        "Aside from yourself and other providers, do you have any other staff (i.e. MA's, front desk, office manager, etc.)?"
+        'has_staff',
+        "Aside from yourself and other providers, do you have any other staff or non-billing providers (i.e. PAs, MAs, "
+        "front desk, office manager, etc.)?"
     )
 
-    has_non_provider.set_template(
+    has_staff.set_template(
         "{please_choose}")
 
-    non_providers = MultiQNA(
+    staff = MultiQNA(
         1, float("inf"),  # change the 3 to the number of days the practice is open from the info
-        getattr(has_non_provider.row, "please_choose", None) == "Yes",
-        'non_provider',
-        "You said you have non-provider staff. Enter your non-provider staff here.",
+        getattr(has_staff.row, "please_choose", None) == "Yes",
+        'staff',
+        "You said you have other staff and/or non-billing providers. Enter them here.",
     )
 
-    non_providers.set_template(
+    staff.set_template(
         "{first_name} {last_name}, {role}&emsp;Usually in office on: {days_of_the_week}")
 
     return dict(documents={})
@@ -207,7 +217,7 @@ def pcmh_0_emr():
 # (1)###################################################
 
 
-def pcmh_1_a():
+def pcmh_1_a_1():
     """Same Day Appointments"""
 
     same_day_appointments = MultiQNA(
@@ -220,10 +230,10 @@ def pcmh_1_a():
 
     same_day_appointments.add_warning(
         getattr(same_day_appointments.row, "please_choose", None) == "No",
-        T(("{practice_name} <b>MUST</b> reserve time every day that patients are seen for same-day appointments. It "
+        "The practice <b>MUST</b> reserve time every day that patients are seen for same-day appointments. It "
            "is a requirement for PCMH certification at any level. We recommend at least two 15 minute slots reserved "
            "visibly in your scheduler, for <u>each day patients are seen</u>. Please see <a href='{url}'>these "
-           "examples</a> of ideal same-day scheduling.").format(practice_name=_practice.practice_name, url=None))
+           "examples</a> of ideal same-day scheduling.".format(url=None)
     )
 
     same_day_blocks = MultiQNA(
@@ -278,8 +288,26 @@ def pcmh_1_a():
         ("PCMH_1A_4.doc", URL("init", "policy", "PCMH_1A_4.doc"))
     })
 
+def pcmh_1_a_5():
+    """Monitoring no-shows"""
+    no_shows_training = MultiQNA(
+        1, 1, True,
+        'no_shows_training',
+        "Does the practice actively monitor no-shows with the EMR?"
+    )
 
-def pcmh_1_b():
+    no_shows_training.add_warning(
+        getattr(no_shows_training.row, "please_choose", None) == "No",
+        ("The practice must begin monitoring patient no-shows <b>as soon as possible</b>. No-shows are calculated by "
+         "measuring the ratio of patients who arrived for their appointment (numerator) to the total number of patients"
+         " scheduled for any appointment for a given time period. NCQA requires a no-show report spanning for at "
+         "least 30 days. Please see <a href=''>this guide</a> to see how to do this with your EMR.").format(url=None)
+    )
+
+    no_shows_training.set_template("{please_choose}")
+    return dict(documents={})
+
+def pcmh_2_b_3_4():
     """Transition of Care"""
 
     transition_of_care_plan_internal = MultiQNA(
@@ -333,6 +361,31 @@ def pcmh_1_b():
 
     return dict(documents={})
 
+def pcmh_0_ncqa():
+    """NCQA logins"""
+    application = CryptQNA(
+        1, 1,
+        True,
+        'ncqa_app',
+        "Enter the login information for the application tool."
+    )
+    application.set_template(
+        "{gpg_encrypted}")
+
+    iss = CryptQNA(
+        1, 1,
+        True,
+        'ncqa_iss',
+        "Enter the login information for the ISS survey tool."
+    )
+    iss.set_template(
+        "{gpg_encrypted}")
+
+    return dict(documents={})
+
+def pcmh_3_b_4b_4c():
+    """Record Review Workbook"""
+    return dict(documents={})
 
 # (2)###################################################
 
@@ -357,5 +410,4 @@ request.nav = Navigator()
 def index():
     pcmh = int(request.args(0) or 0)
     url = request.nav[pcmh]['index']
-    print "nigget%s"%url
     redirect(url)

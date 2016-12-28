@@ -7,6 +7,7 @@
 {{block head}}
     {{super}}
     <link rel="stylesheet" href="{{=URL('static','css/custom/bootstrap-multiselect.css')}}"/>
+    <link type="text/css" rel="stylesheet" href="{{=URL('static','home/font-awesome/css/font-awesome.min.css')}}"/>
 {{end}}
 
 {{block header}}
@@ -31,21 +32,21 @@
     </h4>  {{#address}} {{# http://bit.ly/2a59inp}}
     <h5>
     <span class="glyphicon glyphicon-earphone"></span> {{=app_row.application.practice_phone}} <span style="opacity:0.2">|</span>
-    <span class="glyphicon glyphicon-print"></span> {{=app_row.application.practice_fax}} <span style="opacity:0.2">|</span>
+    <span class="fa fa-fax"></span> {{=app_row.application.practice_fax}} <span style="opacity:0.2">|</span>
     {{# <span class="glyphicon glyphicon-envelope"></span> <a href="mailto:allison@insightmanagement.org">allison@insightmanagement.org</a>}}
-    <span class="glyphicon glyphicon-envelope"></span> <a href="mailto:ebony@insightmanagement.org" class="text-capitalize">{{=app_row.auth_user.first_name}} {{=app_row.auth_user.last_name}} (primary contact)</a>
+    <span class="glyphicon glyphicon-envelope"></span> <a href="mailto:{{=app_row.auth_user.email}}" class="text-capitalize">{{=app_row.auth_user.first_name}} {{=app_row.auth_user.last_name}} (primary contact)</a>
     </h5>
 </header>
 {{end}}
 
 {{block left_sidebar}}
-<ul class="nav nav-pills nav-stacked">
+<ul class="nav nav-pills nav-stacked hidden-print">
     {{_pcmh = request.nav.get_pcmh_from_request()
     _element = request.nav.get_element_from_request()
-    _elements = request.nav[_pcmh]['elements']}}
-    {{for e in _elements:}}
-        {{e_storage = _elements[e]}}
-        <li role="presentation" {{if _element==e:}}class="active"{{pass}}><a href="{{=e_storage.url}}">{{=e_storage.description}}</a></li> {{# credit card http://stackoverflow.com/questions/1146810/taking-credit-card-information-online-without-processing-how-best-to-do-so}}
+    _elements = request.nav[_pcmh]['elements']
+    _element_list = sorted(map(lambda e: _elements[e], _elements), key=lambda i: i.description)}}
+    {{for e_storage in _element_list:}}
+        <li role="presentation" {{if _element==e_storage.element:}}class="active"{{pass}}><a href="{{=e_storage.url}}">{{=e_storage.description}}</a></li> {{# credit card http://stackoverflow.com/questions/1146810/taking-credit-card-information-online-without-processing-how-best-to-do-so}}
     {{pass}}
 </ul>
 {{end}}
@@ -54,7 +55,7 @@
 {{if qna.show:}}
 <div id="{{=qna.table_name}}" class="panel panel-{{if qna.needs_answer():}}info{{elif qna.has_warnings():}}warning{{else:}}primary{{pass}}">
     <div class="panel-heading question-box-heading"><span class="pull-right">&emsp;<span class="glyphicon glyphicon-{{if qna.needs_answer():}}unchecked{{elif qna.has_warnings():}}edit{{else:}}check{{pass}}" title="{{if qna.needs_answer():}}Incomplete{{elif qna.has_warnings():}}Needs Attention{{else:}}Answered{{pass}}"></span></span>
-        <span class="glyphicon glyphicon-asterisk"></span>&nbsp;{{=qna.question}}</div>
+        <span class="glyphicon glyphicon-asterisk {{if qna.needs_answer():}}fa-spin{{pass}}"></span>&nbsp;{{=qna.question}}</div>
     <div class="panel-body">
     {{for warning in qna.warnings:}}
         <blockquote class="text-danger">{{=warning}}</blockquote>
@@ -71,10 +72,10 @@
         <br>
     {{pass}}
     {{=qna.form}}
-    <small class="text-muted pull-left text-uppercase"><i>#{{=qna.table_name}}</i></small>
+    <small class="text-muted pull-left text-uppercase hidden-print"><i>#{{=qna.table_name}}</i></small>
     {{=TAG.button(SPAN(_class='glyphicon glyphicon-comment', _style="color: #BA55D3"),
         _title="Leave a question or comment regarding #%s" % qna.table_name,
-        _class="btn btn-sm btn-secondary pull-right", _type="button",  # button needed else submit
+        _class="btn btn-sm btn-secondary pull-right hidden-print", _type="button",  # button needed else submit
         _onclick="askForHelp('%s');" % qna.table_name)
     }}
     </div>
@@ -93,13 +94,13 @@
             actions.append(XML(T("Please <b class='text-warning'>resolve</b> one or more questions below.")))
         pass
         if actions:
-            actions.append(XML(T("If you feel stuck at any point, please contact your trainer above.")))
+            actions.append(XML(T("If you feel stuck at any point, please contact your trainer.")))
         pass
         has_action = bool(actions)
 }}
 
 <div class="panel panel-primary panel-{{if has_action:}}danger{{else:}}success{{pass}}">
-    <div class="panel-heading question-box-heading" style="text-transform: none; font-size:17px"><span class="pull-right glyphicon glyphicon-{{if not has_action:}}ok-sign{{else:}}exclamation-sign{{pass}}"></span><span class="glyphicon glyphicon-pushpin"></span> {{if has_action:}}Action{{="s" if len(actions)>1 else ""}} needed...{{else:}}Success!{{pass}}</div>
+    <div class="panel-heading question-box-heading" style="text-transform: none; font-size:17px"><a href="javascript:void(0);" class="pull-right hidden-print" title="Print page" style="color:white;" onclick="Tawk_API.hideWidget();"><span class="glyphicon glyphicon-print"></span></a><span class="glyphicon glyphicon-{{if not has_action:}}ok-sign{{else:}}exclamation-sign{{pass}}"></span> {{if has_action:}}Action{{="s" if len(actions)>1 else ""}} needed...{{else:}}Success!{{pass}}</div>
     <div class="panel-body">
         <ul>
             {{for action in actions:}}
@@ -175,6 +176,7 @@
             'pcmh': "{{=request.controller}}", {{#todo}}
             'element': "{{=request.function}}"
         }, function(error){if (error){alert("Chat error:\n"+error);}});
+        Tawk_API.showWidget();
         Tawk_API.maximize();
     }
     Tawk_API.onBeforeLoad = function(){
@@ -183,4 +185,14 @@
 </script>
 
 <!--End of Tawk.to Script-->
+
+<script>
+    Tawk_API.onChatHidden = function(){
+            $(".form-control").addClass("hidden-print");
+            $("[title]").tooltip('hide');
+            window.print();
+    };
+</script>
+
+<script src="{{=URL('static','js/custom/_fixes.js')}}"></script>
 {{end page_js}}

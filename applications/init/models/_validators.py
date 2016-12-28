@@ -6,7 +6,7 @@ _telephone_field_validator = requires=IS_MATCH('\([0-9][0-9][0-9]\)[0-9][0-9][0-
 
 _note_field = Field("note", label=XML("<span class='text-muted'>Note</span>"), comment="Optional")
 
-_yes_no_field_default = Field("please_choose", requires=IS_IN_SET(["Yes", "No"]))
+_yes_no_field_default = Field("please_choose", requires=IS_IN_SET(["Yes", "No"]), comment=XML("<span class='visible-print-inline'>Yes or No.</span>"))
 
 """
 def _on_validation_send(form):
