@@ -50,6 +50,11 @@ class _sample_validator:
 
 def _on_validation_filename(form):
     form.vars.filename = request.vars.upload.filename
+    _on_validation_generic(form)
+
+
+def _on_validation_generic(form):
+    form.vars.application = APP_ID
 
 
 def _on_validation_crypt(table_name):
@@ -62,7 +67,7 @@ def _on_validation_crypt(table_name):
                 value = form.vars[each]
             plaintext += "%s: %s\n" % (each, value)
         encrypted = gpg.encrypt(plaintext, "7AA8DBFE")  #change latter to list of private keys approved via rbac
-        db[table_name].insert(gpg_encrypted=encrypted)
+        db[table_name].insert(gpg_encrypted=encrypted, application=APP_ID)
     return inner
 
 class _IS_DIGITS:

@@ -139,8 +139,9 @@ class MultiQNA(QNA):
         self.process()
 
     def preprocess(self):
+        self.validator = _on_validation_generic
         # self.rows = db(self.table.id > 0).select(orderby=~db[self.table].id,limitby=(0,self.multi))  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
-        self.rows = db(self.table.id > 0).select()  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
+        self.rows = db((self.table.id > 0) & (self.table.application==APP_ID)).select()  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
         if self.limit == 1:
             self.row = self.rows.last()
         self.set_form_buttons()
@@ -275,7 +276,7 @@ class CryptQNA(MultiQNA):
         # self.rows = db(self.table.id > 0).select(orderby=~db[self.table].id,limitby=(0,self.multi))  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
         self.validator = _on_validation_crypt(self.table_name)
 
-        self.rows = db(self.table.id > 0).select()  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
+        self.rows = db((self.table.id > 0) & (self.table.application==APP_ID)).select()  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
 
         self.set_form_buttons()
 
