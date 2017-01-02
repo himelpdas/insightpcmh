@@ -288,6 +288,18 @@ def pcmh_1_a_1():
         ("PCMH_1A_4.doc", URL("init", "policy", "PCMH_1A_4.doc"))
     })
 
+
+
+def pcmh_1_a_4():
+    """Availability of appointments"""
+
+    same_day_appointments = MultiQNA(
+        1, 1, True,
+        'availability_of_appointments',
+        "What is the practice's availability for the following appointment types?"
+    )
+
+
 def pcmh_1_a_5():
     """Monitoring no-shows"""
     no_shows_training = MultiQNA(

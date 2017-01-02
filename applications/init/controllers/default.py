@@ -11,6 +11,8 @@ from collections import OrderedDict
 import json
 import datetime
 
+_role_to_permission = dict(app_managers="manage", contributors="contribute", admins="administrate", trainers="train",
+                           masters=None)
 
 def _disable_rbac_fields(*args):
     def _decorator(func):
@@ -293,8 +295,6 @@ def _assigned_column(row):
     return container
 
 
-
-
 #@_disable_rbac_fields
 # @auth.requires_signature()
 def load_apps_grid():
@@ -305,6 +305,7 @@ def load_apps_grid():
 
     db.application.modified_by.readable = True
     db.application.modified_on.readable = True
+    db.application.owner_id.readable = True
 
     links = [dict(header='',  # header is col title
                   body=lambda row:
@@ -366,7 +367,8 @@ def add_remove_user():
 
     user = db(db.auth_user.id == u).select().last()
 
-    assert(user, "expected user!")
+    assert(user, "expected user! (user deleted?)")
+    assert g in _without_keys(_role_to_permission, "masters"), "Invalid role (web parameter tampering?)" # not needed because of auth.signature
 
     if a == "+":
         auth.add_membership(role=g, user_id=u)
@@ -376,6 +378,13 @@ def add_remove_user():
         auth.del_membership(role=g, user_id=u)
         word = "removed"
         direction = "from"
+
+        permissions_to_delete = db((db.application.id == db.auth_permission.record_id) &
+                             (db.auth_permission.name == _role_to_permission[g]) &
+                             (db.auth_permission.group_id == auth.id_group("user_%s" % u))).select(db.auth_permission.id)
+
+        db(db.auth_permission.id.belongs(permissions_to_delete)).delete()
+
     session.flash = '%s was %s %s the group "%s"' % (user.first_name.capitalize(), word, direction, g.replace("_"," "))
     redirect(URL("dash.html", args=request.args, vars=request.get_vars))
 
@@ -497,10 +506,9 @@ def _user_onupdate(form):  # todo revoke all permissions
     self_group = auth.id_group("user_%s" % id)
     # auth.del_permission(auth.id_group("user_%s" % e), p, "application", r)  # 0 means user_1
     if not form.vars.is_insight:
-        groups = [("admins", "administrate"), ("app_managers", "manage"), ("trainers", "train"), ("masters", None)]
-        for group in groups:
-            role = group[0]
-            permission = group[1]
+        groups = _without_keys(_role_to_permission, "contributors")
+        for role in groups:
+            permission = groups[role]
             auth.del_membership(role=role, user_id=id)
             if permission:
                 db((db.auth_permission.group_id == self_group &

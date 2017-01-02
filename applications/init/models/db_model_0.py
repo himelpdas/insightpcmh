@@ -188,7 +188,6 @@ db.define_table("no_shows_training",
     auth.signature
 )
 
-
 db.define_table("pace_holder",
     Field("application", 'reference application', readable=False, writable=False),
     _yes_no_field_default,
@@ -196,8 +195,20 @@ db.define_table("pace_holder",
     auth.signature
 )
 
-# (3)###################################################
-
+# (availability of appointments)###################################################
+_within = IS_IN_SET([(0, "Same Day"), (1, "1 Day"), (2, "2 Days"), (3, "3 Days"), (4, "4 Days"), (5, "5 Days"),
+                     (6, "6 Days"), (7, "7 Days (1 Week)"), (10, "1.5 Weeks"), (14, "2 Weeks"),
+                     (21, "3 Weeks")], zero=None)
+db.define_table("availability_of_appointments",
+    Field("application", 'reference application', readable=False, writable=False),
+    Field("new_patient", requires=_within),
+    Field("urgent", requires=_within),
+    Field("consult", requires=_within),
+    Field("walk_in", requires=_within),
+    Field("same_day", requires=_within),
+    _note_field,
+    auth.signature
+)
 
 # (4)###################################################
 

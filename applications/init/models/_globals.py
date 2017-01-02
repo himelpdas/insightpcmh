@@ -31,6 +31,10 @@ _list_of_states = ["NY", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "
 
 _days_of_the_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
+
+def _without_keys(d, *keys):
+    return dict(filter(lambda key_value: key_value[0] not in keys, d.items()))
+
 _day_of_week_field = lambda label=None, comment=None: \
     Field("day_of_the_week",
           requires=IS_IN_SET(_days_of_the_week, zero=None),
