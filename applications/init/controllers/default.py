@@ -384,6 +384,10 @@ def add_remove_user():
         direction = "from"
 
     session.flash = '%s was %s %s the group "%s"' % (user.first_name.capitalize(), word, direction, g.replace("_"," "))
+
+    if user.email in MASTER_EMAILS:
+        session.flash = "Don't even think about it! ;)"
+
     redirect(URL("dash.html", args=request.args, vars=request.get_vars))
 
 
@@ -402,8 +406,14 @@ def _employee_group_links(row):
         color = each[1]
         action = "-" if auth.has_membership(role=group, user_id=row.id) else "+"
         sign = _m if action == "-" else _p
+        btn_color = "btn-default"
+        confirm_msg = ""
+        if action != "+":
+            confirm_msg = " All assignments for this user will be lost!"
+            btn_color = "btn-%s" % color
         label = XML("%s %s" % (sign, group_name[:-1]))  # take out the s at the end
-        all_links.append(A(label, _class="btn btn-sm %s" % (("btn-%s" % color) if action != "+" else "btn-default"),
+        all_links.append(A(label, _onclick="if(!confirm('Are you sure?%s')){event.preventDefault()}" % confirm_msg,  # http://bit.ly/2hM7Cbk
+                           _class="btn btn-sm %s" % btn_color,
                            _href=URL("add_remove_user.html",
                                      vars=dict(
                                          user_id=row.id,

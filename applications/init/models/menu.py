@@ -3,6 +3,8 @@
 
 MY_KEY = "Himel123"
 TALK_TO_API_KEY = "e3730573ebe8f86994e9a07e49f1b0fe5a0fe2af"
+MASTER_EMAILS = ["himel@insightmanagement.org", "himel@insightpcmh.org", "himel.p.das@gmail.com", "himeldas@live.com"]
+
 if not session.MY_SALT:
     session.MY_SALT = os.urandom(8)
 
@@ -24,7 +26,7 @@ if not auth.id_group("app_managers"):
 
 if auth.is_logged_in():
     """Himel's role in Insight"""
-    if auth.user.email in ["himel@insightmanagement.org", "himeldas@live.com"]:  # "jason@insightmanagement.org"]:
+    if auth.user.email in MASTER_EMAILS:  # "jason@insightmanagement.org"]:
         if not auth.user.is_insight:
             db(db.auth_user.id == auth.user.id).select().last().update_record(is_insight=True)
         for _role in {"masters", "admins", "trainers", "app_managers"}.symmetric_difference(auth.user_groups.values()):
