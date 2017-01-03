@@ -375,15 +375,13 @@ def add_remove_user():
         word = "added"
         direction = "to"
     else:
+        print g
+        print auth.id_group("user_%s" % u)
         auth.del_membership(role=g, user_id=u)
+        db((db.auth_permission.group_id == auth.id_group("user_%s" % u)) &
+            (db.auth_permission.name == _role_to_permission[g])).delete()
         word = "removed"
         direction = "from"
-
-        permissions_to_delete = db((db.application.id == db.auth_permission.record_id) &
-                             (db.auth_permission.name == _role_to_permission[g]) &
-                             (db.auth_permission.group_id == auth.id_group("user_%s" % u))).select(db.auth_permission.id)
-
-        db(db.auth_permission.id.belongs(permissions_to_delete)).delete()
 
     session.flash = '%s was %s %s the group "%s"' % (user.first_name.capitalize(), word, direction, g.replace("_"," "))
     redirect(URL("dash.html", args=request.args, vars=request.get_vars))
@@ -511,14 +509,12 @@ def _user_onupdate(form):  # todo revoke all permissions
             permission = groups[role]
             auth.del_membership(role=role, user_id=id)
             if permission:
-                db((db.auth_permission.group_id == self_group &
-                    (db.auth_permission.name == permission))
-                   ).delete()
+                db((db.auth_permission.group_id == self_group) &
+                    (db.auth_permission.name == permission)).delete()
     else:
         auth.del_membership(role="contributors", user_id=id)
-        db((db.auth_permission.group_id == self_group &
-            (db.auth_permission.name == "contribute"))
-           ).delete()
+        db((db.auth_permission.group_id == self_group) &
+            (db.auth_permission.name == "contribute")).delete()
 
 
 def _user_oncreate(form):
