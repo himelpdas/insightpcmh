@@ -74,7 +74,7 @@ def _on_validation_crypt(table_name):
             except AttributeError:
                 value = form.vars[each]
             plaintext += "%s: %s\n" % (each, value)
-        encrypted = gpg.encrypt(plaintext, "3E2FD6EB")  #change latter to list of private keys approved via rbac
+        encrypted = gpg.encrypt(plaintext, "ECA488E9")  #change latter to list of private keys approved via rbac
         db[table_name].insert(gpg_encrypted=encrypted, application=APP_ID)
     return inner
 
