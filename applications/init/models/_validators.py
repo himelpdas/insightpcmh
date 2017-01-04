@@ -58,6 +58,14 @@ def _on_validation_generic(form):
 
 
 def _on_validation_crypt(table_name):
+    """must initialize GPG public key to system's GPG keys...
+    gpg = gnupg.GPG()
+    #on local system, generate public/private keys (certificate) in kleopatra or do it in python http://bit.ly/2iyal7g
+    gpg.export_keys("3E2FD6EB", False)  # pass id of the certificate, get public key # True will return private key
+    u'-----BEGIN PGP PUBLIC KEY BLOCK-----\r\nVersion: GnuPG v2\r\n\r\nmQENBFf0YFcBCA...... #key_data
+    #on remote system import the public key
+    gpg.import_keys(key_data)
+    """
     def inner(form):
         plaintext = ""
         for each in sorted(form.vars.keys()):
@@ -66,7 +74,7 @@ def _on_validation_crypt(table_name):
             except AttributeError:
                 value = form.vars[each]
             plaintext += "%s: %s\n" % (each, value)
-        encrypted = gpg.encrypt(plaintext, "7AA8DBFE")  #change latter to list of private keys approved via rbac
+        encrypted = gpg.encrypt(plaintext, "3E2FD6EB")  #change latter to list of private keys approved via rbac
         db[table_name].insert(gpg_encrypted=encrypted, application=APP_ID)
     return inner
 
