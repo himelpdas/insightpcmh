@@ -50,3 +50,9 @@ db.define_table("next_available_appointment",
                 _unit_field,
                 _note_field,
 )
+
+db.define_table("no_show_emr",
+                Field("application", 'reference application', readable=False, writable=False),
+                _yes_no_field_default,
+                _note_field,
+                )

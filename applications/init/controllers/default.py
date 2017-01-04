@@ -10,9 +10,18 @@
 from collections import OrderedDict
 import json
 import datetime
+from gluon.tools import prettydate
+
+
+db.logging.created_on.represent = db.application.created_on.represent = \
+    lambda v, r: XML('<span title="%s">%s</span>' % (prettydate(getattr(r, 'created_on', None)),
+                                                     getattr(r, 'created_on', None)))
+db.application.modified_on.represent = lambda v, r: XML('<span title="%s">%s</span>' % (prettydate(
+    getattr(r, 'modified_on', None)), getattr(r, 'modified_on', None)))
 
 _role_to_permission = dict(app_managers="manage", contributors="contribute", admins="administrate", trainers="train",
                            masters=None)
+
 
 def _disable_rbac_fields(*args):
     def _decorator(func):
@@ -108,7 +117,8 @@ def _assigned_column(row):
         base.update(
             c_posessive="%s's" % base["c_fn"],
             c_name="%s %s (%s)" % (base['c_fn'], base['c_ln'], base['c_id']),
-            c_name_html="%s %s <span class='text-muted'>(%s)</span>" % (base['c_fn'], base['c_ln'], base['c_id']),
+            c_name_html="<a href='mailto:%s'>%s %s</a> <span class='text-muted'>(%s)</span>" %
+                        (base['c_email'], base['c_fn'], base['c_ln'], base['c_id']),
             c_acronym="%s%s%s" % (participator.auth_user.first_name.capitalize()[0],
                                   participator.auth_user.last_name.capitalize()[0],
                                   participator.auth_user.id),
@@ -145,10 +155,11 @@ def _assigned_column(row):
                 buttonClass: 'btn btn-sm btn-{color}', disableIfEmpty: true, enableHTML: true}});
             }})
         </script>"""
-        widget = widget_a = XML("<button class='btn btn-sm btn-{color}' title='{c_email}'>{c_acronym}</button>".format(
+        widget = widget_a = XML("<button class='btn btn-sm btn-{color}' "
+                                "title=\"{c_name_html}\">{c_acronym}</button>".format(
                 color=participator_widget["color"],
                 c_acronym=participator_widget["c_acronym"],
-                c_email=participator_widget["c_email"],  # todo change to popover
+                c_name_html=participator_widget["c_title_html"], # todo change to popover
         ))
         widget_b = XML(widget_script.format(
             c_acronym=participator_widget["c_acronym"],
@@ -175,9 +186,9 @@ def _assigned_column(row):
             widget = widget_b
         elif auth.has_membership("trainers"):
             if participator_widget["title"] == "contributor":
-                widget = widget_a
-            else:
                 widget = widget_b
+            else:
+                widget = widget_a
 
         #assert(widget, "expected a widget!")
 
@@ -305,6 +316,7 @@ def load_apps_grid():
 
     db.application.modified_by.readable = True
     db.application.modified_on.readable = True
+    db.application.created_on.readable = True
     db.application.owner_id.readable = True
 
     links = [dict(header='',  # header is col title
@@ -435,6 +447,8 @@ def load_logs_grid():
     db.logging.owner_id.writable=False
     db.logging.created_on.readable=True
     db.logging.created_by.readable=True
+    db.application.id.represent = lambda v, r: "%s (%s)" % (r.application.practice_name, r.application.id)
+
     if IS_MASTER or IS_ADMIN:
         db.logging.owner_id.readable = True
         query = db(db.logging.id > 0)

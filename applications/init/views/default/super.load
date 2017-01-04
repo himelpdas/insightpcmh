@@ -34,7 +34,8 @@ even if the function is called via ajax.
 {{block load_js}}
 <script>  {{#http://bit.ly/2itgFxG}}
 $(document).ajaxStop(function() {  {{#http://bit.ly/2itnmzG - call when all outstanding ajax complete, no need to call same code for each table}}
-    $('[title]').tooltip({'html': true});
+    $('[title]').tooltip({html: true});
+    $('.multiselect.dropdown-toggle').attr({'data-original-title': 'edit'});
     $(".web2py_htmltable").animate({'min-height': "33em", 'background-color': "#FBF9FF"});  {{# http://bit.ly/2ithnuW}}
     $("[multiple='multiple'][class!='autocomplete']").multiselect("refresh");  {{# select all multi widgets, but not with those hidden autocomplete dropdowns (also has multiple=multiple attr))}}
 

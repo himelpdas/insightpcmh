@@ -214,7 +214,38 @@ def pcmh_0_emr():
     return dict(documents={})
 
 
-# (1)###################################################
+# (1a)###################################################
+
+def pcmh_1_a_2():
+    """After hours"""
+    after_hours = MultiQNA(
+        1, 1, True,
+        'after_hours',
+        "Does the practice have any extended business hours, <u>at least</u> once a week?"
+    )
+
+    after_hours.set_template("{please_choose}")
+
+    after_hours.add_warning(
+        getattr(after_hours.row, "please_choose", None) == "No",
+        "In order to get the point for PCMH 1A2, the practice must see patients during extended buisiness hours at least "
+        "once a week. Please note, that this does not include the provider \"running late,\" this must be implemented as "
+        "a policy of the practice."
+    )
+
+    after_hour_blocks = MultiQNA(
+        1, float("inf"),
+        getattr(after_hours.row, "please_choose", None) == "Yes",
+        'after_hour_block',
+        "You said you have after-hours. Please enter your after-hours here.",
+        validator=_validate_start_end_time,
+    )
+
+    after_hour_blocks.set_template("{day_of_the_week} {start_time:%I}:{start_time:%M} "
+                                   "{start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}")
+
+    return dict(documents={})
+
 
 
 def pcmh_1_a_1():
@@ -247,24 +278,6 @@ def pcmh_1_a_1():
     same_day_blocks.set_template("{day_of_the_week} {start_time:%I}:{start_time:%M} "
                                  "{start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}")
 
-    after_hours = MultiQNA(
-        1, 1, True,
-        'after_hours',
-        "Does the practice have any after hours, <u>at least</u> once a week?"
-    )
-
-    after_hours.set_template("{please_choose}")
-
-    after_hour_blocks = MultiQNA(
-        1, float("inf"),
-        getattr(after_hours.row, "please_choose", None) == "Yes",
-        'after_hour_block',
-        "You said you have after-hours. Please enter your after-hours here.",
-        validator=_validate_start_end_time,
-    )
-
-    after_hour_blocks.set_template("{day_of_the_week} {start_time:%I}:{start_time:%M} "
-                                "{start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}")
 
     walkin = MultiQNA(
         1, 1,
@@ -299,13 +312,15 @@ def pcmh_1_a_4():
         "What is the practice's availability for the following appointment types?"
     )
 
+    return dict(documents={})
+
 
 def pcmh_1_a_5():
     """Monitoring no-shows"""
     no_shows_training = MultiQNA(
         1, 1, True,
         'no_shows_training',
-        "Does the practice actively monitor no-shows with the EMR?"
+        "Does the practice actively contact no-show patients?"
     )
 
     no_shows_training.add_warning(
@@ -317,7 +332,22 @@ def pcmh_1_a_5():
     )
 
     no_shows_training.set_template("{please_choose}")
+
+    no_show_emr = MultiQNA(
+        1, 1,
+        getattr(no_shows_training.row, "please_choose", None) == "Yes",
+        'no_show_emr',
+        "is the no-show documented in the EMR?"
+    )
+
+    no_show_emr.set_template("{please_choose}")
+
     return dict(documents={})
+
+# (1b)###################################################
+
+
+# (2)###################################################
 
 def pcmh_2_b_3_4():
     """Transition of Care"""
