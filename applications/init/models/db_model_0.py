@@ -4,6 +4,10 @@ _list_of_states = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "
                    "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
                    "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
 
+_fake_db = {}
+
+# (practice)###################################################
+
 db.define_table("practice_info",
     Field("application", 'reference application', readable=False, writable=False),
     Field("practice_name", requires=IS_NOT_EMPTY()),
@@ -19,8 +23,6 @@ db.define_table("practice_info",
     _note_field,
     # auth.signature  # not needed because db._common_fields.append(auth.signature)
 )
-
-# _practice = db(db.practice_info.id > 0).select().last() or Storage(practice_name="The practice")
 
 db.define_table("primary_contact",
     Field("application", 'reference application', readable=False, writable=False),
@@ -91,15 +93,7 @@ db.define_table("staff",
     auth.signature
 )
 
-
-db.define_table("emr",
-    Field("application", 'reference application', readable=False, writable=False),
-    Field("name",
-          requires=IS_IN_SET(['eClinicalWorks', 'MDLand', 'HealthFusion', 'Other'], sort=True, zero=None)),
-    _note_field,
-    auth.signature
-)
-
+# (emr)###################################################
 
 db.define_table("account_created",
     Field("application", 'reference application', readable=False, writable=False),
@@ -107,9 +101,6 @@ db.define_table("account_created",
     _note_field,
     auth.signature
 )
-
-
-_fake_db = {}
 
 
 _fake_db.update({"emr_credentials": [
@@ -127,6 +118,8 @@ db.define_table("emr_credentials",
     Field("gpg_encrypted", "text"),
     auth.signature
 )
+
+# (credit_card)###################################################
 
 _fake_db.update({"credit_card": [
     Field("account_holder", requires=IS_NOT_EMPTY(), comment="Must match exact name on card."),
@@ -196,6 +189,7 @@ db.define_table("pace_holder",
 )
 
 # (availability of appointments)###################################################
+
 _within = IS_IN_SET([(0, "Same Day"), (1, "1 Day"), (2, "2 Days"), (3, "3 Days"), (4, "4 Days"), (5, "5 Days"),
                      (6, "6 Days"), (7, "7 Days (1 Week)"), (10, "1.5 Weeks"), (14, "2 Weeks"),
                      (21, "3 Weeks")], zero=None)
@@ -209,11 +203,3 @@ db.define_table("availability_of_appointments",
     _note_field,
     auth.signature
 )
-
-# (4)###################################################
-
-
-# (5)###################################################
-
-
-# (end)###################################################

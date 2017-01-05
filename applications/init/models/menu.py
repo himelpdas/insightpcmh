@@ -33,6 +33,7 @@ if auth.is_logged_in():
             auth.add_membership(role=_role, user_id=auth.user.id)
 
 APP_ID = request.get_vars["app_id"]
+APP = None
 INSIGHT_ADDR = "660 Whiteplains Rd, Tarrytown, NY 10591"
 IS_MASTER = auth.has_membership("masters")
 IS_ADMIN = auth.has_membership("admins")
@@ -82,9 +83,11 @@ response.menu = [
      ('default' == request.controller and 'dash' == request.function), URL('default', 'dash'), []),
 ]
 
+
 @auth.requires(False, requires_login=False)
 def ACCESS_DENIED():
     pass
+
 
 if APP_ID:
     # auth.requires_membership('application_'+APP_ID)(lambda: 1)()
@@ -95,18 +98,8 @@ if APP_ID:
                      auth.has_permission('contribute', 'application', APP_ID) or
                      auth.has_permission('administrate', 'application', APP_ID)):
             ACCESS_DENIED()
-    """
-    response.menu += [
-        (T('(0) Practice'), ('0' == request.controller), URL('0', 'index', vars=request.get_vars), []),
-        (T('(1) Access'), ('1' == request.controller), URL('1', 'index', vars=request.vars), []),
-        (T('(2) Team'), ('2' == request.controller), URL('2', 'index', vars=request.vars), []),
-        (T('(3) Population'), ('3' == request.controller), URL('default', 'dash'), []),
-        (T('(4) Care'), ('4' == request.controller), URL('default', 'dash'), []),
-        (T('(5) Coordination'), ('5' == request.controller), URL('default', 'dash'), []),
-        (T('(6) Performance'), ('6' == request.controller), URL('default', 'dash'), []),
-    ]
-    """
-elif request.controller in list("0123456"):
+    APP = db(db.application.id == APP_ID).select().last()
+elif request.controller in ["2014", "2017"]:  # do not let them access a survey without app id
     ACCESS_DENIED()
 
 #

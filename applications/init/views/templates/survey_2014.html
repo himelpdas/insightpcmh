@@ -190,6 +190,7 @@
     Tawk_API.onChatHidden = function(){
             $(".form-control").addClass("hidden-print");
             $("[title]").tooltip('hide');
+            $(".w2p_flash").addClass("hidden-print");  {{# hide web2py flash}}
             window.print();
     };
 </script>

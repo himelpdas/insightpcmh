@@ -1,13 +1,3 @@
-import gnupg
-gpg = gnupg.GPG()
-
-_telephone_field_validator = requires=IS_MATCH('\([0-9][0-9][0-9]\)[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]',
-                                               error_message='Use the format (123)456-7890 (no spaces)')
-
-_note_field = Field("note", label=XML("<span class='text-muted'>Note</span>"), comment="Optional")
-
-_yes_no_field_default = Field("please_choose", requires=IS_IN_SET(["Yes", "No"]), comment=XML("<span class='visible-print-inline'>Yes or No.</span>"))
-
 # """
 # def _on_validation_send(form):
 #     text = ""
@@ -48,6 +38,10 @@ _yes_no_field_default = Field("please_choose", requires=IS_IN_SET(["Yes", "No"])
 # """
 
 
+import gnupg
+gpg = gnupg.GPG()
+
+
 def _on_validation_filename(form):
     form.vars.filename = request.vars.upload.filename
     _on_validation_generic(form)
@@ -77,6 +71,7 @@ def _on_validation_crypt(table_name):
         encrypted = gpg.encrypt(plaintext, "ECA488E9")  #change latter to list of private keys approved via rbac
         db[table_name].insert(gpg_encrypted=encrypted, application=APP_ID)
     return inner
+
 
 class _IS_DIGITS:
     def __init__(self, length=None, error_message='Must be all digits'):

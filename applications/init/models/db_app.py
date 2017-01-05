@@ -1,16 +1,24 @@
-EMRS = ['eClinicalWorks','MDLand','HealthFusion','Other']
-
 db.define_table("application",
     Field("practice_name", requires=IS_NOT_EMPTY()),
     Field("owner_id", db.auth_user, comment="Enter primary contact's email address", label="Primary Contact", required=True, writable=False, readable=False),
     Field('pps', label="PPS"),
     Field("application_type", requires=IS_IN_SET(["Initial", "Renewal"])),
-    Field("application_size", requires=IS_IN_SET(["Single", "Corporate"]), comment='Choose "Corporate" if there are 3 or more sites under one owner or CEO. Otherwise the application should be treated as "Single."'),
-    Field('authorized_representative', label="Authorized Representative (Email)", requires=IS_EMAIL() if request.post_vars.application_size == "Multi" else None),
+    Field("application_size", requires=IS_IN_SET(["Single", "Corporate"]),
+          comment=XML('Choose "Corporate" if there are <b>3 or more</b> sites that can be represented by <b>one</b> '
+                      'person representative (i.e. an owner or CEO). '
+                      'Otherwise the application should be treated as "Single."')),
+    Field('authorized_representative', label=SPAN("Authorized Representative (Email)",
+                                                  _title="Applies to corporate tool only"),
+          requires=IS_EMAIL() if request.post_vars.application_size == "Multi" else None),
     Field('largest_practice', 'boolean', default=True, comment="Is this the practice with the most active lives?",
-          label="Largest Practice?", requires=IS_NOT_EMPTY() if request.post_vars.application_size == "Multi" else None),
+          label=SPAN("Largest Site?", _title="Applies to corporate tool only"),
+          requires=IS_NOT_EMPTY() if request.post_vars.application_size == "Multi" else None),
     Field("emr", label="Primary EMR", requires=IS_IN_SET(EMRS, sort=True, zero=None)),
-    Field("other_software", label="Secondary Software", comment=XML("If you use more than one software to run your practice, enter the name of the software here, otherwise <b>leave blank</b>. For example, some practices use a 2nd EMR as a scheduler or has a separate software for billing.")),
+    Field("other_software", label="Secondary Software", comment=XML("If you use more than one software to run your "
+                                                                    "practice, enter the name of the software here, "
+                                                                    "otherwise <b>leave blank</b>. For example, some "
+                                                                    "practices use a 2nd EMR as a scheduler or has a "
+                                                                    "separate software for billing.")),
     Field("practice_specialty", label="Speciality",
           requires=IS_IN_SET(['Internal Medicine', 'Pediatrics', 'Family Medicine'], sort=True, zero=None)),
     Field("practice_phone", label="Phone", requires=_telephone_field_validator),

@@ -9,6 +9,12 @@ practice_info = MultiQNA(
 practice_info.set_template("Practice: {practice_name} ({practice_specialty})<br>Phone: {phone} {extension}"
                            "<br>Address 1: {address_line_1}<br>Address 2: {address_line_2}<br>City: {city}<br>"
                            "State: {state_}<br>Web: {website}")
+
+...
+account_created.add_warning(getattr(account_created.row, "please_choose", None) == "No",
+                            XML(T(
+                                "Please create provide an account that has provider or admin level access, then "
+                                "come back and change your answer.")))
 """
 
 from collections import OrderedDict
@@ -114,23 +120,13 @@ def pcmh_0_hours():
         3, float("inf"),
         True,
         'clinical_hour',
-        "What are the practice's office hours? Only include days when patients are <u>actually seen</u>.",
+        "What are the practice's office hours?.",
         validator=_validate_start_end_time,
     )
 
     clinical_hours.set_template("{day_of_the_week} {start_time:%I}:{start_time:%M} "
                                 "{start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}")
 
-    """
-    primary_contact = MultiQNA(
-        1, 1,
-        practice_info.row,
-        'primary_contact',
-        "Enter the primary contact who is able to handle all inquiries regarding this PCMH project."
-    )
-
-    primary_contact.set_template("{first_name} {last_name} ({role})<br>{email}<br>{phone} {extension}")
-    """
     return dict(documents={})
 
 
@@ -173,30 +169,21 @@ def pcmh_0_staff():
 
 def pcmh_0_emr():
     """Electronic Medical Record Info"""
-    emr_name = MultiQNA(
-        1, 1,
-        True,
-        'emr',
-        "What is EMR that this practice uses?"
-    )
-
-    emr_name.set_template(
-        "{name}")
 
     account_created = MultiQNA(
         1,1,
-        emr_name.row,
+        True,
         'account_created',
         "Insight Management requires access to <i>%s</i> via a login that has provider or admin level access. "
-        "Do you have this login information ready?" % emr_name.row.name if emr_name.row else "the EMR"
+        "Do you have this login information ready?" % APP.emr if APP.emr != "Other" else "the EMR"
     )
 
     account_created.set_template(
         "{please_choose}")
 
-    account_created.add_warning(getattr(account_created.row, "please_choose", None) == "No",
+    account_created.add_warning(getattr(account_created.row, "please_choose", None) in NOT_YES,
                                 XML(T(
-                                    "Please create provide an account that has provider or amdmin level access, then "
+                                    "Please create provide an account that has provider or admin level access, then "
                                     "come back and change your answer.")))
 
     emr_credentials = CryptQNA(
@@ -227,8 +214,8 @@ def pcmh_1_a_2():
     after_hours.set_template("{please_choose}")
 
     after_hours.add_warning(
-        getattr(after_hours.row, "please_choose", None) == "No",
-        "In order to get the point for PCMH 1A2, the practice must see patients during extended buisiness hours at least "
+        getattr(after_hours.row, "please_choose", None) in NOT_YES,
+        "In order to get credit for PCMH 1A2, the practice must see patients during extended buisiness hours at least "
         "once a week. Please note, that this does not include the provider \"running late,\" this must be implemented as "
         "a policy of the practice."
     )
@@ -247,20 +234,19 @@ def pcmh_1_a_2():
     return dict(documents={})
 
 
-
 def pcmh_1_a_1():
     """Same Day Appointments"""
 
     same_day_appointments = MultiQNA(
         1, 1, True,
         'same_day_appointments',
-        "Does the practice reserve time every clinical day for same-day appointments?"
+        "Does the practice reserve time on every clinical day for same-day appointments?"
     )
 
     same_day_appointments.set_template("{please_choose}")
 
     same_day_appointments.add_warning(
-        getattr(same_day_appointments.row, "please_choose", None) == "No",
+        getattr(same_day_appointments.row, "please_choose", None) in NOT_YES,
         "The practice <b>MUST</b> reserve time every day that patients are seen for same-day appointments. It "
            "is a requirement for PCMH certification at any level. We recommend at least two 15 minute slots reserved "
            "visibly in your scheduler, for <u>each day patients are seen</u>. Please see <a href='{url}'>these "
@@ -290,7 +276,7 @@ def pcmh_1_a_1():
 
     next_available_appointments = MultiQNA(
         1, float("inf"),
-        getattr(walkin.row, "please_choose", None) == "No",
+        getattr(walkin.row, "please_choose", None) in NOT_YES,
         'next_available_appointment',
         "Aside from same-day appointments, what are your other appointment types and how long until their next available appointments?",
     )
@@ -324,7 +310,7 @@ def pcmh_1_a_5():
     )
 
     no_shows_training.add_warning(
-        getattr(no_shows_training.row, "please_choose", None) == "No",
+        getattr(no_shows_training.row, "please_choose", None) in NOT_YES,
         ("The practice must begin monitoring patient no-shows <b>as soon as possible</b>. No-shows are calculated by "
          "measuring the ratio of patients who arrived for their appointment (numerator) to the total number of patients"
          " scheduled for any appointment for a given time period. NCQA requires a no-show report spanning for at "
@@ -337,7 +323,7 @@ def pcmh_1_a_5():
         1, 1,
         getattr(no_shows_training.row, "please_choose", None) == "Yes",
         'no_show_emr',
-        "is the no-show documented in the EMR?"
+        "Is the no-show documented in the EMR?"
     )
 
     no_show_emr.set_template("{please_choose}")
@@ -346,6 +332,55 @@ def pcmh_1_a_5():
 
 # (1b)###################################################
 
+def pcmh_1_b_1_2_3_4():
+    """Clinical advice (calls and messages)"""
+    answering_service = MultiQNA(
+        1, 1,
+        True,
+        'answering_service',
+        "How does <i>%s</i> handle after-hour incoming telephone encounters for medical advice?" % APP.practice_name
+    )
+
+    answering_service.set_template("{please_choose}")
+
+    telephone_encounter = MultiQNA(
+        1, 1,
+        True,
+        'telephone_encounter',
+        "With regard to incoming telephone encounters seeking medical advice "
+        "(<b>excluding</b> refill requests), does <i>%s</i> record <b>all</b> of the following "
+        "into the <b>patient record</b> during <b>and</b> after business hours?<ol>"
+        "<li>A summarized transcript of the <b>advice</b> given to the caller.</li>"
+        "<li>The time and date when the call was answered by the practice.</li>"
+        "<li>The time and date when the caller received a response.</li>"
+        "</ol>" % APP.practice_name
+    )
+
+    telephone_encounter.add_warning(
+        getattr(telephone_encounter.row, "please_choose", None) in NOT_YES,
+        "In order to receive credit for the entire PCMH 1B section, <i>%s</i> must record all incoming telephone "
+        "encounters (during <b>and</b> after business hours) regarding clinical advice (<b>excluding</b> refill "
+        "requests) into the patient record. See <a href='#'>this example</a> of a good telephone encounter in "
+        "<i>%s</i>." % (APP.practice_name, APP.emr)
+    )
+
+    telephone_encounter.set_template("{please_choose}")
+
+    return dict(documents={})
+
+
+def pcmh_1_c_1_2_3_4_5_6():
+    """Meaningful use"""
+    meaningful_use = MultiQNA(
+        1, float("inf"),
+        True,
+        'meaningful_use',
+        "Please upload a meaningful use report no more than 6 months old."
+    )
+
+    meaningful_use.set_template("{choose_file} {file_data}")
+
+    return dict(documents={})
 
 # (2)###################################################
 
@@ -359,7 +394,7 @@ def pcmh_2_b_3_4():
     )
 
     transition_of_care_plan_internal.add_warning(
-        getattr(transition_of_care_plan_internal.row, "please_choose", None) == "No",
+        getattr(transition_of_care_plan_internal.row, "please_choose", None) in NOT_YES,
         "Please schedule a training session with your trainer. Change your answer after training."
     )
 
@@ -374,7 +409,7 @@ def pcmh_2_b_3_4():
     intake_form.set_template("{please_choose}")
 
     intake_form.add_warning(
-        getattr(intake_form.row, "please_choose", None) == "No",
+        getattr(intake_form.row, "please_choose", None) in NOT_YES,
         "Please download this {intake_form_url} and customize it. Change your answer when you're done".format(
             intake_form_url=A("template", _href=URL("policy", "ADHD_screening_letter.doc"))
         )

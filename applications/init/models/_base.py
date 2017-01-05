@@ -7,49 +7,22 @@ import logging
 import os
 
 logger = logging.getLogger("web2py.app.pcmh")
-
-"""
-The numeric values of logging levels are given in the following table.
-These are primarily of interest if you want to define your own levels,
-and need them to have specific values relative to the predefined levels.
-If you define a level with the same numeric value,
-it overwrites the predefined value; the predefined name is lost.
-Level 	Numeric value
-CRITICAL 	50
-ERROR 	40
-WARNING 	30
-INFO 	20
-DEBUG 	10
-NOTSET 	0
-"""
-
-_list_of_states = ["NY", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
-                   "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
-                   "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
-                   "NM", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
-                   "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
-
-_days_of_the_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+# The numeric values of logging levels are given in the following table.
+# These are primarily of interest if you want to define your own levels,
+# and need them to have specific values relative to the predefined levels.
+# If you define a level with the same numeric value,
+# it overwrites the predefined value; the predefined name is lost.
+# Level 	Numeric value
+# CRITICAL 	50
+# ERROR 	40
+# WARNING 	30
+# INFO 	20
+# DEBUG 	10
+# NOTSET 	0
 
 
 def _without_keys(d, *keys):
     return dict(filter(lambda key_value: key_value[0] not in keys, d.items()))
-
-_day_of_week_field = lambda label=None, comment=None: \
-    Field("day_of_the_week",
-          requires=IS_IN_SET(_days_of_the_week, zero=None),
-          label=label,
-          comment=comment
-    )
-
-_days_of_week_field = lambda label=None, comment=None: \
-    Field("days_of_the_week", 'list:string',
-          requires=[IS_IN_SET(_days_of_the_week, zero=None, multiple=True),
-                    IS_NOT_EMPTY()],
-          widget=SQLFORM.widgets.multiple.widget,
-          label=label,
-          comment=comment
-    )
 
 _am_pm_time_validator = IS_TIME("Enter time as HH:MM [AM/PM]")
 

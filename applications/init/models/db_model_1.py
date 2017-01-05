@@ -56,3 +56,26 @@ db.define_table("no_show_emr",
                 _yes_no_field_default,
                 _note_field,
                 )
+
+# (1B)###################################################
+
+db.define_table("answering_service",
+                Field("application", 'reference application', readable=False, writable=False),
+                Field("please_choose", requires=IS_IN_SET(["Answering service", "Call forwarding to provider"], zero=None)),
+                _note_field,
+                )
+
+
+db.define_table("telephone_encounter",
+                Field("application", 'reference application', readable=False, writable=False),
+                _yes_no_field_default,
+                _note_field,
+                )
+
+
+# (1C)###################################################
+
+db.define_table('meaningful_use',
+                Field("application", 'reference application', readable=False, writable=False),
+                Field('choose_file', 'upload', uploadfield='file_data'),
+                Field('file_data', 'blob'))
