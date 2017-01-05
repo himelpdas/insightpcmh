@@ -378,7 +378,7 @@ def pcmh_1_c_1_2_3_4_5_6():
         "Please upload a meaningful use report no more than 6 months old."
     )
 
-    meaningful_use.set_template("{choose_file} {file_data}")
+    meaningful_use.set_template("{choose_file}")
 
     return dict(documents={})
 
@@ -499,3 +499,7 @@ def index():
     pcmh = int(request.args(0) or 0)
     url = request.nav[pcmh]['index']
     redirect(url)
+
+
+def download():
+    return response.download(request, db)

@@ -196,9 +196,21 @@ class MultiQNA(QNA):
                     return func(key)
                 return inner
 
+            def _print_file(func):
+                def inner(key):
+                    if key == "choose_file":
+                        return key, A(row["file_description"], _href=URL("init", request.controller, "download",
+                                                                         args=[row["choose_file"]],
+                                                                         vars=dict(app_id=APP_ID)
+                                                             ))
+                    return func(key)
+                return inner
+
+            @_print_file
             @_print_row_delete_icon
             @_print_auth_user
             def _print_comma_list(key):  #join with commas if object is list-like (python 2 only) http://stackoverflow.com/questions/1835018/python-check-if-an-object-is-a-list-or-tuple-but-not-string
+                #assert row.get(key), "Could not find '%s' in row" % key
                 if not hasattr(row[key], '__iter__'):
                     return key, row[key]  # needed to do **vars for string.format
                 else:
