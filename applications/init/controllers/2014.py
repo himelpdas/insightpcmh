@@ -467,12 +467,64 @@ def pcmh_3_b_4b_4c():
 # (2)###################################################
 
 def pcmh_2_a_1():
-    """holder"""
+    """Assigned PCP"""
+
+    providers = db((db.billing_provider.id > 0) & (db.application.id == APP_ID)).count()
+
+    assigned_pcp = MultiQNA(
+        1, 1, True,
+        'assigned_pcp',
+        "Is the patient's preferred clinician documented in his/her patient record?"
+    )
+
+    assigned_pcp.set_template("{please_choose}")
+
+    assigned_pcp.add_warning(
+        not providers,
+        "It is highly recommended that you enter <b>all</b> of your providers in "
+        "<a href='%s'>section 0</a> before answering this question." % URL("init", "2014", "pcmh_0_staff",
+                                                                           args=request.args, vars=request.get_vars)
+    )
+
+    assigned_pcp.add_warning(
+        getattr(assigned_pcp.row, "please_choose", None) in NOT_YES,
+        "In a multi-PCP setting, the practice should document the patient's PCP into the patient record in order to "
+        "receive credit for PCMH 2A."
+    )
+
+    see_assigned_pcp = MultiQNA(
+        1, 1, getattr(assigned_pcp.row, "please_choose", None) == "Yes",
+        'see_assigned_pcp',
+        "Do patients get to see their assigned PCP at least 75% of the time?"
+    )
+
+    see_assigned_pcp.add_warning(
+        getattr(see_assigned_pcp.row, "please_choose", None) in NOT_YES,
+        "In a multi-PCP setting, the pactice should implement a policy to allow patients to see their assigned PCP in "
+        "order to receive credit for PCMH 2A."
+    )
+
+    see_assigned_pcp.set_template("{please_choose}")
+
     return dict(documents={})
 
 # (3)###################################################
 def pcmh_3_a_1():
     """holder"""
+    return dict(documents={})
+
+def pcmh_3_b_1_2_3_4_5_6_7_8_9_10_11():
+    """Clinical Data (2014 Meaningful use)"""
+
+    meaningful_use = MultiQNA(
+        1, float("inf"),
+        True,
+        'meaningful_use_2014',
+        "Please upload a a meaningful use report using 2014."
+    )
+
+    meaningful_use.set_template("{choose_file}")
+
     return dict(documents={})
 
 # (4)###################################################
