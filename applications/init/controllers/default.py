@@ -149,7 +149,8 @@ def _assigned_column(row):
             $(document).ready(function(){{
             $("#{revoke_id}").val('').multiselect({{
                 nonSelectedText: '{c_acronym}',
-                maxHeight: 250,
+                maxHeight: 200,
+                dropUp: true,
                 onChange: function(option, checked, select) {{
                     window.location = '{url}';
                 }},
@@ -288,7 +289,8 @@ def _assigned_column(row):
                     urls_{row_id} = {urls};
                     $("#assign_participant_{row_id}").val('').multiselect({{
                         nonSelectedText: '<span class="glyphicon glyphicon-plus"></span>',
-                        maxHeight: 250,
+                        maxHeight: 200,
+                        dropUp: true,
                         onChange: function(option, checked, select) {{
                             window.location = urls_{row_id}[$(option).val()];
                         }},
