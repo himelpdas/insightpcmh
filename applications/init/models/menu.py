@@ -26,11 +26,18 @@ if not auth.id_group("app_managers"):
 
 if auth.is_logged_in():
     """Himel's role in Insight"""
-    if auth.user.email in MASTER_EMAILS:  # "jason@insightmanagement.org"]:
+    self_group = "user_%s" % auth.user.id
+    if not auth.id_group(self_group):
+        auth.add_group(self_group, description="Group for user %s. Created in admin panel" % self_group)
+    if not auth.has_membership(self_group):
+        auth.add_membership(role=self_group, user_id=auth.user.id)
+    if auth.user.email in MASTER_EMAILS:
         if not auth.user.is_insight:
             db(db.auth_user.id == auth.user.id).select().last().update_record(is_insight=True)
-        for _role in {"masters", "admins", "trainers", "app_managers"}.symmetric_difference(auth.user_groups.values()):
+        for _role in {"masters", "admins", "trainers", "app_managers"}: #.symmetric_difference(auth.user_groups.values()):
             auth.add_membership(role=_role, user_id=auth.user.id)
+        for _role in {"observers", "contributors"}:
+            auth.del_membership(role=_role, user_id=auth.user.id)
 
 APP_ID = request.get_vars["app_id"]
 APP = None
