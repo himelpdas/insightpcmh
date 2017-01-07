@@ -37,7 +37,7 @@ $(document).ajaxStop(function() {  {{#http://bit.ly/2itnmzG - call when all outs
     $('[title]').tooltip({html: true});
     $('.multiselect.dropdown-toggle').attr({'data-original-title': 'edit'});
     $(".web2py_htmltable").animate({'min-height': "33em", 'background-color': "#FBF9FF"});  {{# http://bit.ly/2ithnuW}}
-    $("[multiple='multiple'][class!='autocomplete']").multiselect("refresh");  {{# select all multi widgets, but not with those hidden autocomplete dropdowns (also has multiple=multiple attr))}}
+    $("[multiple='multiple'][class!='autocomplete']").multiselect({maxHeight: 400});  {{# select all multi widgets, but not with those hidden autocomplete dropdowns (also has multiple=multiple attr))}}
 
 {{#$( "input[name^='_autocomplete_']" ).addClass('form-control');}}  {{#starts with selector https://api.jquery.com/attribute-starts-with-selector/}}
     $("input[autocomplete='off']").each(function (i, obj) {
