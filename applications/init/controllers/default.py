@@ -150,7 +150,6 @@ def _assigned_column(row):
             $("#{revoke_id}").val('').multiselect({{
                 nonSelectedText: '{c_acronym}',
                 maxHeight: 200,
-                dropUp: true,
                 onChange: function(option, checked, select) {{
                     window.location = '{url}';
                 }},
@@ -290,7 +289,6 @@ def _assigned_column(row):
                     $("#assign_participant_{row_id}").val('').multiselect({{
                         nonSelectedText: '<span class="glyphicon glyphicon-plus"></span>',
                         maxHeight: 200,
-                        dropUp: true,
                         onChange: function(option, checked, select) {{
                             window.location = urls_{row_id}[$(option).val()];
                         }},
