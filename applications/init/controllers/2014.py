@@ -577,6 +577,21 @@ def pcmh_5_a_1():
     """holder"""
     return dict(documents={})
 
+def pcmh_5_b_3():
+    """Referral Tracking"""
+
+    referral_blurb = MultiQNA(
+        1, 1, True,
+        'referral_blurb',
+        "NCQA expects that for <u>every referral sent</u>, an informal time-frame should be given to the specialist. "
+        "The practice must add or template the following text to all outgoing referrals: <pre><i>In referring this "
+        "patient to your care, Dr. Gonzalez expects in return a full report regarding our patient’s visit within 7 days "
+        "of the appointment.<br>Additionally, please send any documentation regarding your diagnosis and any test, labs or "
+        "imaging you deem appropriate.</i></pre> Are you doing this already?"
+    )
+
+    return dict(documents={})
+
 # (6)###################################################
 def pcmh_6_a_1():
     """holder"""
