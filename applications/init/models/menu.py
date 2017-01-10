@@ -36,7 +36,7 @@ if auth.is_logged_in():
             db(db.auth_user.id == auth.user.id).select().last().update_record(is_insight=True)
         for _role in {"masters", "admins", "trainers", "app_managers"}: #.symmetric_difference(auth.user_groups.values()):
             auth.add_membership(role=_role, user_id=auth.user.id)
-        for _role in {"observers", "contributors"}:
+        for _role in {"observers"}:
             auth.del_membership(role=_role, user_id=auth.user.id)
 
 APP_ID = request.get_vars["app_id"]

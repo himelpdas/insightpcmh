@@ -20,7 +20,7 @@ db.application.modified_on.represent = lambda v, r: XML('<span title="%s">%s</sp
     getattr(r, 'modified_on', None)), getattr(r, 'modified_on', None)))
 
 _role_to_permission = dict(app_managers="manage", contributors="contribute", admins="administrate", trainers="train",
-                           masters=None)
+                           masters=None)  # todo observers=observe
 
 
 def _disable_rbac_fields(*args):
@@ -82,8 +82,8 @@ def assign_user():
     del request.get_vars["_signature"]
 
     auth.add_permission(auth.id_group("user_%s" % e), p, "application", r)  # 0 means user_1
-    if not auth.has_membership(role="contributors", user_id=e):
-        auth.add_membership(role="contributors", user_id=e)
+    #if not auth.has_membership(role="contributors", user_id=e):
+    #    auth.add_membership(role="contributors", user_id=e)
 
     session.flash = "Assigned user to application ID%s" % r
     redirect(URL("dash.html", args=request.args, vars=request.get_vars))
@@ -129,18 +129,20 @@ def _assigned_column(row):
                                             c_title=base['c_name']+" (Trainer)",
                                             c_title_html=base['c_name_html'] +
                                             " <span class='text-danger'>(Trainer)</span>", **base))
-        if auth.has_membership(user_id=participator.auth_user.id, role="app_managers") and \
+        elif auth.has_membership(user_id=participator.auth_user.id, role="app_managers") and \
                         participator.auth_permission.name == "manage":
             participator_widgets.append(dict(color="warning", title="app_manager", permission="manage",
                                             c_title=base['c_name']+" (App Manager)",
                                             c_title_html=base['c_name_html'] +
                                             " <span class='text-warning'>(App Manager)</span>", **base))  # it is possible to be two roles
-        if auth.has_membership(user_id=participator.auth_user.id, role="contributors") and \
-                        participator.auth_permission.name == "contribute":
-            participator_widgets.append(dict(color="success", title="contributor", permission="contribute",
-                                            c_title=base['c_name']+" (Contributor)",
-                                            c_title_html=base['c_name_html'] +
-                                            " <span class='text-success'>(Contributor)</span>", **base))
+        elif participator.auth_permission.name == "contribute":
+            is_contrib = auth.has_membership(user_id=participator.auth_user.id, role="contributors")
+            fake_title = "Contributor" if is_contrib else "Visitor"
+            fake_color = "success" if is_contrib else "primary"
+            participator_widgets.append(dict(color=fake_color, title="contributor",
+                                             permission="contribute", c_title=base['c_name'] + " (%s)" % fake_title,
+                                             c_title_html=base['c_name_html'] +
+                                             " <span class='text-%s'>(%s)</span>" % (fake_color, fake_title), **base))
 
     for participator_widget in participator_widgets:
         revoke_id = "revoke_participant_%s_%s_%s" % (participator_widget["title"], participator_widget["c_id"], row.id)
@@ -149,14 +151,13 @@ def _assigned_column(row):
             $(document).ready(function(){{
             $("#{revoke_id}").val('').multiselect({{
                 nonSelectedText: '{c_acronym}',
-                maxHeight: 200,
                 onChange: function(option, checked, select) {{
                     window.location = '{url}';
                 }},
                 buttonClass: 'btn btn-sm btn-{color}', disableIfEmpty: true, enableHTML: true}});
             }})
-        </script>"""
-        widget = widget_a = XML("<button class='btn btn-sm btn-{color}' "
+        </script>"""  # option
+        widget_a = XML("<button class='btn btn-sm btn-{color}' "
                                 "title=\"{c_name_html}\">{c_acronym}</button>".format(
                 color=participator_widget["color"],
                 c_acronym=participator_widget["c_acronym"],
@@ -181,15 +182,10 @@ def _assigned_column(row):
                           _class="assigned", )
         ))
 
-        if auth.has_membership("contributor"):
+        if IS_ADMIN or IS_MASTER:
+            widget = widget_b  # only admins can revoke
+        else:
             widget = widget_a
-        elif auth.has_membership("admins") or auth.has_membership("masters"):
-            widget = widget_b
-        elif auth.has_membership("trainers"):
-            if participator_widget["title"] == "contributor":
-                widget = widget_b
-            else:
-                widget = widget_a
 
         #assert(widget, "expected a widget!")
 
@@ -197,33 +193,40 @@ def _assigned_column(row):
             widget=widget
         ))
 
-    employees = db((db.auth_group.id == db.auth_membership.group_id) &
-                   (db.auth_group.role.belongs("trainers", "app_managers")) &
-                   (db.auth_user.id == db.auth_membership.user_id)).select()
+    colleagues = db((db.auth_group.id == db.auth_membership.group_id) &
+                    (db.auth_group.role.belongs("trainers", "app_managers", "contributors")) &
+                    (db.auth_user.id == db.auth_membership.user_id)).select(orderby=db.auth_user.first_name|db.auth_group.role)
 
     employee_options = []
+    contributor_options = []
     assign_urls = {}
 
     title = e_title = e_title_html = permission = None
-    for employee in employees:
-        e_id = employee.auth_user.id
-        e_fn = employee.auth_user.first_name.capitalize()
-        e_ln = employee.auth_user.last_name.capitalize()
-        e_email = employee.auth_user.email
+    for colleague in colleagues:
+        e_id = colleague.auth_user.id
+        e_fn = colleague.auth_user.first_name.capitalize()
+        e_ln = colleague.auth_user.last_name.capitalize()
+        e_email = colleague.auth_user.email
         e_name = "%s %s (%s)" % (e_fn, e_ln, e_id)
         e_name_html = "%s %s <span class='text-muted'>(%s)</span>" % (e_fn, e_ln, e_id)
 
-        if employee.auth_group.role == "trainers":
+        if colleague.auth_group.role == "trainers":
             title = "trainer"
             permission = "train"
             e_title = e_name + " (trainer)"
             e_title_html = e_name_html + " <span class='text-danger'>(Trainer)</span>"        
         
-        if employee.auth_group.role == "app_managers":
+        if colleague.auth_group.role == "app_managers":
             title = "app_manager"
             permission = "manage"
             e_title = e_name + " (App Mananger)"
             e_title_html = e_name_html + " <span class='text-warning'>(App Manager)</span>"
+            
+        if colleague.auth_group.role == "contributors":
+            title = "contributor"
+            permission = "contribute"
+            e_title = e_name + " (Contributor)"
+            e_title_html = e_name_html + " <span class='text-warning'>(Contributor)</span>"
 
         assign_id = "%s_%s" % (title, e_id)
         assign_urls[assign_id] = URL("assign_user.html",
@@ -237,13 +240,16 @@ def _assigned_column(row):
                                      )
         # if not already in revoke buttons
         if not "%s_%s" % (title, e_id) in map(lambda w: "%s_%s" % (w["title"], w["c_id"]), participator_widgets):
-            employee_options.append(OPTION(e_title_html, _value=assign_id))
+            _bucket = employee_options
+            if colleague.auth_group.role == "contributors":
+                _bucket = contributor_options
+            _bucket.append(OPTION(e_title_html, _value=assign_id))
 
-    employees_and_participants = set(map(lambda e: e.auth_user.id, employees) + map(lambda e: e.auth_user.id, 
+    colleagues_and_participants = set(map(lambda e: e.auth_user.id, colleagues) + map(lambda e: e.auth_user.id, 
                                                                                     participators))
     # a_week_ago = request.now - datetime.timedelta(days=7)
-    recent = db(db.auth_user.created_on > 0).select(orderby=~db.auth_user.modified_on, limitby=(0, 5))
-    recent.exclude(lambda r: r.id in employees_and_participants or r.is_insight)
+    recent = db(db.auth_user.created_on > 0).select(orderby=~db.auth_user.modified_on, limitby=(0, 50))
+    recent.exclude(lambda r: r.id in colleagues_and_participants or r.is_insight)
     recent_options = []
     
     for new in recent:
@@ -266,19 +272,19 @@ def _assigned_column(row):
         recent_options.append(OPTION(n_name_html, _value=assign_id))
 
     employee_optgroup = OPTGROUP(*employee_options, _label="Assign an employee:")
+    contributor_optgroup = OPTGROUP(*contributor_options, _label="Assign a contributor:")
     recent_optgroup = OPTGROUP(*recent_options, _label="Assign a recent registrant:")
 
     assign_optgroups = []
-    enable_participant_assign_select = True
+    enable_participant_assign_select = False
     if IS_ADMIN or IS_MASTER:
         if recent_options:
             assign_optgroups.append(recent_optgroup)
+        if contributor_options:  # no need to show opt-group if there are no options available
+            assign_optgroups.append(contributor_optgroup)
         if employee_options:
             assign_optgroups.append(employee_optgroup)
-    elif IS_TRAINER or IS_MANAGER:  # let trainers assign a recent user
-        assign_optgroups.append(recent_optgroup)
-    else:
-        enable_participant_assign_select = False
+        enable_participant_assign_select = True
 
     all_widgets = map(lambda e: e['widget'], participator_widgets)
 
@@ -289,12 +295,14 @@ def _assigned_column(row):
                     $("#assign_participant_{row_id}").val('').multiselect({{
                         nonSelectedText: '<span class="glyphicon glyphicon-plus"></span>',
                         maxHeight: 200,
+                        enableFiltering: true,
+                        enableCaseInsensitiveFiltering: true,
                         onChange: function(option, checked, select) {{
                             window.location = urls_{row_id}[$(option).val()];
                         }},
-                        buttonClass: 'btn btn-sm', disableIfEmpty: true, enableHTML: true}});
+                        buttonClass: 'btn btn-sm btn-info', disableIfEmpty: true, enableHTML: true}});
                     }})
-                </script>""".format(  #http://bit.ly/2g9PyCl select remove default choice, then style with multiselect
+                </script>""".format(  # option #http://bit.ly/2g9PyCl select remove default choice, then style with multiselect
             select=SELECT(
                 *reversed(assign_optgroups),
                 _id="assign_participant_%s" % row.id,
@@ -361,6 +369,8 @@ def load_apps_grid():
                             create=IS_ADMIN or IS_MASTER or IS_CONTRIB,
                             formname="load_apps_grid",
                             links=links,
+                            deletable=IS_ADMIN or IS_MASTER or IS_CONTRIB,
+                            editable=IS_ADMIN or IS_MASTER or IS_CONTRIB,
                             # groupby=db.application.id,  # groupby by itself behaves like distinct http://bit.ly/2h0Ou3Z
                             field_id=db.application.id,
                             links_placement='left')
@@ -420,12 +430,14 @@ def _employee_group_links(row):
         color = each[1]
         action = "-" if auth.has_membership(role=group, user_id=row.id) else "+"
         sign = _m if action == "-" else _p
-        btn_color = "btn-default"
+        btn_color = "btn-secondary"
         confirm_msg = ""
         if action != "+":
             confirm_msg = " All assignments for this user will be lost!"
             btn_color = "btn-%s" % color
-        label = XML("%s %s" % (sign, group_name[:-1]))  # take out the s at the end
+        label = XML("%s %s" % (sign,
+                               group_name[:-1] if not group == "contributors" else "Contributor (Write Access)")
+                    )  # take out the s at the end
         all_links.append(A(label, _onclick="if(!confirm('Are you sure?%s')){event.preventDefault()}" % confirm_msg,  # http://bit.ly/2hM7Cbk
                            _class="btn btn-sm %s" % btn_color,
                            _href=URL("add_remove_user.html",

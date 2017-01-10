@@ -1,11 +1,16 @@
 db.define_table("application",
     Field("practice_name", requires=IS_NOT_EMPTY()),
     Field("owner_id", db.auth_user, comment="Enter primary contact's email address", label="Primary Contact", required=True, writable=False, readable=False),
+    # Field("status", requires=IS_IN_SET(["1st Training Complete", "2nd Training Complete", "3rd Training Complete",
+    #                                     "4th Training Complete", "Ready for Application Manager",
+    #                                     "Working on Application", "Awaiting Documents from Practice"
+    #                                     "Submitted", "OIF", "Add On",
+    #                                     "Certified"], zero=None)),
     Field('pps', label="PPS"),
     Field("application_type", requires=IS_IN_SET(["Initial", "Renewal"])),
     Field("application_size", requires=IS_IN_SET(["Single", "Corporate"]),
           comment=XML('Choose "Corporate" if there are <b>3 or more</b> sites that can be represented by <b>one</b> '
-                      'person representative (i.e. an owner or CEO). '
+                      'authorized representative (i.e. an owner or CEO). '
                       'Otherwise the application should be treated as "Single."')),
     Field('authorized_representative', label=SPAN("Authorized Representative (Email)",
                                                   _title="Applies to corporate tool only"),
