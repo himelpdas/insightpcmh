@@ -1,5 +1,7 @@
 db.define_table("application",
     Field("practice_name", requires=IS_NOT_EMPTY()),
+    Field("progress", default="0.0%", writable=False),
+    Field("status", default="New", requires=IS_IN_SET(["New", "Training", "Working", "Certified"], zero=None)),
     Field("owner_id", db.auth_user, comment="Enter primary contact's email address", label="Primary Contact", required=True, writable=False, readable=False),
     # Field("status", requires=IS_IN_SET(["1st Training Complete", "2nd Training Complete", "3rd Training Complete",
     #                                     "4th Training Complete", "Ready for Application Manager",

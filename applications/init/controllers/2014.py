@@ -25,18 +25,25 @@ class Navigator:
     titles = ["Practice", "Access", "Team", "Population", "Care", "Coordination", "Performance"]
 
     def __init__(self):
+        self.numerator = 0.0
         self.all_questions = List()
         # warning!! - function names MUST be sorted for init_list to work
         self.all_funcs = sorted(filter(lambda g: "pcmh_" == g[:5], globals()), key=lambda e: e.split("_", 2)[1])
         self.init_list()
+        self.denominator = float(len(self.all_funcs))
+        logger.info("Progress - num: %s den: %s" % (self.numerator, self.denominator))
         self.init_menu()
+        self.init_title()
 
+        db(db.application.id == APP_ID).update(progress='{:.1%}'.format(self.numerator/self.denominator))
+
+    def init_title(self):
         if self.get_pcmh_from_request():
             pcmh = self.get_pcmh_from_request()
-            description = self[pcmh]['elements'][self.get_element_from_request()]["description"]
-            response.title = "PCMH ({pcmh}) {title} - {description}".format(pcmh=pcmh,
+            label = self[pcmh]['elements'][self.get_element_from_request()]["label"]
+            response.title = "PCMH ({pcmh}) {title} - {label}".format(pcmh=pcmh,
                                                                             title=self.get_title_from_pcmh(pcmh),
-                                                                            description=description)
+                                                                            label=label)
 
     def __getitem__(self, item):
         return self.all_questions[int(item)]
@@ -65,10 +72,28 @@ class Navigator:
         print self.all_questions
         for each in self.all_questions:
             response.menu.append(
-                (T('({pcmh}) {title}'.format(pcmh=each.pcmh, title=each.title)),
-                 self.request_has_pcmh(each.pcmh),  # get element 1 without error
-                 each.index, [])
+                (
+                    SPAN(SPAN(_class="glyphicon glyphicon-%s text-%s" %
+                                     ("ok" if all(each.booleans) else "remove",
+                                      "success" if all(each.booleans) else "danger")
+                              ),
+                         " (%s) " % each.pcmh, each.title),
+                    self.request_has_pcmh(each.pcmh),  # get element 1 without error
+                    each.index, []
+                )
             )
+
+    def function_is_complete(self, func):
+        func()
+        result = True
+        for q in QNA.instances:
+            if q.has_warnings() or q.needs_answer():
+                result = False
+                break
+        if result:
+            self.numerator += 1.0
+        QNA.instances = []
+        return result
 
     def init_list(self):
         """dynamically extracts the info from the function itself, rather than
@@ -81,19 +106,31 @@ class Navigator:
                 pcmh = int(func_name_split[1])
                 element = func_name_split[2]
 
-                label = element.capitalize().replace("_", " → ", 1).replace("_", ", ")
                 assert func.__doc__, "missing doc strings for function %s" % func_name
-                description = func.__doc__ if pcmh == 0 else "Element " + label + ": " + func.__doc__
+
+                label = element.capitalize().replace("_", " → ", 1).replace("_", ", ")
+
+                is_complete = self.function_is_complete(func)
+                icon = SPAN(_class="glyphicon glyphicon-%s text-%s" %
+                                   ("ok" if is_complete else "remove",
+                                    "success" if is_complete else "danger")
+                            )
+
+                description = SPAN(icon, " ", func.__doc__) if pcmh == 0 else \
+                    SPAN(icon, " Element ", label, ": ", func.__doc__)
+
                 pcmh_dict = self.all_questions(pcmh)
 
                 if not pcmh_dict:
                     pcmh_dict = Storage(pcmh=pcmh, done=False, index=URL('2014', func_name, vars=request.get_vars))
                     pcmh_dict["title"] = self.titles[pcmh]
-                    pcmh_dict["elements"] = OrderedDict()
+                    pcmh_dict["elements"] = {}
+                    pcmh_dict["booleans"] = []
                     self.all_questions.append(pcmh_dict)
 
-                element_dict = {element: Storage(description=description, element=element, func=func, done=False,
+                element_dict = {element: Storage(description=description, label=label, element=element, func=func, done=False,
                                               url=URL('2014', func_name, vars=request.get_vars))}
+                pcmh_dict["booleans"].append(is_complete)
                 pcmh_dict["elements"].update(element_dict)
 
 
@@ -102,15 +139,18 @@ class Navigator:
 
 def pcmh_0_credit_card():
     """Credit Card (To Purchase ISS Tool)"""
-    cc = CryptQNA(
-        1, 1,
-        True,
-        'credit_card',
-        "Please enter your credit card in order to purchase the ISS survey tool. The NCQA store accepts American "
-        "Express, Discover, Master Card and Visa."
-    )
-    cc.set_template(
-        "{gpg_encrypted}")
+    if (APP.application_size == "Single") or APP.largest_practice:
+        cc = CryptQNA(
+            1, 1,
+            True,
+            'credit_card',
+            "Please enter your credit card in order to purchase the ISS survey tool. The NCQA store accepts American "
+            "Express, Discover, Master Card and Visa."
+        )
+        cc.set_template(
+            "{gpg_encrypted}")
+    else:
+        response.flash="Enter credit card in the largest practice's portal!"
     return dict(documents={})
 
 

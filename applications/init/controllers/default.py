@@ -333,13 +333,12 @@ def load_apps_grid():
                   body=lambda row:
                   A(SPAN(_class="glyphicon glyphicon-play"),
                     _class="btn btn-sm btn-default",
-                    _title="Start",
+                    _title="Start Portal",
                     _href=URL("2014", 'index.html', args=[0],  # todo- set 2014/2017 standards here table may or may not be joined
                               vars=dict(app_id=getattr(row, "application", row).id))))]
 
-    onvalidation = None
-    if not IS_TEAM or IS_CONTRIB:  # add contributor
-        onvalidation = _app_onvalidation  # indicates new app owner
+    if not IS_STAFF:  # add contributor
+        db.application.status.writable = False
     if IS_MASTER or IS_ADMIN:
         db.application.owner_id.writable = True
     if IS_MASTER:  # remove not after testing non-master mode
@@ -364,7 +363,7 @@ def load_apps_grid():
     ))
 
     app_grid = SQLFORM.grid(my_apps_grid,
-                            onvalidation=onvalidation,
+                            onvalidation=_app_onvalidation,
                             oncreate=_app_oncreate,
                             create=IS_ADMIN or IS_MASTER or IS_CONTRIB,
                             formname="load_apps_grid",
@@ -534,7 +533,14 @@ def user():
 #               not auth.has_membership(user_id=getattr(auth.user, "id", None), role="admins")
 #               , requires_login=True)
 def _app_onvalidation(form):
-    form.vars.owner_id = auth.user.id
+    if not IS_STAFF:
+        form.vars.owner_id = auth.user.id
+    if form.vars.application_size == "Corporate":
+        corporate_apps = db(db.application.authorized_representative == form.vars.authorized_representative).select()
+        if form.vars.largest_practice:
+            for app in corporate_apps:
+                if app.largest_practice:
+                    form.errors.largest_practice = "Largest practice under the authorized representative already exists!"
 
 
 def _user_onupdate(form):  # todo revoke all permissions
@@ -564,10 +570,10 @@ def _user_oncreate(form):
 
 def _app_oncreate(form):
     app_id = form.vars.id
-    auth.add_permission(0, "contribute", 'application', app_id)  # 0 means user_1
 
-    if not IS_ADMIN:
-        auth.add_membership(role="contributor", user_id=auth.user_id)
+    if not IS_STAFF:
+        auth.add_permission(0, "contribute", 'application', app_id)  # 0 means user_1
+        #auth.add_membership(role="contributor", user_id=auth.user_id)
 
     admins = db((db.auth_group.id == db.auth_membership.group_id) &
                 (db.auth_group.role == "admins") &
