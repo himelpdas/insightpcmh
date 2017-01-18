@@ -23,6 +23,10 @@ _role_to_permission = dict(app_managers="manage", contributors="contribute", adm
                            masters=None)  # todo observers=observe
 
 
+def test_email():
+    response.view = os.path.join("templates", "email.html")
+    return dict(summary="test", first_name="test", message="test", action_url="test", call_to_action="test")
+
 def _disable_rbac_fields(*args):
     def _decorator(func):
         """when displaying a grid with something joined, sometimes the auth tables joined are not necessary"""

@@ -202,7 +202,7 @@ class MultiQNA(QNA):
                         return key, A(row["file_description"], _href=URL("init", request.controller, "download",
                                                                          args=[row["choose_file"]],
                                                                          vars=dict(app_id=APP_ID)
-                                                             ))
+                                                                         ))
                     return func(key)
                 return inner
 
@@ -214,7 +214,7 @@ class MultiQNA(QNA):
                 if not hasattr(row[key], '__iter__'):
                     return key, row[key]  # needed to do **vars for string.format
                 else:
-                    return key, ", ".join(row[key])
+                    return key, ", ".join(map(lambda e: str(e), row[key]))  # the map is needed to convert int/float to str
 
             logger.warning("can get value error invalid conversion specification due to None type datetime")
             # x=map(_print_comma_list, keys)
@@ -298,3 +298,18 @@ class CryptQNA(MultiQNA):
                         "&emsp;{delete_table_row}" \
                         "</span>" \
                         "%s</pre>" % template
+
+
+def mailer(user_ids, subject, message, summary, action_url, call_to_action):
+    users = db(db.auth_user.id.belongs(user_ids)).select()
+    assert users, "Expected users before email!"
+    for user in users:
+        first_name = user.first_name
+        email = user.email
+        rendered = response.render(os.path.join("templates", "email.html"),
+                                   dict(summary=summary, first_name=first_name, message=message, action_url=action_url,
+                                        call_to_action=call_to_action)
+                                   )
+        mail.send(to=[email],
+                  subject=subject,
+                  message=rendered)

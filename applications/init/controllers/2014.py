@@ -17,9 +17,10 @@ account_created.add_warning(getattr(account_created.row, "please_choose", None) 
                                 "come back and change your answer.")))
 """
 
-from collections import OrderedDict
-
 response.view = os.path.join("templates", "survey_2014.html")  # http://stackoverflow.com/questions/8750723/is-it-possible-to-change-a-web2py-view-on-the-fly
+
+IS_SINGLE_OR_LARGEST_CORPORATE = (APP.application_size == "Single") or APP.largest_practice
+
 
 class Navigator:
     titles = ["Practice", "Access", "Team", "Population", "Care", "Coordination", "Performance"]
@@ -138,8 +139,8 @@ class Navigator:
 
 
 def pcmh_0_credit_card():
-    """Credit Card (To Purchase ISS Tool)"""
-    if (APP.application_size == "Single") or APP.largest_practice:
+    """Credit Card (To Purchase NCQA Tools)"""
+    if IS_SINGLE_OR_LARGEST_CORPORATE:
         cc = CryptQNA(
             1, 1,
             True,
@@ -245,10 +246,18 @@ def pcmh_0_emr():
 
 def pcmh_1_a_2():
     """After hours"""
+
+    extra = "<br><br><small> The following examples are considered extended buisiness hours: <ul>" \
+            "<li>Monday - Thursday 9AM - 5PM, Friday 10AM - 6PM (shift in hours)</li>" \
+            "<li>Monday - Thursday 9AM - 5PM, Friday 9AM - 6PM (extra hours)</li>" \
+            "<li>Monday - Friday 9AM - 5PM, Saturday 9AM - 3PM (weekend hours)</li>" \
+            "</ul></small>"
+
     after_hours = MultiQNA(
         1, 1, True,
         'after_hours',
-        "Does the practice have any extended business hours, <u>at least</u> once a week?"
+        "Does the practice have any extended office hours (hours when patients are seen), <u>at least</u> once a week?"+
+        extra
     )
 
     after_hours.set_template("{please_choose}")
@@ -256,8 +265,8 @@ def pcmh_1_a_2():
     after_hours.add_warning(
         getattr(after_hours.row, "please_choose", None) in NOT_YES,
         "In order to get credit for PCMH 1A2, the practice must see patients during extended buisiness hours at least "
-        "once a week. Please note, that this does not include the provider \"running late,\" this must be implemented as "
-        "a policy of the practice."
+        "once a week. Please note, that this does not include the provider \"staying late\" on some days; this must be "
+        "implemented as a policy of the practice."
     )
 
     after_hour_blocks = MultiQNA(
@@ -307,7 +316,7 @@ def pcmh_1_a_1():
 
     walkin = MultiQNA(
         1, 1,
-        True,
+        getattr(same_day_appointments.row, "please_choose", None) == "Yes",
         'walkin',
         "Aside from same-day appointments, are you mainly a walk-in clinic?"
     )
@@ -363,7 +372,8 @@ def pcmh_1_a_5():
         1, 1,
         getattr(no_shows_training.row, "please_choose", None) == "Yes",
         'no_show_emr',
-        "Is the no-show documented in the EMR?"
+        "When a patient does not show up for his/her appointment, do you mark that appointment as a missed appointment "
+        "or no-show?"
     )
 
     no_show_emr.set_template("{please_choose}")
@@ -389,19 +399,19 @@ def pcmh_1_b_1_2_3_4():
         'telephone_encounter',
         "With regard to incoming telephone encounters seeking medical advice "
         "(<b>excluding</b> refill requests), does <i>%s</i> record <b>all</b> of the following "
-        "into the <b>patient record</b> during <b>and</b> after business hours?<ol>"
+        "into the <b>patient record</b> during <b>and</b> after business hours?<small><ol>"
         "<li>A summarized transcript of the <b>advice</b> given to the caller.</li>"
         "<li>The time and date when the call was answered by the practice.</li>"
         "<li>The time and date when the caller received a response.</li>"
-        "</ol>" % APP.practice_name
+        "</ol></small>" % APP.practice_name
     )
 
     telephone_encounter.add_warning(
         getattr(telephone_encounter.row, "please_choose", None) in NOT_YES,
         "In order to receive credit for the entire PCMH 1B section, <i>%s</i> must record all incoming telephone "
         "encounters (during <b>and</b> after business hours) regarding clinical advice (<b>excluding</b> refill "
-        "requests) into the patient record. See <a href='#'>this example</a> of a good telephone encounter in "
-        "<i>%s</i>." % (APP.practice_name, APP.emr)
+        "requests) into the patient record. See <a href=#>these examples</a> of  good telephone encounters."
+        % APP.practice_name
     )
 
     telephone_encounter.set_template("{please_choose}")
@@ -500,9 +510,6 @@ def pcmh_0_ncqa():
 
     return dict(documents={})
 
-def pcmh_3_b_4b_4c():
-    """Record Review Workbook"""
-    return dict(documents={})
 
 # (2)###################################################
 
@@ -514,7 +521,7 @@ def pcmh_2_a_1():
     assigned_pcp = MultiQNA(
         1, 1, True,
         'assigned_pcp',
-        "Is the patient's preferred clinician documented in his/her patient record?"
+        "Is the patient's preferred clinician documented in his/her patient record? <a href=#>See example.</a>"
     )
 
     assigned_pcp.set_template("{please_choose}")
@@ -549,23 +556,57 @@ def pcmh_2_a_1():
     return dict(documents={})
 
 # (3)###################################################
-def pcmh_3_a_1():
-    """holder"""
+def pcmh_3_b_4b_4c():
+    """Record Review Workbook"""
+    return dict(documents={})
+
+def pcmh_3_a_1_2_3_4_5_6_7_9_10_11_12_13_14():
+    """Patient Demographics"""
+
+    patient_demographics_choices = ['Date of birth', 'Sex', 'Race', 'Ethnicity', 'Preferred language', 'Telephone numbers', 'E-mail address', 'Occupation', 'Dates of previous clinical visits', 'Legal guardian/health care proxy', 'Primary caregiver', 'Presence of advance directives', 'Health insurance information', 'Name and contact information of other health care professionals involved in patient\'s care.']
+    minimum = 10
+
+    if APP.practice_specialty == "Pediatrics":
+        patient_demographics_choices = filter(lambda t: t[0] not in [7, 9], patient_demographics_choices)
+        minimum = 8
+
+    db.patient_demographics.please_choose.requires = IS_IN_SET(patient_demographics_choices, multiple=True)
+
+    patient_demographics = MultiQNA(
+        1, 1, True,
+        'patient_demographics',
+        ("Recording patient demographics <b>thoroughly</b> is considered good PCMH behavior. Which of the following "
+         "information does <i>%s</i> record <b>at least 80%%</b> of the time with new patients?") % APP.practice_name
+    )
+
+    choices = getattr(patient_demographics.row, "please_choose", None)
+
+    if choices:
+        patient_demographics.add_warning(
+            len(choices) < minimum,
+            "<i>%s</i> needs to be able to meet <b>at least %s</b> of these choices (%s given): %s Please consider filling out "
+            "more of these fields for your new and recent patients (need minimum 3 months of data). Then come back "
+            "and change your answer." %
+            (APP.practice_name, minimum, len(choices), TAG.SMALL(OL(*map(lambda e: LI(e), patient_demographics_choices))))
+        )
+
+    patient_demographics.set_template("{please_choose}")
     return dict(documents={})
 
 def pcmh_3_b_1_2_3_4_5_6_7_8_9_10_11():
     """Clinical Data (2014 Meaningful use)"""
+    documents = {}
 
     meaningful_use = MultiQNA(
         1, float("inf"),
         True,
         'meaningful_use_2014',
-        "Please upload a a meaningful use report using 2014."
+        "If available in your EMR, please upload the Stage 1 Meaningful Use report using the 2014 standards."
     )
 
     meaningful_use.set_template("{choose_file}")
 
-    return dict(documents={})
+    return dict(documents=documents)
 
 # (4)###################################################
 def pcmh_4_a_1():
@@ -584,11 +625,21 @@ def pcmh_5_b_3():
         1, 1, True,
         'referral_blurb',
         "NCQA expects that for <u>every referral sent</u>, an informal time-frame should be given to the specialist. "
-        "The practice must add or template the following text to all outgoing referrals: <pre><i>In referring this "
-        "patient to your care, Dr. Gonzalez expects in return a full report regarding our patient’s visit within 7 days "
-        "of the appointment.<br>Additionally, please send any documentation regarding your diagnosis and any test, labs or "
-        "imaging you deem appropriate.</i></pre> Are you doing this already?"
+        "The practice must include or template the following text to all outgoing referrals (customize as you wish): "
+        "<p><small><i>In referring this patient to your care, Dr. Gonzalez expects in return a full report regarding our patient’s visit within 7 days "
+        "of the appointment. Additionally, please send any documentation regarding your diagnosis and any test, labs or "
+        "imaging you deem appropriate.</i></small></p> Are you doing this already?"
     )
+
+    referral_tracking_generic = MultiQNA(
+        1, 1, True,
+        'referral_tracking_generic',
+        "<i>%s</i> needs to track referrals until the consultant or specialist’s report is available, "
+        "while flagging and following up on overdue reports. For please download <a href='%s'>this chart</a> "
+        "and fill out a minimum of 5 days worth of referrals. When you are done, upload the document below." % (APP.practice_name, URL('init', 'word', 'referral_tracking_chart.doc', vars=request.get_vars))
+    )
+
+    referral_tracking_generic.set_template("{choose_file}")
 
     return dict(documents={})
 
@@ -598,6 +649,9 @@ def pcmh_6_a_1():
     return dict(documents={})
 
 # (end)###################################################
+
+# if True:
+#      del pcmh_6_a_1
 
 request.nav = Navigator()
 

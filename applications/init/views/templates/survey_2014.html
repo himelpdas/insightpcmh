@@ -53,9 +53,9 @@
 
 {{def QUESTION_PANEL(qna):}}
 {{if qna.show:}}
-<div id="{{=qna.table_name}}" class="panel panel-{{if qna.needs_answer():}}info{{elif qna.has_warnings():}}warning{{else:}}primary{{pass}}">
+<div id="{{=qna.table_name}}" class="panel panel-{{if qna.needs_answer():}}primary{{elif qna.has_warnings():}}warning{{else:}}default{{pass}}">
     <div class="panel-heading question-box-heading"><span class="pull-right">&emsp;<span class="glyphicon glyphicon-{{if qna.needs_answer():}}unchecked{{elif qna.has_warnings():}}edit{{else:}}check{{pass}}" title="{{if qna.needs_answer():}}Incomplete{{elif qna.has_warnings():}}Needs Attention{{else:}}Answered{{pass}}"></span></span>
-        <span class="glyphicon glyphicon-asterisk {{if qna.needs_answer():}}fa-spin{{pass}}"></span>&nbsp;{{=qna.question}}</div>
+        <span class="glyphicon glyphicon-asterisk {{if qna.needs_answer() or qna.has_warnings():}}fa-spin{{pass}}"></span>&nbsp;{{=qna.question}}</div>
     <div class="panel-body">
     {{for warning in qna.warnings:}}
         <blockquote class="text-danger">{{=warning}}</blockquote>
@@ -137,7 +137,7 @@
 <script src="{{=URL('static','js/custom/bootstrap-multiselect.js')}}"></script>
 <script type="text/javascript">
     $(document).ready(function() {
-        $("[multiple='multiple'][class!='autocomplete']").multiselect();
+        $("[multiple='multiple'][class!='autocomplete']").multiselect({maxHeight:250});
     });
 </script>
 

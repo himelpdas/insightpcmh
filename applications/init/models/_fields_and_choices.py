@@ -4,7 +4,7 @@ _list_of_states = ["NY", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "
                    "NM", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
                    "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
 
-EMRS = ['Other','eClinicalWorks', 'MDLand', 'HealthFusion',]
+EMRS = ['Other', "Amazing Charts", 'eClinicalWorks', 'Health Fusion', 'MDLand iClinic', "Practice Fusion"]
 REMOTE_EMRS = EMRS[1:2]
 CLOUD_EMRS = EMRS[2:]
 

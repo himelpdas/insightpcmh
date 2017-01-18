@@ -37,7 +37,7 @@ db.define_table("application",
     Field("practice_zip", label="Zip", requires=IS_NOT_EMPTY()),
     Field("practice_state", label="State", requires=IS_IN_SET(_list_of_states, zero=None)),
     Field("website", requires=IS_EMPTY_OR(IS_URL()), comment="Optional"),
-    common_filter=lambda query: db.application.is_active==True,
+    common_filter=lambda query: db.application.is_active == True,
     format='%(practice_name)s (%(id)s)'
     # auth.signature  # not needed because db._common_fields.append(auth.signature)
 )
