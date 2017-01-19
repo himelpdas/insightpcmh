@@ -40,6 +40,8 @@ def d_tables():
             db(db[each].id > 0).delete()
     db.commit()
 
+
+
 class QNA(object):
     instances = []
 
@@ -52,7 +54,6 @@ class QNA(object):
         return func_wrapper  # this is the function that will replace func
 
     def __init__(self, show, table_name, question, validator=None):  # constructor
-        self.__class__.instances.append(self)  # keep track of instances
         #argument
         self.table_name = table_name
         self.table = db[table_name]
@@ -66,10 +67,16 @@ class QNA(object):
         self.warnings = []  #
         self.form_buttons = []
 
+        if not self.table_name in map(lambda e: e.table_name, self.__class__.instances):
+            self.__class__.instances.append(self)  # keep track of instances
+
     def _form_process(self):
-        if self.form and self.form.process(onvalidation=self.validator).accepted:
-            session.flash = "Answer saved!"
-            redirect(URL(vars=request.get_vars))
+        if self.form:
+            if self.form.process(onvalidation=self.validator).accepted:
+                session.flash = "Answer saved!"
+                redirect(URL(vars=request.get_vars))
+            elif self.form.errors:
+                request.reuse = self
 
     def preprocess(self):
         """Perform tasks related to Single or Multi forms before form_process"""
@@ -80,7 +87,7 @@ class QNA(object):
 
     @require_show  # because __init__ was not yet called, self is not the first argument here
     def process(self):
-        if request.get_vars["delete"] and URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT or "", hash_vars=["delete", "app_id"]):  # security to prevent SQL Injection attack
+        if request.get_vars["delete"] and URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["delete", "app_id"]):  # security to prevent SQL Injection attack
             table_name, id = request.get_vars["delete"].rsplit("_", 1)  # will split table_name_1 to [table_name, 1]
             del request.get_vars["delete"]  # http://bit.ly/2gyvlqs # get rid of delete to prevent inf loop when redirecting with vars=request.get_vars
             db(db[table_name].id == id).delete()  # change to active = False
@@ -174,7 +181,7 @@ class MultiQNA(QNA):
                                       _onClick="if(confirm('Clear entry?')){parent.location='%s'}" %
                                                 URL(vars=dict([('delete', self.table_name+"_%s" % row.id)] +
                                                               request.get_vars.items()),
-                                                    hmac_key=MY_KEY, salt=session.MY_SALT or "",
+                                                    hmac_key=MY_KEY, salt=session.MY_SALT,
                                                     hash_vars=["delete", "app_id"]),
                                       )
                     return func(key)

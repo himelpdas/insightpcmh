@@ -72,6 +72,12 @@ db.define_table("telephone_encounter",
                 _note_field,
                 )
 
+db.define_table('telephone_encounter_examples',
+                Field("application", 'reference application', readable=False, writable=False),
+                Field("patient_name", requires=IS_NOT_EMPTY()),
+                Field("patient_dob", "date", label="Patient DOB", requires=IS_DATE()),
+                _note_field,
+                )
 
 # (1C)###################################################
 

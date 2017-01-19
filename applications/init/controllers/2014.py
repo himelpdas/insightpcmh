@@ -37,6 +37,8 @@ class Navigator:
         self.init_title()
 
         db(db.application.id == APP_ID).update(progress='{:.1%}'.format(self.numerator/self.denominator))
+        if request.reuse:
+            QNA.instances = [request.reuse]
 
     def init_title(self):
         if self.get_pcmh_from_request():
@@ -109,7 +111,9 @@ class Navigator:
 
                 assert func.__doc__, "missing doc strings for function %s" % func_name
 
-                label = element.capitalize().replace("_", " → ", 1).replace("_", ", ")
+                plural = " Elements " if element.count("__") > 1 else " Element "
+
+                label = element.capitalize().replace("__", " → ").replace("_", ", ")
 
                 is_complete = self.function_is_complete(func)
                 icon = SPAN(_class="glyphicon glyphicon-%s text-%s" %
@@ -118,7 +122,7 @@ class Navigator:
                             )
 
                 description = SPAN(icon, " ", func.__doc__) if pcmh == 0 else \
-                    SPAN(icon, " Element ", label, ": ", func.__doc__)
+                    SPAN(icon, plural, label, ": ", func.__doc__)
 
                 pcmh_dict = self.all_questions(pcmh)
 
@@ -161,7 +165,7 @@ def pcmh_0_hours():
         3, float("inf"),
         True,
         'clinical_hour',
-        "What are the practice's office hours?.",
+        "What are the practice's office hours?",
         validator=_validate_start_end_time,
     )
 
@@ -241,10 +245,32 @@ def pcmh_0_emr():
 
     return dict(documents={})
 
+def pcmh_0_ncqa():
+    """NCQA logins"""
+    application = CryptQNA(
+        1, 1,
+        True,
+        'ncqa_app',
+        "Enter the login information for the application tool."
+    )
+    application.set_template(
+        "{gpg_encrypted}")
+
+    iss = CryptQNA(
+        1, 1,
+        True,
+        'ncqa_iss',
+        "Enter the login information for the ISS survey tool."
+    )
+    iss.set_template(
+        "{gpg_encrypted}")
+
+    return dict(documents={})
+
 
 # (1a)###################################################
 
-def pcmh_1_a_2():
+def pcmh_1_1a__2():
     """After hours"""
 
     extra = "<br><br><small> The following examples are considered extended buisiness hours: <ul>" \
@@ -280,10 +306,12 @@ def pcmh_1_a_2():
     after_hour_blocks.set_template("{day_of_the_week} {start_time:%I}:{start_time:%M} "
                                    "{start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}")
 
+
+
     return dict(documents={})
 
 
-def pcmh_1_a_1():
+def pcmh_1_1a__1():
     """Same Day Appointments"""
 
     same_day_appointments = MultiQNA(
@@ -338,7 +366,7 @@ def pcmh_1_a_1():
 
 
 
-def pcmh_1_a_4():
+def pcmh_1_1a__4():
     """Availability of appointments"""
 
     same_day_appointments = MultiQNA(
@@ -350,7 +378,7 @@ def pcmh_1_a_4():
     return dict(documents={})
 
 
-def pcmh_1_a_5():
+def pcmh_1_1a__5():
     """Monitoring no-shows"""
     no_shows_training = MultiQNA(
         1, 1, True,
@@ -382,7 +410,7 @@ def pcmh_1_a_5():
 
 # (1b)###################################################
 
-def pcmh_1_b_1_2_3_4():
+def pcmh_1_1b__1_2_3_4():
     """Clinical advice (calls and messages)"""
     answering_service = MultiQNA(
         1, 1,
@@ -397,9 +425,8 @@ def pcmh_1_b_1_2_3_4():
         1, 1,
         True,
         'telephone_encounter',
-        "With regard to incoming telephone encounters seeking medical advice "
-        "(<b>excluding</b> refill requests), does <i>%s</i> record <b>all</b> of the following "
-        "into the <b>patient record</b> during <b>and</b> after business hours?<small><ol>"
+        "With regard to incoming telephone encounters, does <i>%s</i> record all of the following "
+        "into the <b>patient record</b> during and after business hours?<small><ol>"
         "<li>A summarized transcript of the <b>advice</b> given to the caller.</li>"
         "<li>The time and date when the call was answered by the practice.</li>"
         "<li>The time and date when the caller received a response.</li>"
@@ -409,17 +436,27 @@ def pcmh_1_b_1_2_3_4():
     telephone_encounter.add_warning(
         getattr(telephone_encounter.row, "please_choose", None) in NOT_YES,
         "In order to receive credit for the entire PCMH 1B section, <i>%s</i> must record all incoming telephone "
-        "encounters (during <b>and</b> after business hours) regarding clinical advice (<b>excluding</b> refill "
-        "requests) into the patient record. See <a href=#>these examples</a> of  good telephone encounters."
+        "encounters (during and after business hours) regarding clinical advice (refill requests "
+        "do not count) into the patient record. See <a href=#>these examples</a> of  good telephone encounters."
         % APP.practice_name
     )
 
     telephone_encounter.set_template("{please_choose}")
 
+    telephone_encounter_examples = MultiQNA(
+        3, 3, getattr(telephone_encounter.row, "please_choose", None) == "Yes",
+        'telephone_encounter_examples',
+        "Please provide <b>3 patient names</b> where the telephone encounter was documented in the "
+        "<span class='dashed-underline'>same week</span>. The examples <b>must</b> be regarding clinical adive, "
+        "<b>not</b> refill requests!"
+    )
+
+    telephone_encounter_examples.set_template("{patient_name}: {patient_dob}")
+
     return dict(documents={})
 
 
-def pcmh_1_c_1_2_3_4_5_6():
+def pcmh_1_1c__1_2_3_4_5_6():
     """Meaningful use"""
     meaningful_use = MultiQNA(
         1, float("inf"),
@@ -434,7 +471,7 @@ def pcmh_1_c_1_2_3_4_5_6():
 
 # (2)###################################################
 
-def pcmh_2_b_3_4():
+def pcmh_2_2b__3_4():
     """Transition of Care"""
 
     transition_of_care_plan_internal = MultiQNA(
@@ -483,37 +520,14 @@ def pcmh_2_b_3_4():
         "Enter <u>3 or more</u> patient names where each patient has a completed intake form in the patient record.",
     )
 
-    intake_form_patient_example.set_template("<b class='text-success'>{patient_first_name} {patient_last_name}, "
-                                             "{patient_DOB} {note}</b>")
+    intake_form_patient_example.set_template("{patient_first_name} {patient_last_name}, "
+                                             "{patient_DOB}")
 
     return dict(documents={})
-
-def pcmh_0_ncqa():
-    """NCQA logins"""
-    application = CryptQNA(
-        1, 1,
-        True,
-        'ncqa_app',
-        "Enter the login information for the application tool."
-    )
-    application.set_template(
-        "{gpg_encrypted}")
-
-    iss = CryptQNA(
-        1, 1,
-        True,
-        'ncqa_iss',
-        "Enter the login information for the ISS survey tool."
-    )
-    iss.set_template(
-        "{gpg_encrypted}")
-
-    return dict(documents={})
-
 
 # (2)###################################################
 
-def pcmh_2_a_1():
+def pcmh_2_2a__1():
     """Assigned PCP"""
 
     providers = db((db.billing_provider.id > 0) & (db.application.id == APP_ID)).count()
@@ -556,11 +570,11 @@ def pcmh_2_a_1():
     return dict(documents={})
 
 # (3)###################################################
-def pcmh_3_b_4b_4c():
+def pcmh_3_3b__1_4b__1_4c__1():
     """Record Review Workbook"""
     return dict(documents={})
 
-def pcmh_3_a_1_2_3_4_5_6_7_9_10_11_12_13_14():
+def pcmh_3_3a__1_2_3_4_5_6_7_9_10_11_12_13_14():
     """Patient Demographics"""
 
     patient_demographics_choices = ['Date of birth', 'Sex', 'Race', 'Ethnicity', 'Preferred language', 'Telephone numbers', 'E-mail address', 'Occupation', 'Dates of previous clinical visits', 'Legal guardian/health care proxy', 'Primary caregiver', 'Presence of advance directives', 'Health insurance information', 'Name and contact information of other health care professionals involved in patient\'s care.']
@@ -593,7 +607,7 @@ def pcmh_3_a_1_2_3_4_5_6_7_9_10_11_12_13_14():
     patient_demographics.set_template("{please_choose}")
     return dict(documents={})
 
-def pcmh_3_b_1_2_3_4_5_6_7_8_9_10_11():
+def pcmh_3_3b__1_2_3_4_5_6_7_8_9_10_11():
     """Clinical Data (2014 Meaningful use)"""
     documents = {}
 
@@ -601,7 +615,8 @@ def pcmh_3_b_1_2_3_4_5_6_7_8_9_10_11():
         1, float("inf"),
         True,
         'meaningful_use_2014',
-        "If available in your EMR, please upload the Stage 1 Meaningful Use report using the 2014 standards."
+        "If available in your EMR, please upload the <span class='dashed-underline'>Stage 1 Meaningful Use</span> "
+        "report using the 2014 standards."
     )
 
     meaningful_use.set_template("{choose_file}")
@@ -609,34 +624,116 @@ def pcmh_3_b_1_2_3_4_5_6_7_8_9_10_11():
     return dict(documents=documents)
 
 # (4)###################################################
-def pcmh_4_a_1():
+def pcmh_4_4a__1():
     """holder"""
     return dict(documents={})
 
 # (5)###################################################
-def pcmh_5_a_1():
-    """holder"""
+def pcmh_5_5a__1_3():
+    """Lab Tracking"""
+    lab_tracking_generic = MultiQNA(
+        1, 1, True,
+        'lab_tracking_generic',
+        "<i>%s</i> needs to <b>track labs</b> until the lab center's report is available, "
+        "while flagging and following up on overdue reports. Flagging abnormal results and notifying patients of normal"
+        " and abnormal results are of importance as well. Please download <a href='%s'><b>this chart</b></a> "
+        "and fill out a minimum of 5 days worth of orders. When you are done, scan (or take a picture) and upload the"
+        " document below." % (
+        APP.practice_name,
+        URL('init', 'word', 'tracking_chart.doc', args=["lab_order_tracking_chart"],
+            vars=dict(type="image", **request.get_vars),
+            hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id", "type"]))
+    )
+
+    lab_tracking_generic.set_template("{choose_file}")
+
     return dict(documents={})
 
-def pcmh_5_b_3():
+def pcmh_5_5a__5_6():
+    """Lab and Image Follow-Up"""
+    lab_image_follow_up = MultiQNA(
+        1, 1, True,
+        'lab_image_follow_up',
+        "Does <i>%s</i> contact patients when lab or imaging results arrive (regardless of abnormalities)? "
+        "Is this contact recorded as a telephone encounter? Note, letters are acceptable as well, but a copy must be "
+        "uploaded to the patient's documents." % (
+            APP.practice_name
+        )
+    )
+
+    lab_image_follow_up.set_template("{please_choose}")
+
+    lab_image_follow_up.add_warning(
+        getattr(lab_image_follow_up.row, "please_choose", None) in NOT_YES,
+        "In order to get credit for PCMH 5A5, the practice must contact the patient for both lab and imaging results, "
+        "and the contact must be recorded somewhere in the patient's record (i.e. as a telephone encounter)."
+    )
+
+    lab_image_follow_up_examples = MultiQNA(
+        4, 4, getattr(lab_image_follow_up.row, "please_choose", None) == "Yes",
+        'lab_image_follow_up_examples',
+        "Please provide <b>4 patient names</b> where the patient was contacted about lab or "
+        "imaging results (within the last 6 months). One must regard labs, one must regard imaging, "
+        "one must regard abnormal results and one must regard normal results."
+    )
+
+    lab_image_follow_up_examples.set_template("{patient_name}: {patient_dob}")
+
+    # todo - add new born screening for peds
+
+    return dict(documents={})
+
+
+def pcmh_5_5a__2_4():
+    """Image Tracking"""
+    image_tracking_generic = MultiQNA(
+        1, 1, True,
+        'image_tracking_generic',
+        "<i>%s</i> needs to <b>track imaging</b> (EKGs, X-Rays, MRIs, etc.) until the imaging center's report is available, "
+        "while flagging and following up on overdue reports. Flagging abnormal results and notifying patients of normal"
+        " and abnormal results are of importance as well. Please download <a href='%s'><b>this chart</b></a> "
+        "and fill out a minimum of 5 days worth of orders. When you are done, scan (or take a picture) and upload the"
+        " document below." % (
+            APP.practice_name,
+            URL('init', 'word', 'tracking_chart.doc', args=["image_order_tracking_chart"],
+                vars=dict(type="lab", **request.get_vars),
+                hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id", "type"]))
+    )
+
+    image_tracking_generic.set_template("{choose_file}")
+
+    return dict(documents={})
+
+
+def pcmh_5_5b__1_2_3_5_6_7_8_9_10():
     """Referral Tracking"""
 
     referral_blurb = MultiQNA(
         1, 1, True,
         'referral_blurb',
-        "NCQA expects that for <u>every referral sent</u>, an informal time-frame should be given to the specialist. "
-        "The practice must include or template the following text to all outgoing referrals (customize as you wish): "
-        "<p><small><i>In referring this patient to your care, Dr. Gonzalez expects in return a full report regarding our patient’s visit within 7 days "
-        "of the appointment. Additionally, please send any documentation regarding your diagnosis and any test, labs or "
-        "imaging you deem appropriate.</i></small></p> Are you doing this already?"
+        "For <b>every referral sent</b>, an informal <span class='dashed-underline'>time-frame</span> and <span class='dashed-underline'>expectation of content</span> should be "
+        "given to the specialist. <i>{practice}</i> should include or template the following text to all outgoing referrals (customize as you wish): "
+        "<p><small><i>In referring this patient to your care, {practice} expects in return a full report "
+        "regarding our patient’s visit <span class='dashed-underline'>within 7 days</span> of the appointment. Additionally, please send <span class='dashed-underline'>any documentation</span> regarding your diagnosis and <span class='dashed-underline'>any test, labs or "
+        "imaging</span> you deem appropriate.</i></small></p> Are you including this text with every referral order?".format(practice=APP.practice_name)
     )
+
+    referral_blurb.set_template("{please_choose}")
+
+    referral_blurb.add_warning(getattr(referral_blurb.row, "please_choose", None) in NOT_YES,
+                               "PCMH 5B is a must pass element, please consider correcting this answer."
+                               )
 
     referral_tracking_generic = MultiQNA(
         1, 1, True,
         'referral_tracking_generic',
-        "<i>%s</i> needs to track referrals until the consultant or specialist’s report is available, "
-        "while flagging and following up on overdue reports. For please download <a href='%s'>this chart</a> "
-        "and fill out a minimum of 5 days worth of referrals. When you are done, upload the document below." % (APP.practice_name, URL('init', 'word', 'referral_tracking_chart.doc', vars=request.get_vars))
+        "<i>%s</i> needs to <b>track referrals</b> until the consultant or specialist’s report is available, "
+        "while flagging and following up on overdue reports. Please download <a href='%s'><b>this chart</b></a> "
+        "and fill out a minimum of 5 days worth of referrals. When you are done, scan (or take a picture) and upload the"
+        " document below." % (APP.practice_name,
+                              URL('init', 'word', 'tracking_chart.doc', args=["referral_order_tracking_chart"],
+                                  vars=dict(type="referral", **request.get_vars),
+                                  hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id", "type"]))
     )
 
     referral_tracking_generic.set_template("{choose_file}")
@@ -644,7 +741,7 @@ def pcmh_5_b_3():
     return dict(documents={})
 
 # (6)###################################################
-def pcmh_6_a_1():
+def pcmh_6_6a__1_6b__2():
     """holder"""
     return dict(documents={})
 

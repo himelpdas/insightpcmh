@@ -2,7 +2,7 @@ from gluon import contenttype
 
 response.headers['Content-Type'] = contenttype.CONTENT_TYPE['.doc']
 
-
+# todo - this has no RBAC
 def index():
     app = db(db.application.id == APP_ID).select().last()
     street = ("%s %s" % (app.practice_address_line_1, app.practice_address_line_2) if app.practice_address_line_2 else
@@ -21,5 +21,7 @@ def index():
     )
 
 
-def referral_tracking_chart():
-    return index()
+@auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["type", "app_id"]))
+# security to prevent SQL Injection attack
+def tracking_chart():
+    return dict(_type=request.get_vars["type"], **index())

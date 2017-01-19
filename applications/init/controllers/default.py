@@ -54,7 +54,7 @@ def dash():
     response.title = "PCMH Dashboard"
     return dict()
 
-@auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT or "",
+@auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT,
                           hash_vars=["revoke_participant", "permission", "row_id"]))
 def revoke_user():
     e = request.get_vars["revoke_participant"]
@@ -73,7 +73,7 @@ def revoke_user():
     redirect(URL("dash.html", args=request.args, vars=request.get_vars))
 
 
-@auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT or "",
+@auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT,
                       hash_vars=["assign_participant", "permission", "row_id"]))
 def assign_user():
 
@@ -177,7 +177,7 @@ def _assigned_column(row):
                         permission=participator_widget["permission"],
                         row_id=row.id,
                         **request.get_vars),
-                    hmac_key=MY_KEY, salt=session.MY_SALT or "",
+                    hmac_key=MY_KEY, salt=session.MY_SALT,
                     hash_vars=["revoke_participant", "permission", "row_id"]
                     ),
             select=SELECT(OPTGROUP(OPTION("Revoke %s access to this application" % participator_widget['c_posessive']),
@@ -239,7 +239,7 @@ def _assigned_column(row):
                                          permission=permission,
                                          row_id=row.id,
                                          **request.get_vars),
-                                     hmac_key=MY_KEY, salt=session.MY_SALT or "",
+                                     hmac_key=MY_KEY, salt=session.MY_SALT,
                                      hash_vars=["assign_participant", "permission", "row_id"]
                                      )
         # if not already in revoke buttons
@@ -270,7 +270,7 @@ def _assigned_column(row):
                                          permission="contribute",
                                          row_id=row.id,
                                          **request.get_vars),
-                                     hmac_key=MY_KEY, salt=session.MY_SALT or "",
+                                     hmac_key=MY_KEY, salt=session.MY_SALT,
                                      hash_vars=["assign_participant", "permission", "row_id"]
                                      )
         recent_options.append(OPTION(n_name_html, _value=assign_id))
@@ -381,7 +381,7 @@ def load_apps_grid():
     return dict(app_grid=app_grid)
 
 
-@auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT or "", hash_vars=["group", "action",
+@auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["group", "action",
                                                                                            "user_id"]))
 def add_remove_user():
     u = request.get_vars["user_id"]
@@ -449,7 +449,7 @@ def _employee_group_links(row):
                                          group=group,
                                          action=action,
                                          **request.get_vars),
-                                     hmac_key=MY_KEY, salt=session.MY_SALT or "",
+                                     hmac_key=MY_KEY, salt=session.MY_SALT,
                                      hash_vars=["user_id", "group", "action"]
                                      ),
                            _title=(("Remove %s from " if action == "-" else "Add %s to ")
