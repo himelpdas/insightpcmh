@@ -25,3 +25,10 @@ def index():
 # security to prevent SQL Injection attack
 def tracking_chart():
     return dict(_type=request.get_vars["type"], **index())
+
+
+@auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id"]))
+def discharge_poster():
+    return index()
+
+

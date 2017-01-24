@@ -160,16 +160,17 @@ def pcmh_0_credit_card():
 
 
 def pcmh_0_hours():
-    """Clinical hours"""
-    clinical_hours = MultiQNA(
+    """Office hours"""
+    office_hours = MultiQNA(
         3, float("inf"),
         True,
-        'clinical_hour',
-        "What are the practice's office hours?",
+        'office_hours',
+        "What are the practice's office hours? Note, these must be hours when <span class='dashed-underline'>patients "
+        "are seen</span>.",
         validator=_validate_start_end_time,
     )
 
-    clinical_hours.set_template("{day_of_the_week} {start_time:%I}:{start_time:%M} "
+    office_hours.set_template("{day_of_the_week} {start_time:%I}:{start_time:%M} "
                                 "{start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}")
 
     return dict(documents={})
@@ -299,7 +300,7 @@ def pcmh_1_1a__2():
         1, float("inf"),
         getattr(after_hours.row, "please_choose", None) == "Yes",
         'after_hour_block',
-        "You said you have after-hours. Please enter your after-hours here.",
+        "You said you have extended hours. Please enter your extended hours here.",
         validator=_validate_start_end_time,
     )
 
@@ -314,10 +315,13 @@ def pcmh_1_1a__2():
 def pcmh_1_1a__1():
     """Same Day Appointments"""
 
+    sda_example = "Please see <a href='{url}'>these examples</a> " \
+                  "of ideal same-day scheduling.".format(url=None)
+
     same_day_appointments = MultiQNA(
         1, 1, True,
         'same_day_appointments',
-        "Does the practice reserve time on every clinical day for same-day appointments?"
+        "Does the practice reserve time on every clinical day for same-day appointments? " + sda_example
     )
 
     same_day_appointments.set_template("{please_choose}")
@@ -326,8 +330,7 @@ def pcmh_1_1a__1():
         getattr(same_day_appointments.row, "please_choose", None) in NOT_YES,
         "The practice <b>MUST</b> reserve time every day that patients are seen for same-day appointments. It "
            "is a requirement for PCMH certification at any level. We recommend at least two 15 minute slots reserved "
-           "visibly in your scheduler, for <u>each day patients are seen</u>. Please see <a href='{url}'>these "
-           "examples</a> of ideal same-day scheduling.".format(url=None)
+           "visibly in your scheduler, for <u>each day patients are seen</u>. " + sda_example
     )
 
     same_day_blocks = MultiQNA(
@@ -401,7 +404,7 @@ def pcmh_1_1a__5():
         getattr(no_shows_training.row, "please_choose", None) == "Yes",
         'no_show_emr',
         "When a patient does not show up for his/her appointment, do you mark that appointment as a missed appointment "
-        "or no-show?"
+        "/ no-show?"
     )
 
     no_show_emr.set_template("{please_choose}")
@@ -447,8 +450,8 @@ def pcmh_1_1b__1_2_3_4():
         3, 3, getattr(telephone_encounter.row, "please_choose", None) == "Yes",
         'telephone_encounter_examples',
         "Please provide <b>3 patient names</b> where the telephone encounter was documented in the "
-        "<span class='dashed-underline'>same week</span>. The examples <b>must</b> be regarding clinical adive, "
-        "<b>not</b> refill requests!"
+        "<span class='dashed-underline'>same week</span>. The examples <span class='dashed-underline'>must</span> be regarding clinical advice, "
+        "<span class='dashed-underline'>not</span> refill requests!"
     )
 
     telephone_encounter_examples.set_template("{patient_name}: {patient_dob}")
@@ -641,7 +644,7 @@ def pcmh_5_5a__1_3():
         " document below." % (
         APP.practice_name,
         URL('init', 'word', 'tracking_chart.doc', args=["lab_order_tracking_chart"],
-            vars=dict(type="image", **request.get_vars),
+            vars=dict(type="lab", **request.get_vars),
             hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id", "type"]))
     )
 
@@ -691,12 +694,12 @@ def pcmh_5_5a__2_4():
         'image_tracking_generic',
         "<i>%s</i> needs to <b>track imaging</b> (EKGs, X-Rays, MRIs, etc.) until the imaging center's report is available, "
         "while flagging and following up on overdue reports. Flagging abnormal results and notifying patients of normal"
-        " and abnormal results are of importance as well. Please download <a href='%s'><b>this chart</b></a> "
+        " and abnormal results are of importance as well. Please download <a href='%s'>this chart</a> "
         "and fill out a minimum of 5 days worth of orders. When you are done, scan (or take a picture) and upload the"
         " document below." % (
             APP.practice_name,
             URL('init', 'word', 'tracking_chart.doc', args=["image_order_tracking_chart"],
-                vars=dict(type="lab", **request.get_vars),
+                vars=dict(type="image", **request.get_vars),
                 hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id", "type"]))
     )
 
@@ -728,7 +731,7 @@ def pcmh_5_5b__1_2_3_5_6_7_8_9_10():
         1, 1, True,
         'referral_tracking_generic',
         "<i>%s</i> needs to <b>track referrals</b> until the consultant or specialist’s report is available, "
-        "while flagging and following up on overdue reports. Please download <a href='%s'><b>this chart</b></a> "
+        "while flagging and following up on overdue reports. Please download <a href='%s'>this chart</a> "
         "and fill out a minimum of 5 days worth of referrals. When you are done, scan (or take a picture) and upload the"
         " document below." % (APP.practice_name,
                               URL('init', 'word', 'tracking_chart.doc', args=["referral_order_tracking_chart"],
@@ -740,15 +743,65 @@ def pcmh_5_5b__1_2_3_5_6_7_8_9_10():
 
     return dict(documents={})
 
+
+def pcmh_5_5c__3():
+    """Hospital discharge"""
+    discharge_poster_url = URL('init', 'word', 'discharge_poster.doc',
+                               vars=request.get_vars, hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id"])
+
+    discharge_poster = MultiQNA(
+        1, 1, True,
+        'discharge_poster',
+        "Does <i>%s</i> display (in the waiting room) <a href='%s'>this poster</a> (or any similar "
+        "poster) that requests patients to inform the practice if they have been recently hospitalized?" %
+        (APP.practice_name, discharge_poster_url)
+    )
+
+    discharge_poster.set_template("{please_choose}")
+
+    discharge_poster.add_warning(getattr(
+        discharge_poster.row, "please_choose", None) in NOT_YES,
+                                   "<i>%s</i> must display <a href='%s'>this poster</a> (or similar)&mdash;"
+                                   "visible in the waiting room&mdash;requesting that patients inform the practice"
+                                   " if they have been recently hospitalized." %
+                                   (APP.practice_name, discharge_poster_url)
+                                   )
+
+    return dict(documents={})
+
+
 # (6)###################################################
-def pcmh_6_6a__1_6b__2():
-    """holder"""
+def pcmh_6_6a__1_2_3():
+    """QUARR/HEDIS"""
+
+    qarr_hedis = MultiQNA(
+        3, float("inf"), True,
+        'qarr_hedis',
+        "Upload QARR/HEDIS performance <span class='dashed-underline'>report cards</span> <b>and</b> the "
+        "corresponding <span class='dashed-underline'>patient list for pending services</span> for a "
+        "<span class='dashed-underline'>minimum of 3 health plans</span> "
+        "<i>(i.e. Health First, Fidelis, etc.)</i>. Documents should be no older than 6 months."
+    )
+
+    qarr_hedis.set_template("{choose_file}")
+
+    immunization_log = MultiQNA(
+        1, float("inf"), True,
+        'immunization_log',
+        "Upload any CIR reports and/or immunization logs that <i>{pc}</i> may have. It is expected that the practice at the very "
+        "least keeps a log of immunizations, whether or not <i>{pc}</i> conducts immunizations in-house."
+        " Documents should be no older than 6 months.".format(pc=APP.practice_name)
+    )
+
+    immunization_log.set_template("{choose_file}")
+
     return dict(documents={})
 
 # (end)###################################################
 
-# if True:
-#      del pcmh_6_a_1
+if not APP.largest_practice:
+    del pcmh_0_credit_card
+    # def pcmh_0_baa
 
 request.nav = Navigator()
 

@@ -65,5 +65,27 @@ db.define_table('referral_tracking_emr',
                 _note_field,
                 )
 
-# (5C 1)###################################################
+# (5C)###################################################
 
+db.define_table('discharge_poster',
+                Field("application", 'reference application', readable=False, writable=False),
+                _yes_no_field_default,
+                _note_field,
+                )
+
+# (6A)###################################################
+db.define_table('qarr_hedis',
+                Field("application", 'reference application', readable=False, writable=False),
+                Field('choose_file', 'upload', uploadfield='file_data'),
+                Field('file_data', 'blob'),
+                Field('file_description', requires=IS_NOT_EMPTY()),
+                _note_field,
+                )
+
+db.define_table('immunization_log',
+                Field("application", 'reference application', readable=False, writable=False),
+                Field('choose_file', 'upload', uploadfield='file_data'),
+                Field('file_data', 'blob'),
+                Field('file_description', requires=IS_NOT_EMPTY()),
+                _note_field,
+                )

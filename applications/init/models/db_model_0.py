@@ -38,7 +38,7 @@ db.define_table("primary_contact",
 )
 
 
-db.define_table("clinical_hour",
+db.define_table("office_hours",
     Field("application", 'reference application', readable=False, writable=False),
     _day_of_week_field(),
     Field("start_time", "time", requires=_am_pm_time_validator, label="Opens"),
