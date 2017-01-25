@@ -316,12 +316,16 @@ def pcmh_1_1a__1():
     """Same Day Appointments"""
 
     sda_example = "Please see <a href='{url}'>these examples</a> " \
-                  "of ideal same-day scheduling.".format(url=None)
+                  "of ideal same-day scheduling.".format(
+        url=URL('init', 'word', 'same_day_training_generic.xml',
+                vars=request.get_vars,
+                hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id"]))
 
     same_day_appointments = MultiQNA(
         1, 1, True,
         'same_day_appointments',
-        "Does the practice reserve time on every clinical day for same-day appointments? " + sda_example
+        "Does the practice visibly reserve time on the scheduler <span class='dotted-underline'>every day</span> "
+        "for same-day appointments? " + sda_example
     )
 
     same_day_appointments.set_template("{please_choose}")

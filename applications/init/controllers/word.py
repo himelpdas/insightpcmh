@@ -1,6 +1,8 @@
 from gluon import contenttype
 
-response.headers['Content-Type'] = contenttype.CONTENT_TYPE['.doc']
+# response.headers['Content-Type'] = contenttype.CONTENT_TYPE['.doc']
+response.headers['Content-Type'] = 'application/msword'
+
 
 # todo - this has no RBAC
 def index():
@@ -32,3 +34,6 @@ def discharge_poster():
     return index()
 
 
+@auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id"]))
+def same_day_training_generic():
+    return dict(EMR_NAME=APP.emr, **index())
