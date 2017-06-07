@@ -92,15 +92,21 @@ plugins = PluginManager()
 # -------------------------------------------------------------------------
 
 auth.settings.extra_fields['auth_user'] = [
-    Field("contact_phone", requires=_telephone_field_validator),
-    Field("contact_phone_extension", requires=IS_EMPTY_OR(_IS_DIGITS()), comment="Optional"),
-    Field("personal_phone", requires=IS_EMPTY_OR(_telephone_field_validator), comment="Optional"),
-    Field("personal_phone_extension", requires=IS_EMPTY_OR(_IS_DIGITS()), comment="Optional"),
-    Field("is_insight", "boolean", default=False, label="Insight Employee?",
+    Field("contact_phone", requires=PHONE_VALIDATOR),
+    Field("contact_phone_extension", requires=IS_EMPTY_OR(IS_DIGITS()), comment="Optional"),
+    Field("personal_phone", requires=IS_EMPTY_OR(PHONE_VALIDATOR), comment="Optional"),
+    Field("personal_phone_extension", requires=IS_EMPTY_OR(IS_DIGITS()), comment="Optional"),
+    Field("is_insight", 'boolean', default=False, label="Insight Employee?",
           comment="Is this person an Insight Management employee?"),
+    Field("title", label="Formal Title",
+          requires=IS_NOT_EMPTY(), comment=SCRIPT("$('#auth_user_title').addClass('form-control string')")),
 ]
+
 auth.define_tables(username=False, signature=True)  # Setting signature=True adds user and date stamping to auth tables,
 # to track modifications.
+
+db.auth_user.title.widget = SQLFORM.widgets.autocomplete(
+    request, db.auth_user.title, limitby=(0, 10), min_length=0, distinct=True)
 
 db._common_fields.append(auth.signature)  # instead of having to add the auth.signature to every table
 

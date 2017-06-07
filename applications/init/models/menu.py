@@ -39,7 +39,6 @@ if auth.is_logged_in():
         for _role in {"observers"}:
             auth.del_membership(role=_role, user_id=auth.user.id)
 
-APP_ID = request.get_vars["app_id"]
 APP = None
 INSIGHT_ADDR = "660 Whiteplains Rd, Tarrytown, NY 10591"
 IS_MASTER = auth.has_membership("masters")

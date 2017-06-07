@@ -13,14 +13,15 @@
 {{block header}}
 <header style="text-align: center; padding-bottom:1px;">
     {{# <h3>A. Spencer MD (MDLand)</h3>  {{#practice}}
-    {{app_row = db((db.application.id == APP_ID) & (db.application.owner_id == db.auth_user.id)).select().last()}}
-    <h3>{{=app_row.application.practice_name}}</h3>  {{#practice}}
+    {{app_row = db(db.application.id == APP_ID).select().last()}}
+    {{participators = PARTICIPATORS(app_row)}}
+    <h3>{{=app_row.practice_name}}</h3>  {{#practice}}
     <h4>
-        {{_practice_address = "%s%s, %s, %s %s" % (app_row.application.practice_address_line_1,
-                                                   ", %s" % app_row.application.practice_address_line_2 if app_row.application.practice_address_line_2 else "",
-                                                   app_row.application.practice_city,
-                                                   app_row.application.practice_state,
-                                                   app_row.application.practice_zip,
+        {{_practice_address = "%s%s, %s, %s %s" % (app_row.practice_address_line_1,
+                                                   ", %s" % app_row.practice_address_line_2 if app_row.practice_address_line_2 else "",
+                                                   app_row.practice_city,
+                                                   app_row.practice_state,
+                                                   app_row.practice_zip,
                                                   )
           if not IS_STAFF:
             _map_query = urllib.urlencode({'q':'660 White Plains Rd #325, Tarrytown, NY 10573'})
@@ -31,10 +32,19 @@
         <span class="glyphicon glyphicon-map-marker"></span><span class="visible-print-inline">{{=_practice_address}}</span><a class="hidden-print" href="http://maps.google.com/?{{=_map_query}}">{{=_practice_address}}</a>  {{#}}
     </h4>  {{#address}} {{# http://bit.ly/2a59inp}}
     <h5>
-    <span class="glyphicon glyphicon-earphone"></span> {{=app_row.application.practice_phone}} <span style="opacity:0.2">|</span>
-    <span class="fa fa-fax"></span> {{=app_row.application.practice_fax}} <span style="opacity:0.2">|</span>
+    <span class="glyphicon glyphicon-earphone"></span> {{=app_row.practice_phone}} <span style="opacity:0.2">|</span>
+    <span class="fa fa-fax"></span> {{=app_row.practice_fax}} <span style="opacity:0.2">|</span>
     {{# <span class="glyphicon glyphicon-envelope"></span> <a href="mailto:allison@insightmanagement.org">allison@insightmanagement.org</a>}}
-    <span class="glyphicon glyphicon-envelope"></span> <a href="mailto:{{=app_row.auth_user.email}}" class="text-capitalize">{{=app_row.auth_user.first_name}} {{=app_row.auth_user.last_name}} (primary contact)</a>
+    <div class="btn-group">
+      <button class="btn btn-default btn-xs dropdown-toggle" type="button" data-toggle="dropdown">
+          <span class="glyphicon glyphicon-envelope"></span> Contacts <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu">
+        {{for participant in participators:}}
+        <li><a href="mailto:{{=participant.auth_user.email}}" class="text-capitalize">{{=participant.auth_user.first_name}} {{=participant.auth_user.last_name}} <span class="text-muted">{{=participant.auth_user.email}}</span> ({{=participant.auth_user.title}}{{=XML((", %s"%SPAN("Practice Contact", _class="text-danger")) if participant.auth_user.id == app_row.owner_id else "")}}{{=XML((", %s"%SPAN("You", _class="text-success")) if participant.auth_user.id == auth.user.id else "")}})</a></li>
+        {{pass}}
+      </ul>
+    </div>
     </h5>
 </header>
 {{end}}
@@ -57,9 +67,6 @@
     <div class="panel-heading question-box-heading"><span class="pull-right">&emsp;<span class="glyphicon glyphicon-{{if qna.needs_answer():}}unchecked{{elif qna.has_warnings():}}edit{{else:}}check{{pass}}" title="{{if qna.needs_answer():}}Incomplete{{elif qna.has_warnings():}}Needs Attention{{else:}}Answered{{pass}}"></span></span>
         <span class="glyphicon glyphicon-asterisk {{if qna.needs_answer() or qna.has_warnings():}}fa-spin{{pass}}"></span>&nbsp;{{=qna.question}}</div>
     <div class="panel-body">
-    {{for warning in qna.warnings:}}
-        <blockquote class="text-danger">{{=warning}}</blockquote>
-    {{pass}}
     {{if qna.rows:}}
         <h5>
         {{_bullet="ul" if qna.limit==1 else "ol"}}
@@ -70,6 +77,9 @@
         {{=XML("</"+_bullet+">")}}
         </h5>
         <br>
+    {{pass}}
+    {{for warning in qna.warnings:}}
+        <blockquote class="text-primary">{{=warning}}</blockquote>
     {{pass}}
     {{=qna.form}}
     <small class="text-muted pull-left text-uppercase hidden-print"><i>#{{=qna.table_name}}</i></small>
@@ -94,7 +104,7 @@
             actions.append(XML(T("Please <b class='text-warning'>resolve</b> one or more questions below.")))
         pass
         if actions:
-            actions.append(XML(T("If you feel stuck at any point, please contact your trainer.")))
+            actions.append(XML(T("If you feel stuck at any point, please reach out to a contact above.")))
         pass
         has_action = bool(actions)
 }}
@@ -146,6 +156,20 @@
     $('[title]').tooltip({'html': true});
 </script>
 
+<script>
+    $(document).ready(function(){
+        $(".carousel-caption").hide();
+        $(".carousel").carousel(0).carousel({interval: 5000, pause: 'hover'}).hover(  //{{# pause: hover doesn't seem to work http://bit.ly/2rhzWph}}
+            function(){
+                $(".carousel").carousel('pause');
+                $(".carousel-caption").fadeIn();
+            }, function(){
+                $(".carousel").carousel('cycle');
+                $(".carousel-caption").fadeOut();
+            });
+    });
+</script>
+
 <!--Start of Tawk.to Script-->
 {{import hashlib, hmac}}
 <script type="text/javascript">
@@ -170,7 +194,7 @@
     function askForHelp(tablename){
         Tawk_API.setAttributes({
             'last-question-id': tablename,
-            'practice-name': "{{=app_row.application.practice_name}}",
+            'practice-name': "{{=app_row.practice_name}}",
             'app-id': "{{=APP_ID}}",
             'user-id': "{{=auth.user.id}}",
             'pcmh': "{{=request.controller}}", {{#todo}}

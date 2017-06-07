@@ -1,4 +1,4 @@
-_list_of_states = ["NY", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
+LIST_OF_STATES = ["NY", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA",
                    "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
                    "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
                    "NM", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
@@ -7,30 +7,32 @@ _list_of_states = ["NY", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "
 EMRS = ['Other', "Amazing Charts", 'eClinicalWorks', 'Health Fusion', 'MDLand iClinic', "Practice Fusion"]
 REMOTE_EMRS = EMRS[1:2]
 CLOUD_EMRS = EMRS[2:]
+EMRS = ["Practice Fusion"]
 
-_days_of_the_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+DAYS_OF_THE_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
-_telephone_field_validator = requires = IS_MATCH('\([0-9][0-9][0-9]\)[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]',
+PHONE_VALIDATOR = requires = IS_MATCH('\([0-9][0-9][0-9]\)[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]',
                                                  error_message='Use the format (123)456-7890 (no spaces)')
 
-_note_field = Field("note", label=XML("<span class='text-muted'>Note</span>"), comment="Optional")
+NOTE_FIELD = Field("note", label=XML("<span class='text-muted'>Note</span>"), comment="Optional")
 
-_yes_no_field_default = Field("please_choose", requires=IS_IN_SET(["Yes", "No", "Not sure"]),
+YES_NO_FIELD = Field("please_choose", requires=IS_IN_SET(["Yes", "No / Not sure / Need help"]),
                               comment=XML("<span class='visible-print-inline'>Yes or No.</span>"))
 
-NOT_YES = ["No", "Not sure"]
+NOT_YES = ["No / Not sure / Need help"]
 
-_day_of_week_field = lambda label=None, comment=None: \
+
+DAY_FIELD = lambda label=None, comment=None: \
     Field("day_of_the_week",
-          requires=IS_IN_SET(_days_of_the_week, zero=None),
+          requires=IS_IN_SET(DAYS_OF_THE_WEEK, zero=None),
           label=label,
           comment=comment
     )
 
 
-_days_of_week_field = lambda label=None, comment=None: \
+DAYS_OF_WEEK_FIELD = lambda label=None, comment=None: \
     Field("days_of_the_week", 'list:string',
-          requires=[IS_IN_SET(_days_of_the_week, zero=None, multiple=True),
+          requires=[IS_IN_SET(DAYS_OF_THE_WEEK, zero=None, multiple=True),
                     IS_NOT_EMPTY()],
           widget=SQLFORM.widgets.multiple.widget,
           label=label,

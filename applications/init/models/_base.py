@@ -1,6 +1,8 @@
 if not request.is_local:  # True if the client is localhost, False otherwise. Should work behind a proxy if the proxy supports http_x_forwarded_for.
     request.requires_https()  # prevents further code execution if the request is not over HTTPS and redirects the visitor to the current page over HTTPS.
 
+APP_ID = request.get_vars["app_id"]
+
 from string import Formatter
 from gluon.storage import List, Storage
 import logging
@@ -24,15 +26,6 @@ logger = logging.getLogger("web2py.app.pcmh")
 def _without_keys(d, *keys):
     return dict(filter(lambda key_value: key_value[0] not in keys, d.items()))
 
-_am_pm_time_validator = IS_TIME("Enter time as HH:MM [AM/PM]")
-
-
-def _validate_start_end_time(form, start_field_name="start_time", end_field_name="end_time"):
-    # get the actual datetime.time object and compare
-    if form.vars[start_field_name] > form.vars[end_field_name]:
-        form.errors[start_field_name] = "Start time cannot be after the end time!"
-        form.errors[end_field_name] = "End time cannot be before the start time!"
-
 
 def d_tables():
     for each in db.tables:
@@ -41,9 +34,9 @@ def d_tables():
     db.commit()
 
 
-
 class QNA(object):
     instances = []
+    reuse_form = None  # needed to keep errors in forms
 
     def require_show(func):  # get decorated func as first argument
         def func_wrapper(self, *args, **kwargs):  # this is the function that will replace func
@@ -54,29 +47,38 @@ class QNA(object):
         return func_wrapper  # this is the function that will replace func
 
     def __init__(self, show, table_name, question, validator=None):  # constructor
-        #argument
+        # argument
         self.table_name = table_name
         self.table = db[table_name]
         self.question = XML(question)
         self.validator = validator
         self.show = show
-        #generate
+        # generate
         self.form = None
         self.row = None
         self.rows = []
         self.warnings = []  #
         self.form_buttons = []
 
-        if not self.table_name in map(lambda e: e.table_name, self.__class__.instances):
-            self.__class__.instances.append(self)  # keep track of instances
+        if getattr(self.__class__.reuse_form, 'table_name', None) == self.table_name:
+            self.__class__.instances.append(self.__class__.reuse_form)  # keep track of instances
+        else:
+            self.__class__.instances.append(self)
+
+    def set_rows(self):
+        self.rows = db((self.table.id > 0) &  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
+                       (self.table.application == APP_ID) &
+                       (self.table.is_active == True)).select()
 
     def _form_process(self):
         if self.form:
+            self.form.vars.application = APP_ID
             if self.form.process(onvalidation=self.validator).accepted:
                 session.flash = "Answer saved!"
                 redirect(URL(vars=request.get_vars))
             elif self.form.errors:
-                request.reuse = self
+                request.reuse_form = self
+                QNA.reuse_form = request.reuse_form  # form.process appears to happen before QNA.__init__
 
     def preprocess(self):
         """Perform tasks related to Single or Multi forms before form_process"""
@@ -90,7 +92,8 @@ class QNA(object):
         if request.get_vars["delete"] and URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["delete", "app_id"]):  # security to prevent SQL Injection attack
             table_name, id = request.get_vars["delete"].rsplit("_", 1)  # will split table_name_1 to [table_name, 1]
             del request.get_vars["delete"]  # http://bit.ly/2gyvlqs # get rid of delete to prevent inf loop when redirecting with vars=request.get_vars
-            db(db[table_name].id == id).delete()  # change to active = False
+            # db(db[table_name].id == id).delete()  # change to active = False
+            db(db[table_name].id == id).update(is_active=False)  # change to active = False
             session.flash = "Deleted answer (%s) question from question #%s" % (id, table_name)
             redirect(URL(request.controller, request.function, vars=request.get_vars))  # TODO
         self.preprocess()
@@ -103,7 +106,7 @@ class QNA(object):
     @require_show
     def add_warning(self, conditional, message):
         if conditional:
-            self.warnings.append(XML(T(message)))
+            self.warnings.append(XML(message))
             return True
 
     require_show = staticmethod(require_show)  # http://stackoverflow.com/questions/1263451/python-decorators-in-classes
@@ -123,9 +126,8 @@ class MultiQNA(QNA):
         self.process()
 
     def preprocess(self):
-        self.validator = _on_validation_generic
         # self.rows = db(self.table.id > 0).select(orderby=~db[self.table].id,limitby=(0,self.multi))  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
-        self.rows = db((self.table.id > 0) & (self.table.application==APP_ID)).select()  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
+        self.set_rows()
         if self.limit == 1:
             self.row = self.rows.last()
         self.set_form_buttons()
@@ -178,11 +180,12 @@ class MultiQNA(QNA):
                     if key == "delete_table_row":
                         return key, A(SPAN(_class="glyphicon glyphicon-trash hidden-print"), _class="text-danger",
                                       _href="#",
-                                      _onClick="if(confirm('Clear entry?')){parent.location='%s'}" %
+                                      _onClick="if(confirm('Are you sure?')){parent.location='%s'}" %
                                                 URL(vars=dict([('delete', self.table_name+"_%s" % row.id)] +
                                                               request.get_vars.items()),
                                                     hmac_key=MY_KEY, salt=session.MY_SALT,
                                                     hash_vars=["delete", "app_id"]),
+                                      _title="Delete this answer"
                                       )
                     return func(key)
                 return inner
@@ -272,7 +275,7 @@ class CryptQNA(MultiQNA):
         # self.rows = db(self.table.id > 0).select(orderby=~db[self.table].id,limitby=(0,self.multi))  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
         self.validator = _on_validation_crypt(self.table_name)
 
-        self.rows = db((self.table.id > 0) & (self.table.application==APP_ID)).select()  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
+        self.set_rows()
 
         self.set_form_buttons()
 
@@ -320,3 +323,98 @@ def mailer(user_ids, subject, message, summary, action_url, call_to_action):
         mail.send(to=[email],
                   subject=subject,
                   message=rendered)
+
+
+def DOC_HEADER():
+    """:returns:
+        PRACTICE_NAME=app.practice_name,
+        PRACTICE_CITY=app.practice_city,
+        PRACTICE_STREET=street,
+        PRACTICE_STATE=app.practice_state,
+        PRACTICE_NUMBER=phone,
+        PRACTICE_FAX=app.practice_fax,
+        PRACTICE_ZIP=app.practice_zip,
+        DATE=request.now.strftime("%m/%d/%y")
+    """
+    app = db(db.application.id == APP_ID).select().last()
+    street = ("%s %s" % (app.practice_address_line_1, app.practice_address_line_2) if app.practice_address_line_2 else
+              app.practice_address_line_1)
+    phone = ("%s ext: %s" % (app.practice_phone, app.practice_phone_extension) if app.practice_phone_extension else
+             app.practice_phone)
+    return dict(
+        PRACTICE_NAME=app.practice_name,
+        PRACTICE_CITY=app.practice_city,
+        PRACTICE_STREET=street,
+        PRACTICE_STATE=app.practice_state,
+        PRACTICE_NUMBER=phone,
+        PRACTICE_FAX=app.practice_fax,
+        PRACTICE_ZIP=app.practice_zip,
+        DATE=request.now.strftime("%m/%d/%y")
+    )
+
+
+def CAROUSEL(_id, values):
+    """
+    :param _id: The table ID number
+    :param values: [(title, caption, src)]
+    :return: A carousel string
+
+    <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+      <ol class="carousel-indicators">
+        <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+        <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+        <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+      </ol>
+      <div class="carousel-inner" role="listbox">
+        <div class="carousel-item active">
+          <img class="d-block img-fluid" src="..." alt="First slide">
+        </div>
+        <div class="carousel-item">
+          <img class="d-block img-fluid" src="..." alt="Second slide">
+        </div>
+        <div class="carousel-item">
+          <img class="d-block img-fluid" src="..." alt="Third slide">
+        </div>
+      </div>
+      <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+      </a>
+      <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+      </a>
+    </div>
+    """
+    _id = "carousel_" + _id
+    targets = []
+    items = []
+    for i, value in enumerate(values):
+        title, caption, src = value
+        targets.append(LI(**
+                          dict({"_data-target": "#"+_id, "_data-slide-to": i}.items()
+                               + ({} if i == 0 else {"_class": "active"}).items())
+                          )
+                       )
+        items.append(DIV(
+            IMG(_src=src, _class="img-thumbnail"),
+            DIV(H3(title), P(caption), _class="carousel-caption",
+                _style="background: rgba(0,0,0,0.5); border-radius: 20px; margin: 5px;"
+                ),
+            _class="item%s" % ("" if i != 0 else " active"),
+        ))
+
+    inner = DIV(*items, _class="carousel-inner", _role="listbox")
+    prev = indicators = _next = ""
+    if len(values) > 1:
+        indicators = OL(*targets, _class="carousel-indicators")
+        prev = A(SPAN(_class="glyphicon glyphicon-chevron-left"), _class="left carousel-control",
+                 _role="button",
+                 _href="#"+_id, **{"_data-slide": "prev"}
+                 )
+        _next = A(SPAN(_class="glyphicon glyphicon-chevron-right"), _class="right carousel-control",
+                  _role="button",
+                  _href="#"+_id, **{"_data-slide": "next"}
+                  )  # http://bit.ly/2rhaCQi
+    return DIV(indicators, inner, prev, _next, _id=_id, _class="carousel slide",
+               **{"_data-ride": "carousel"})

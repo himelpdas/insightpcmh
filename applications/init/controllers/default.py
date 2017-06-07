@@ -98,18 +98,9 @@ def _assigned_column(row):
 
     assert row.id, "expected row.id"
 
-    participators = db(
-        # JOIN SECTION
-        (db.auth_group.id == db.auth_membership.group_id) &  # join auth_group and auth_membership
-        (db.auth_user.id == db.auth_membership.user_id) &  # join auth_user and auth_membership
-        (db.auth_permission.group_id == db.auth_group.id) &  # join auth_permission and auth_group
-        # FILTER SECTION
-        (db.auth_permission.record_id == row.id) &  # only where permission is given to this record
-        (db.auth_permission.table_name == "application") &
-        (db.auth_permission.name.belongs("manage", "train", "contribute"))  # trainers app mgrs and users
-    ).select()
+    participators = PARTICIPATORS(row)
     #
-    #print participators
+    # print participators
     participator_widgets = []
     for participator in participators:
         base = dict(
@@ -374,7 +365,7 @@ def load_apps_grid():
                             links=links,
                             deletable=IS_ADMIN or IS_MASTER or IS_CONTRIB,
                             editable=IS_ADMIN or IS_MASTER or IS_CONTRIB,
-                            # groupby=db.application.id,  # groupby by itself behaves like distinct http://bit.ly/2h0Ou3Z
+                            # groupby=db.application.id, # groupby by itself behaves like distinct http://bit.ly/2h0Ou3Z
                             field_id=db.application.id,
                             links_placement='left')
 
@@ -394,7 +385,7 @@ def add_remove_user():
 
     user = db(db.auth_user.id == u).select().last()
 
-    assert(user, "expected user! (user deleted?)")
+    assert user, "expected user! (user deleted?)"
     assert g in _without_keys(_role_to_permission, "masters"), "Invalid role (web parameter tampering?)" # not needed because of auth.signature
 
     if a == "+":
@@ -608,3 +599,28 @@ def call():
     supports xml, json, xmlrpc, jsonrpc, amfrpc, rss, csv
     """
     return service()
+
+import docx
+from cStringIO import StringIO
+def test_word():
+    output = StringIO()
+    doc = docx.Document()
+    doc.add_heading('Document Title', 0)
+
+    p = doc.add_paragraph('A plain paragraph having some ')
+    p.add_run('bold').bold = True
+    p.add_run(' and some ')
+    p.add_run('italic.').italic = True
+
+    doc.add_heading('Heading, level 1', level=1)
+    doc.add_paragraph('Intense quote', style='IntenseQuote')
+
+    doc.add_paragraph(
+        'first item in unordered list', style='ListBullet'
+    )
+    doc.add_paragraph(
+        'first item in ordered list', style='ListNumber'
+    )
+    doc.save(output)
+    response.headers['Content-Type'] = 'application/msword'
+    return output.getvalue()

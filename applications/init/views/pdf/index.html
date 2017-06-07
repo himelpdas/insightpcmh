@@ -1,0 +1,18 @@
+{{import time, datetime}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{=PRACTICE_NAME}}</title>
+</head>
+<h5>{{=PRACTICE_NAME}}</h5>
+<h5>{{=PRACTICE_STREET}}</h5>
+<h5>{{=PRACTICE_CITY}} {{=PRACTICE_STATE}} {{=PRACTICE_ZIP}}</h5>
+<h5>Tel: {{=PRACTICE_NUMBER}} | Fax: {{=PRACTICE_FAX}}</h5>
+<h3>{{="-"*100}}<br>{{=response.title}}<br>{{="-"*100}}</h3>
+{{include}}
+{{=XML("<br>"*5)}}
+<h6>Document requested by {{=auth.user.first_name.capitalize()}} {{=auth.user.last_name.capitalize()}} ({{=auth.user.id}}) on {{=time.ctime()}}</h6>
+<h6>(C) {{=datetime.datetime.now().year}} Insight Management</h6>
+</body>
+</html>

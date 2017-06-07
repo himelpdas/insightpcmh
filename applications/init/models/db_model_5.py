@@ -1,91 +1,160 @@
 # (5A)###################################################
 
+db.define_table(
+    'lab_tracking',
+    APP_FIELD, 
+    YES_NO_FIELD,
+    NOTE_FIELD,
+    )
 
-db.define_table('lab_tracking_generic',
-                Field("application", 'reference application', readable=False, writable=False),
-                Field('choose_file', 'upload', uploadfield='file_data'),
-                Field('file_data', 'blob'),
-                Field('file_description', requires=IS_NOT_EMPTY()),
-                _note_field,
-                )
+db.define_table(
+    'lab_tracking_chart',
+    APP_FIELD, 
+    Field('choose_file', 'upload', uploadfield='file_data'),
+    Field('file_data', 'blob'),
+    Field('file_description', requires=IS_NOT_EMPTY()),
+    NOTE_FIELD,
+    )
 
-db.define_table('lab_tracking_emr',
-                Field("application", 'reference application', readable=False, writable=False),
-                _yes_no_field_default,
-                _note_field,
-                )
+db.define_table(
+    'image_tracking',
+    APP_FIELD,
+    YES_NO_FIELD,
+    NOTE_FIELD,
+    )
 
-db.define_table('image_tracking_generic',
-                Field("application", 'reference application', readable=False, writable=False),
-                Field('choose_file', 'upload', uploadfield='file_data'),
-                Field('file_data', 'blob'),
-                Field('file_description', requires=IS_NOT_EMPTY()),
-                _note_field,
-                )
+db.define_table(
+    'image_tracking_chart',
+    APP_FIELD, 
+    Field('choose_file', 'upload', uploadfield='file_data'),
+    Field('file_data', 'blob'),
+    Field('file_description', requires=IS_NOT_EMPTY()),
+    NOTE_FIELD,
+    )
 
-db.define_table('image_tracking_emr',
-                Field("application", 'reference application', readable=False, writable=False),
-                _yes_no_field_default,
-                _note_field,
-                )
+db.define_table(
+    'referral_tracking',
+    APP_FIELD,
+    YES_NO_FIELD,
+    NOTE_FIELD,
+    )
 
-db.define_table('lab_image_follow_up',
-                Field("application", 'reference application', readable=False, writable=False),
-                _yes_no_field_default,
-                _note_field,
-                )
+db.define_table(
+    'referral_tracking_chart',
+    APP_FIELD, 
+    Field('choose_file', 'upload', uploadfield='file_data'),
+    Field('file_data', 'blob'),
+    Field('file_description', requires=IS_NOT_EMPTY()),
+    NOTE_FIELD,
+    )
 
-db.define_table('lab_image_follow_up_examples',
-                Field("application", 'reference application', readable=False, writable=False),
-                Field("patient_name", requires=IS_NOT_EMPTY()),
-                Field("patient_dob", "date", label="Patient DOB", requires=IS_DATE()),
-                _note_field,
-                )
+db.define_table(
+    'lab_follow_up',
+    APP_FIELD, 
+    YES_NO_FIELD,
+    NOTE_FIELD,
+    )
+
+db.define_table(
+    'image_follow_up',
+    APP_FIELD, 
+    YES_NO_FIELD,
+    NOTE_FIELD,
+    )
+
+db.define_table(
+    'referral_follow_up',
+    APP_FIELD, 
+    YES_NO_FIELD,
+    NOTE_FIELD,
+    )
+
+db.define_table(
+    'lab_follow_up_normal_example',
+    APP_FIELD, 
+    Field("patient_name", requires=IS_NOT_EMPTY()),
+    Field("patient_dob", "date", label="Patient DOB", requires=IS_DATE()),
+    NOTE_FIELD,
+    )
+
+db.define_table(
+    'lab_follow_up_abnormal_example',
+    APP_FIELD,
+    Field("patient_name", requires=IS_NOT_EMPTY()),
+    Field("patient_dob", "date", label="Patient DOB", requires=IS_DATE()),
+    NOTE_FIELD,
+    )
+
+db.define_table(
+    'image_follow_up_normal_example',
+    APP_FIELD, 
+    Field("patient_name", requires=IS_NOT_EMPTY()),
+    Field("patient_dob", "date", label="Patient DOB", requires=IS_DATE()),
+    NOTE_FIELD,
+    )
+
+db.define_table(
+    'image_follow_up_abnormal_example',
+    APP_FIELD,
+    Field("patient_name", requires=IS_NOT_EMPTY()),
+    Field("patient_dob", "date", label="Patient DOB", requires=IS_DATE()),
+    NOTE_FIELD,
+    )
+
+db.define_table(
+    'referral_follow_up_normal_example',
+    APP_FIELD, 
+    Field("patient_name", requires=IS_NOT_EMPTY()),
+    Field("patient_dob", "date", label="Patient DOB", requires=IS_DATE()),
+    NOTE_FIELD,
+    )
+
+db.define_table(
+    'referral_follow_up_abnormal_example',
+    APP_FIELD,
+    Field("patient_name", requires=IS_NOT_EMPTY()),
+    Field("patient_dob", "date", label="Patient DOB", requires=IS_DATE()),
+    NOTE_FIELD,
+    )
 
 # (5B)###################################################
 
 
-db.define_table('referral_blurb',
-                Field("application", 'reference application', readable=False, writable=False),
-                _yes_no_field_default,
-                _note_field,
-                )
+db.define_table(
+    'referral_blurb',
+    APP_FIELD,
+    YES_NO_FIELD,
+    NOTE_FIELD,
+    )
 
-db.define_table('referral_tracking_generic',
-                Field("application", 'reference application', readable=False, writable=False),
-                Field('choose_file', 'upload', uploadfield='file_data'),
-                Field('file_data', 'blob'),
-                Field('file_description', requires=IS_NOT_EMPTY()),
-                _note_field,
-                )
+db.define_table(
+    'specialist_order_example',
+    APP_FIELD,
+    Field('choose_file', 'upload', uploadfield='file_data'),
+    Field('file_data', 'blob'),
+    Field('file_description', requires=IS_NOT_EMPTY()),
+    NOTE_FIELD,
+    )
 
-db.define_table('referral_tracking_emr',
-                Field("application", 'reference application', readable=False, writable=False),
-                _yes_no_field_default,
-                _note_field,
-                )
+db.define_table(
+    'psych_order_example',
+    APP_FIELD,
+    Field('choose_file', 'upload', uploadfield='file_data'),
+    Field('file_data', 'blob'),
+    Field('file_description', requires=IS_NOT_EMPTY()),
+    NOTE_FIELD,
+    )
 
 # (5C)###################################################
 
-db.define_table('discharge_poster',
-                Field("application", 'reference application', readable=False, writable=False),
-                _yes_no_field_default,
-                _note_field,
-                )
+db.define_table(
+    'er_ip_log',
+    APP_FIELD,
+    Field('choose_file', 'upload', uploadfield='file_data'),
+    Field('file_data', 'blob'),
+    Field('file_description', requires=IS_NOT_EMPTY()),
+    NOTE_FIELD,
+    )
 
 # (6A)###################################################
-db.define_table('qarr_hedis',
-                Field("application", 'reference application', readable=False, writable=False),
-                Field('choose_file', 'upload', uploadfield='file_data'),
-                Field('file_data', 'blob'),
-                Field('file_description', requires=IS_NOT_EMPTY()),
-                _note_field,
-                )
 
-db.define_table('immunization_log',
-                Field("application", 'reference application', readable=False, writable=False),
-                Field('choose_file', 'upload', uploadfield='file_data'),
-                Field('file_data', 'blob'),
-                Field('file_description', requires=IS_NOT_EMPTY()),
-                _note_field,
-                )

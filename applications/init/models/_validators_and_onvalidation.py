@@ -39,16 +39,18 @@
 
 
 import gnupg
+
 gpg = gnupg.GPG()
 
 
 def _on_validation_filename(form):
     form.vars.filename = request.vars.upload.filename
-    _on_validation_generic(form)
 
 
-def _on_validation_generic(form):
-    form.vars.application = APP_ID
+def _validate_start_end_time(form, start_field_name="start_time", end_field_name="end_time"):
+    # get the actual datetime.time object and compare
+    if form.vars[start_field_name] >= form.vars[end_field_name]:
+        form.errors[end_field_name] = "End time must be after start time!"
 
 
 def _on_validation_crypt(table_name):
@@ -64,20 +66,24 @@ def _on_validation_crypt(table_name):
         plaintext = ""
         for each in sorted(form.vars.keys()):
             try:
-                value = form.vars[each].password  #try to get password from LAZYCRYPT object
+                value = form.vars[each].password  # try to get password from LAZYCRYPT object
             except AttributeError:
                 value = form.vars[each]
             plaintext += "%s: %s\n" % (each, value)
-        encrypted = gpg.encrypt(plaintext, "ECA488E9")  #change latter to list of private keys approved via rbac
+        encrypted = gpg.encrypt(plaintext, "ECA488E9")  # change latter to list of private keys approved via rbac
         db[table_name].insert(gpg_encrypted=encrypted, application=APP_ID)
     return inner
 
 
-class _IS_DIGITS:
+class IS_DIGITS:
     def __init__(self, length=None, error_message='Must be all digits'):
         self.l = length
         self.e = error_message + " of length %s!" % length if length else error_message + "!"
+
     def __call__(self, value):
         if (value and all(map(lambda d: d.isdigit(), value))) and (not self.l or len(value) == self.l):
-            return (value, None)
-        return (value, self.e)
+            return value, None
+        return value, self.e
+
+
+_am_pm_time_validator = IS_TIME("Enter time as HH:MM [AM/PM]")
