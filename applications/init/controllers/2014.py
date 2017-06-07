@@ -399,8 +399,8 @@ def pcmh_1_1a__5():
 
     return dict(documents={})
 
-# (1b)###################################################
 
+# (1b)###################################################\
 def pcmh_1_1b__1_2_3_4():
     """Clinical advice (telephone encounters)"""
 
@@ -491,8 +491,8 @@ def pcmh_1_1b__1_2_3_4():
 #
 #     return dict(documents={})
 
-# (2)###################################################
 
+# (2)###################################################
 def pcmh_2_2d__1_2():
     """Team Structure"""
 
@@ -569,7 +569,7 @@ def pcmh_2_2d__3_5_6_7_8():
 
     # referral tracking chart
     huddle_sheet = MultiQNA(
-        1, float('inf'), True,
+        5, float('inf'), True,
         'huddle_sheet',
         "Please upload a minimum of 5 days' worth of <a href='{url}'>daily huddle sheets</a>. The huddles must filled "
         "out every morning discussing tasks / reminders regarding a particular patient or a population of "
@@ -601,7 +601,7 @@ def pcmh_2_2d__3_5_6_7_8():
                              hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id", "type"])
 
     training_sheet = MultiQNA(
-        5, float('inf'), True,
+        1, float('inf'), True,
         'training_sheet',
         (temp % ("training", "training / re-training regarding patient and population management")).format(
             url=training_sheet_url)
