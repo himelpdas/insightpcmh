@@ -4,8 +4,13 @@ if not request.is_local:  # True if the client is localhost, False otherwise. Sh
 APP_ID = request.get_vars["app_id"]
 
 from string import Formatter
+
 from gluon.storage import List, Storage
+
+from gluon.dal import Rows
+
 import logging
+
 import os
 
 logger = logging.getLogger("web2py.app.pcmh")
@@ -56,7 +61,7 @@ class QNA(object):
         # generate
         self.form = None
         self.row = None
-        self.rows = []
+        self.rows = Rows()
         self.warnings = []  #
         self.form_buttons = []
 
