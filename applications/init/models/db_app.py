@@ -4,7 +4,12 @@ db.define_table("application",
           comment=XML("Un-check this <u>only</u> if you or your parent company already "
                       "has other site(s) doing PCMH with us."), default=True),
     Field("progress", default="0.0%", writable=False),
-    Field("status", default="New", requires=IS_IN_SET(["New", "Training", "Working", "Certified"], zero=None)),
+    Field("status", default="New",
+          requires=IS_IN_SET(["New", "Gap Analysis", "Training", "Documenting", "Reviewing", "Submitted", "Under Audit",
+                              "Scoring Stage 1", "Scoring Stage 2", "Scoring Stage 3", "Scoring Stage 4",
+                              "Add On", "OIF", "Certified"],
+                             zero=None)
+          ),
     Field("owner_id", db.auth_user, comment="Enter primary contact's email address.", label="Primary Contact", required=True, writable=False, readable=False),
     # Field("status", requires=IS_IN_SET(["1st Training Complete", "2nd Training Complete", "3rd Training Complete",
     #                                     "4th Training Complete", "Ready for Application Manager",
