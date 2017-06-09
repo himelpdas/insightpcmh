@@ -3,7 +3,7 @@ db.define_table("application",
     Field("first_site", 'boolean', label="First/Only site",
           comment=XML("Un-check this <u>only</u> if you or your parent company already "
                       "has other site(s) doing PCMH with us."), default=True),
-    Field("progress", default="0.0%", writable=False),
+    Field("progress", label="Data Progress", default="0.0%", writable=False),
     Field("status", default="New",
           requires=IS_IN_SET(["New", "Gap Analysis", "Training", "Documenting", "Reviewing", "Submitted", "Under Audit",
                               "Scoring Stage 1", "Scoring Stage 2", "Scoring Stage 3", "Scoring Stage 4",
