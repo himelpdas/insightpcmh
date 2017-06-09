@@ -425,7 +425,7 @@ def pcmh_1_1b__1_2_3_4():
                 "telephone_encounter",
                 [("1. Create Encounter",
                   "In the patient's chart, create a new encounter.",
-                  URL('static', 'pcmh/practice_fusion/telephone_encounter_create.png')),
+                  URL('static', 'pcmh/practice_fusion/telephone_encounter_create2.png')),
                  ("2. Describe Encounter",
                   "Describe when the call was received, when the call was ended satisfied, and a summary of the call. "
                   "Note if patient expresses understanding of the advice given.",
