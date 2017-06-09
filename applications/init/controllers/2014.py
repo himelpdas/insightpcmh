@@ -157,6 +157,9 @@ class Navigator:
 def pcmh_0_emr():
     """Electronic Medical Record Info"""
 
+    if APP.emr in CLOUD_EMRS:
+        db.emr_login.requires = IS_URL()
+
     account_created = MultiQNA(
         1,1,
         True,
@@ -191,7 +194,7 @@ def pcmh_0_emr():
         "Insight Management.".format(emr=APP.emr),
     )
 
-    emr_login.set_template("User: {username}<br>Password: {password}")
+    emr_login.set_template("Site: {website}<br>User: {username}<br>Password: {password}")
 
     return dict(documents={})
 

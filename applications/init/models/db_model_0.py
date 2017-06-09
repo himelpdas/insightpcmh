@@ -35,6 +35,7 @@ db.define_table("emr_credentials",
 
 db.define_table(  # todo - change back to gpg when gnupg binary and gpg certificate is fixed
     "emr_login", APP_FIELD,
+    Field("website"),
     Field("username", requires=IS_NOT_EMPTY()),
     Field("password", requires=IS_NOT_EMPTY()),
     NOTE_FIELD,
