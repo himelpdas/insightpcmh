@@ -922,7 +922,7 @@ def pcmh_5_5b__1_2_3_5_6_7_8_9_10():
     psych_order_example = MultiQNA(
         1, 1, referral_blurb.row,
         'psych_order_example',
-        "Please upload a copy of a referral order to specialist that includes the latest patient demographics (i.e. "
+        "Please upload a copy of a referral order to a specialist that includes the latest patient demographics (i.e. "
         "latest care plan), the latest lab/screening/test results and the informal agreement (see first question)."
         .format(practice=APP.practice_name)
     )
@@ -932,7 +932,7 @@ def pcmh_5_5b__1_2_3_5_6_7_8_9_10():
     specialist_order_example = MultiQNA(
         1, 1, referral_blurb.row,
         'specialist_order_example',
-        "Please upload a copy of a referral order to specialist that includes the latest patient demographics (i.e. "
+        "Please upload a copy of a referral order to a specialist that includes the latest patient demographics (i.e. "
         "latest care plan), the latest lab/screening/test results and the informal agreement (see first question)"
         .format(practice=APP.practice_name)
     )
