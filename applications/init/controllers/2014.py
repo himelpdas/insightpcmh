@@ -454,13 +454,13 @@ def pcmh_1_1b__1_2_3_4():
     completed_log_url = URL("init", request.controller, "download", args=[completed_log_file_name],
                             vars=dict(**request.get_vars))
 
-    temp = "Please provide <b>%s</b> patient <a href='{url}'>from your telephone encounter log</a> where the " \
+    temp = "Please provide <b>%s</b> patient%s <a href='{url}'>from your telephone encounter log</a> where the " \
            "advice was documented into the patient record <b>%s business hours</b>".format(url=completed_log_url)
 
     telephone_encounter_during_hours_example = MultiQNA(
         2, 2, telephone_encounter_log.rows,
         'telephone_encounter_during_hours_example',
-        temp % (2, "during")
+        temp % (2, "s", "during")
     )
 
     telephone_encounter_during_hours_example.set_template("{patient_name}: {patient_dob}")
@@ -468,7 +468,7 @@ def pcmh_1_1b__1_2_3_4():
     telephone_encounter_after_hours_example = MultiQNA(
         1, 1, telephone_encounter_log.rows,
         'telephone_encounter_after_hours_example',
-        temp % (1, "after")
+        temp % (1, "", "after")
     )
 
     telephone_encounter_after_hours_example.set_template("{patient_name}: {patient_dob}")
