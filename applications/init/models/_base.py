@@ -1,5 +1,7 @@
-if not request.is_local:  # True if the client is localhost, False otherwise. Should work behind a proxy if the proxy supports http_x_forwarded_for.
-    request.requires_https()  # prevents further code execution if the request is not over HTTPS and redirects the visitor to the current page over HTTPS.
+if not request.is_local:  # True if the client is localhost, False otherwise. Should work behind a proxy if the
+    # proxy supports http_x_forwarded_for.
+    request.requires_https()  # prevents further code execution if the request is not over HTTPS and redirects the
+    # visitor to the current page over HTTPS.
 
 APP_ID = request.get_vars["app_id"]
 
@@ -94,11 +96,13 @@ class QNA(object):
 
     @require_show  # because __init__ was not yet called, self is not the first argument here
     def process(self):
-        if request.get_vars["delete"] and URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["delete", "app_id"]):  # security to prevent SQL Injection attack
+        if request.get_vars["delete"] and \
+                URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["delete", "app_id"]):
+            # security to prevent SQL Injection attack
             table_name, id = request.get_vars["delete"].rsplit("_", 1)  # will split table_name_1 to [table_name, 1]
-            del request.get_vars["delete"]  # http://bit.ly/2gyvlqs # get rid of delete to prevent inf loop when redirecting with vars=request.get_vars
-            # db(db[table_name].id == id).delete()  # change to active = False
-            db(db[table_name].id == id).update(is_active=False)  # change to active = False
+            del request.get_vars["delete"]  # http://bit.ly/2gyvlqs # get rid of delete to prevent inf loop when
+            # redirecting with vars=request.get_vars
+            db(db[table_name].id == id).update(is_active=False)  # done - changed to active = False
             session.flash = "Deleted answer (%s) question from question #%s" % (id, table_name)
             redirect(URL(request.controller, request.function, vars=request.get_vars))  # TODO
         self.preprocess()
@@ -118,6 +122,12 @@ class QNA(object):
 
 
 class MultiQNA(QNA):
+    pre_template = "<span>Submitted on {created_on}&mdash;<i>{created_by}</i> " \
+                   "</span>&emsp;<span class='text-muted'>" \
+                   "{note}</span><pre class='text-success'>" \
+                   "<span class='text-danger pull-right'>" \
+                   "&emsp;{delete_table_row}</span>%s</pre>"
+
     def __init__(self, multi, limit, *args, **kwargs):
         """multi: integer of number required to be answered, OR needs answer if False
            limit: turn of form submit if limit is True and multi is reached
@@ -131,14 +141,15 @@ class MultiQNA(QNA):
         self.process()
 
     def preprocess(self):
-        # self.rows = db(self.table.id > 0).select(orderby=~db[self.table].id,limitby=(0,self.multi))  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
+        # self.rows = db(self.table.id > 0).select(orderby=~db[self.table].id,limitby=(0,self.multi))
+        # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
         self.set_rows()
         if self.limit == 1:
             self.row = self.rows.last()
         self.set_form_buttons()
-        #self.form = MultiSQLFORM(self.table_name, self.rows, self.multi, _action="#"+self.table_name)  # if limit, prevent submit
         if len(self.rows) < self.limit:
-            self.form = SQLFORM(self.table, buttons=self.form_buttons, showid=False, _action="#"+self.table_name)  # if limit, prevent submit
+            self.form = SQLFORM(self.table, buttons=self.form_buttons, showid=False, _action="#"+self.table_name)
+            # if limit, prevent submit
         else:
             self.form = ""
 
@@ -151,12 +162,7 @@ class MultiQNA(QNA):
         return True
 
     def set_template(self, template):
-        self.template = "<span>Submitted on {created_on}&mdash;<i>{created_by}</i> </span>&emsp;<span class='text-muted'>" \
-                        "{note}</span><pre class='text-success'>" \
-                        "<span class='text-danger pull-right'>" \
-                        "&emsp;{delete_table_row}" \
-                        "</span>" \
-                        "%s</pre>" % template
+        self.template = template
 
     def set_form_buttons(self):
         submit_label = "Add Answer"
@@ -172,24 +178,27 @@ class MultiQNA(QNA):
 
         self.form_buttons.append(TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right" % btn_class))
 
-    def render_template(self):
-        assert self.template, "template was not set for #%s" % self.table_name
-        for row in self.rows:
-            keys = filter(lambda key: key, [i[1] for i in Formatter().parse(self.template)])  #filter because we get Nones # http://stackoverflow.com/questions/13037401/get-keys-from-template
+    @classmethod
+    def _render_template(cls, table_name, rows, template, trash=True):
+        """HAPPENS BEFORE SET_TEMPLATE"""
+        for row in rows:
+
+            keys = filter(lambda key: key, [i[1] for i in Formatter().parse(template)])
+            # filter because we get Nones # http://stackoverflow.com/questions/13037401/get-keys-from-template
 
             logger.warn("Possible source of infinite loop, for some reason it acts weird when using {created_by}"
                         " (reference object)")  # fixme
 
             def _print_row_delete_icon(func):
                 def inner(key):
-                    if key == "delete_table_row":
+                    if trash and key == "delete_table_row":
                         return key, A(SPAN(_class="glyphicon glyphicon-trash hidden-print"), _class="text-danger",
                                       _href="#",
                                       _onClick="if(confirm('Are you sure?')){parent.location='%s'}" %
-                                                URL(vars=dict([('delete', self.table_name+"_%s" % row.id)] +
-                                                              request.get_vars.items()),
-                                                    hmac_key=MY_KEY, salt=session.MY_SALT,
-                                                    hash_vars=["delete", "app_id"]),
+                                               URL(vars=dict([('delete', table_name+"_%s" % row.id)] +
+                                                             request.get_vars.items()),
+                                                   hmac_key=MY_KEY, salt=session.MY_SALT,
+                                                   hash_vars=["delete", "app_id"]),
                                       _title="Delete this answer"
                                       )
                     return func(key)
@@ -205,79 +214,59 @@ class MultiQNA(QNA):
                         #                                (db.auth_group.role.belongs(["admins", "app_managers",
                         #                                                             "trainers", "contributors"]))
                         #                                ).select()))
-                        return key, "%s %s (%s)" % (auth_user.first_name.capitalize(),
-                                                         auth_user.last_name.capitalize(),
-                                                         auth_user.id)
+                        return key, "%s %s (%s)" % (auth_user.first_name.capitalize(), auth_user.last_name.capitalize(),
+                                                    auth_user.id)
                     return func(key)
                 return inner
 
             def _print_file(func):
                 def inner(key):
                     if key == "choose_file":
-                        return key, A(row["file_description"], _href=URL("init", request.controller, "download",
-                                                                         args=[row["choose_file"]],
-                                                                         vars=dict(app_id=APP_ID)
-                                                                         ))
+                        return key, A(row["file_description"],
+                                      _href=URL("init", request.controller, "download",
+                                                args=[row["choose_file"]],
+                                                vars=dict(app_id=APP_ID)
+                                                ))
                     return func(key)
                 return inner
 
             @_print_file
             @_print_row_delete_icon
             @_print_auth_user
-            def _print_comma_list(key):  #join with commas if object is list-like (python 2 only) http://stackoverflow.com/questions/1835018/python-check-if-an-object-is-a-list-or-tuple-but-not-string
-                #assert row.get(key), "Could not find '%s' in row" % key
+            def _print_comma_list(key):  # join with commas if object is list-like (python 2 only)
+                # http://stackoverflow.com/questions/1835018/python-check-if-an-object-is-a-list-or-tuple-but-not-string
+                # assert row.get(key), "Could not find '%s' in row" % key
                 if not hasattr(row[key], '__iter__'):
                     return key, row[key]  # needed to do **vars for string.format
                 else:
-                    return key, ", ".join(map(lambda e: str(e), row[key]))  # the map is needed to convert int/float to str
+                    return key, ", ".join(map(lambda e: str(e), row[key]))
+                    # the map is needed to convert int/float to str
 
             logger.warning("can get value error invalid conversion specification due to None type datetime")
             # x=map(_print_comma_list, keys)
-            yield XML(self.template.format(
+            yield XML(template.format(
                 **dict(
                     map(_print_comma_list, keys)  #
                 )))  # would look like self.template.format(name="Jon", ...)
 
-# '''
-# class SingleQNA(QNA):
-#
-#     def __init__(self, *args, **kwargs):
-#         super(SingleQNA, self).__init__(*args, **kwargs)
-#         self.process()
-#
-#     def preprocess(self):
-#         """make form editable"""
-#         self.row = db(self.table.id > 0).select().last()
-#         self.set_form_buttons()
-#         self.form = SQLFORM(self.table, record=self.row, buttons=self.form_buttons, showid=False, _action="#"+self.table_name)
-#
-#     def set_form_buttons(self):
-#         submit_label = "Submit Answer"
-#         btn_class = "warning"
-#
-#         if bool(self.row):
-#             submit_label = T("Change Answer")
-#             btn_class = "primary"
-#         else:
-#             self.clear_button = ""
-#
-#         self.form_buttons.append(TAG.button(submit_label, _type="submit", _class="btn btn-%s pull-right" % btn_class))
-#
-#
-#     @QNA.require_show
-#     def needs_answer(self):
-#         if self.row:
-#             return False
-#         return True
-# '''
+    def render_template(self):
+        assert self.template, "template was not set for #%s" % self.table_name
+        return self._render_template(self.table_name, self.rows, self.pre_template % self.template)
+
 
 class CryptQNA(MultiQNA):
+    pre_template = "<span>Encrypted on {created_on}&mdash;<i>{created_by}</i> " \
+                   "</span>&emsp;<span class='text-muted'>" \
+                   "{note}</span><pre class='text-success'>" \
+                   "<span class='text-danger pull-right'>" \
+                   "&emsp;{delete_table_row}</span>%s</pre>"
 
     def __init__(self, *args, **kwargs):
         super(CryptQNA, self).__init__(*args, **kwargs)
 
     def preprocess(self):
-        # self.rows = db(self.table.id > 0).select(orderby=~db[self.table].id,limitby=(0,self.multi))  # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
+        # self.rows = db(self.table.id > 0).select(orderby=~db[self.table].id,limitby=(0,self.multi))
+        # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
         self.validator = _on_validation_crypt(self.table_name)
 
         self.set_rows()
@@ -285,7 +274,8 @@ class CryptQNA(MultiQNA):
         self.set_form_buttons()
 
         if len(self.rows) < self.limit:
-            self.form = SQLFORM.factory(*_fake_db[self.table_name], buttons=self.form_buttons)  # if limit, prevent submit
+            self.form = SQLFORM.factory(*_fake_db[self.table_name], buttons=self.form_buttons)
+            # if limit, prevent submit
         else:
             self.form = ""
 
@@ -305,14 +295,6 @@ class CryptQNA(MultiQNA):
 
         self.form_buttons.append(TAG.button(submit_label, _title="This answer will be GPG encrypted",
                                             _type="submit", _class="btn btn-%s pull-right" % btn_class))
-
-    def set_template(self, template):
-        self.template = "<span>Encrypted on {created_on}&mdash;<i>{created_by}</i></span>" \
-                        "<pre class='text-success'>" \
-                        "<span class='text-danger pull-right'>" \
-                        "&emsp;{delete_table_row}" \
-                        "</span>" \
-                        "%s</pre>" % template
 
 
 def mailer(user_ids, subject, message, summary, action_url, call_to_action):

@@ -157,21 +157,20 @@ class Navigator:
 def pcmh_0_emr():
     """Electronic Medical Record Info"""
 
-    # account_created = MultiQNA(
-    #     1,1,
-    #     True,
-    #     'account_created',
-    #     "Insight Management requires access to <b>%s</b> via a login that has provider or admin level access. "
-    #     "Do you have this login information ready?" % APP.emr_std() if APP.emr != "Other" else "the EMR"
-    # )
-    #
-    # account_created.set_template(
-    #     "{please_choose}")
-    #
-    # account_created.add_warning(getattr(account_created.row, "please_choose", None) in NOT_YES,
-    #                             XML(T(
-    #                                 "Please create provide an account that has provider or admin level access, then "
-    #                                 "come back and change your answer.")))
+    account_created = MultiQNA(
+        1,1,
+        True,
+        'account_created',
+        "Insight Management requires access to <b>%s</b> via a login that has provider or admin level access. "
+        "Do you have this login information ready?" % APP.emr_std() if APP.emr != "Other" else "the EMR"
+    )
+
+    account_created.set_template(
+        "{please_choose}")
+
+    account_created.add_warning(getattr(account_created.row, "please_choose", None) in NOT_YES,
+                                XML(T(
+                                    "Please create provide an account that has provider or admin level access.")))
 
     # emr_credentials = CryptQNA(
     #     1, float("inf"),  # change the 3 to the number of days the practice is open from the info
@@ -184,15 +183,15 @@ def pcmh_0_emr():
     # emr_credentials.set_template(
     #     "{gpg_encrypted}")
 
-    # emr_login = MultiQNA(
-    #     1, float("inf"),  # change the 3 to the number of days the practice is open from the info
-    #     getattr(account_created.row, "please_choose", None) == "Yes",
-    #     'emr_credentials',
-    #     "Please provide the username and password to the {emr} account that was created for "
-    #     "Insight Management.".format(emr=APP.emr),
-    # )
-    #
-    # emr_login.set_template("User: {username}<br>Password: {password}")
+    emr_login = MultiQNA(
+        1, float("inf"),  # change the 3 to the number of days the practice is open from the info
+        getattr(account_created.row, "please_choose", None) == "Yes",
+        'emr_login',
+        "Please provide the username and password to the {emr} account that was created for "
+        "Insight Management.".format(emr=APP.emr),
+    )
+
+    emr_login.set_template("User: {username}<br>Password: {password}")
 
     return dict(documents={})
 
@@ -680,11 +679,13 @@ def pcmh_4_4b__1_2_3_4_5___3e__1_2_3_4_5():
 
     care_plan = MultiQNA(
         1, 1, True, "care_plan",
-        ("For every care plan, does {practice} thoroughly log the discussion or assessment for all of the following? "
-         "<i>Prescription and OTC risk / reward / usage / understanding, patient goals / preferences / life-style, "
-         "patient barriers to maintaining treatment plan or medications, labs / screenings / referrals ordered, "
-         "resources or materials given to patient or family,%sand recent hospitalizations or self-referrals.</i>" %
-         (" " if is_pediatrics else " advanced care planning, ")
+        ("For every care plan, does {practice} thoroughly discuss or assess <b>all</b> of the following? "
+         "<small><ul><li>Prescription and OTC risk / reward / usage / understanding</li>"
+         "<li>Patient goals / preferences / life-style</li>"
+         "<li>Patient barriers to maintaining treatment plan or medications, labs / screenings / referrals ordered</li>"
+         "<li>Resources or materials given to patient or family</li>"
+         "<li>Recent hospitalizations or self-referrals</li>%s</small>" %
+         (" " if is_pediatrics else "<li>Advanced care planning</li>")
          ).format(practice=APP.practice_name)
     )
 
@@ -692,7 +693,7 @@ def pcmh_4_4b__1_2_3_4_5___3e__1_2_3_4_5():
 
     care_plan.add_warning(
         getattr(care_plan.row, "please_choose", None) in NOT_YES,
-        "The following should be templated into <b>every care plan</b> when applicable:<ul>"
+        "The following should be templated into <b>every care plan</b> and thoroughly answered when applicable:<ul>"
         "<li>Has the patient been recently hospitalized or self-referred?</li>"
         "<li>Describe the patient's goals, preferences and any life-style changes discussed:</li>"
         "<li>Describe patient's barriers to treatment plan or medications and any solutions discussed:</i>"
@@ -924,7 +925,7 @@ def pcmh_5_5b__1_2_3_5_6_7_8_9_10():
         .format(practice=APP.practice_name)
     )
 
-    psych_order_example.set_template("{please_choose}")
+    psych_order_example.set_template("{choose_file}")
 
     specialist_order_example = MultiQNA(
         1, 1, referral_blurb.row,
@@ -934,7 +935,7 @@ def pcmh_5_5b__1_2_3_5_6_7_8_9_10():
         .format(practice=APP.practice_name)
     )
 
-    specialist_order_example.set_template("{please_choose}")
+    specialist_order_example.set_template("{choose_file}")
 
     return dict(documents={})
 
@@ -949,7 +950,8 @@ def pcmh_5_5c__3():
         1, float('inf'), True,
         'er_ip_log',
         "Please fill out this <a href='{url}'>ER/IP log</a> with at least 4 months of past data. Continue to maintain "
-        "this log permanently as part of your PCMH transformation."
+        "this log permanently as part of your PCMH transformation. <b>Please make sure all the patients in this log "
+        "have their discharge summary in their patient record!</b>"
         .format(url=er_ip_log_url)
     )
 
@@ -965,12 +967,31 @@ def pcmh_6_6a__1_2_3_4():
         1, float("inf"), True,
         'report_card',
         "Please upload QARR/HEDIS performance report cards from a <b>minimum of 3 health plans</b> (i.e. Health First, "
-        "Fidelis, etc.) Alternatively, you may upload reporting from {emr} showing performance of two immunization "
-        "measures, two preventative care measures and two chronic care measures. "
+        "Fidelis, etc.) <b>Alternatively</b>, you may upload reporting from {emr} showing performance of "
+        "<b>two immunization measures</b>, <b>two preventative care measures</b> and <b>two chronic care measures.</b> "
         "Documents must be dated no older than 10 months.".format(emr=APP.emr_std())
     )
 
     report_cards.set_template("{choose_file}")
+
+    award = MultiQNA(
+        1, 1, True,
+        'award',
+        "Did {practice} ever receive any kind of award or letter of recognition from an external entity "
+        "(i.e. MetroPlus QARR/HEDIS award in Chalymdia Screening) within the last 10 months?"
+        .format(practice=APP.practice_name)
+    )
+
+    award.set_template("{please_choose}")
+
+    award_document = MultiQNA(
+        1, float("inf"), award.row,
+        'award_document',
+        "Please upload document containing an award or letter of recognition from an external entity regarding "
+        "practice or Quality Measure performance".format(emr=APP.emr_std())
+    )
+
+    award_document.set_template("{choose_file}")
 
     return dict(documents={})
 

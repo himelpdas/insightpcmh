@@ -78,16 +78,21 @@
         </h5>
         <br>
     {{pass}}
+        <div class="history"></div>
     {{for warning in qna.warnings:}}
         <blockquote class="text-primary">{{=warning}}</blockquote>
     {{pass}}
     {{=qna.form}}
-    <small class="text-muted pull-left text-uppercase hidden-print"><i>#{{=qna.table_name}}</i></small>
-    {{=TAG.button(SPAN(_class='glyphicon glyphicon-comment', _style="color: #BA55D3"),
-        _title="Leave a question or comment regarding #%s" % qna.table_name,
-        _class="btn btn-sm btn-secondary pull-right hidden-print", _type="button",  # button needed else submit
-        _onclick="askForHelp('%s');" % qna.table_name)
-    }}
+        <small class="text-muted pull-left text-uppercase hidden-print"><i>#{{=qna.table_name}}</i></small>
+        {{=TAG.button(SPAN(_class='glyphicon glyphicon-time'),  #_style="color: #BA55D3"),
+            _title="See history of changes",
+            _class="btn btn-sm btn-secondary pull-right hidden-print", _type="button",  # button needed else submit
+            _onclick="$('{select}').load('{url}', function( response, status, xhr ) {onstatus});"
+            .format(select = "#%s .history" % qna.table_name,
+        url=URL('init', 'ajax', 'history.html', vars=dict(table_name=qna.table_name, template = qna.template,**request.get_vars),
+        hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id", "table_name", "template"]),
+            onstatus = "{ if (status=='error') {alert(status + ' ' + xhr.status + ' ' + xhr.statusText);} }",))
+        }}
     </div>
 </div>
 {{pass}}
@@ -110,7 +115,11 @@
 }}
 
 <div class="panel panel-primary panel-{{if has_action:}}danger{{else:}}success{{pass}}">
-    <div class="panel-heading question-box-heading" style="text-transform: none; font-size:17px"><a href="javascript:void(0);" class="pull-right hidden-print" title="Print page" style="color:white;" onclick="Tawk_API.hideWidget();"><span class="glyphicon glyphicon-print"></span></a><span class="glyphicon glyphicon-{{if not has_action:}}ok-sign{{else:}}exclamation-sign{{pass}}"></span> {{if has_action:}}Action{{="s" if len(actions)>1 else ""}} needed...{{else:}}Success!{{pass}}</div>
+    <div class="panel-heading question-box-heading" style="text-transform: none; font-size:17px"><a href="javascript:void(0);" class="pull-right
+    hidden-print" title="Print page" style="color:white;" onclick="Tawk_API.hideWidget();">
+        <span class="glyphicon glyphicon-print"></span></a>
+        <span class="glyphicon glyphicon-{{if not has_action:}}ok-sign{{else:}}exclamation-sign{{pass}}"></span>
+    {{if has_action:}}Action{{="s" if len(actions)>1 else ""}} needed...{{else:}}Success!{{pass}}</div>
     <div class="panel-body">
         <ul>
             {{for action in actions:}}
@@ -190,27 +199,10 @@
     })();
 </script>
 
-<script>
-    function askForHelp(tablename){
-        Tawk_API.setAttributes({
-            'last-question-id': tablename,
-            'practice-name': "{{=app_row.practice_name}}",
-            'app-id': "{{=APP_ID}}",
-            'user-id': "{{=auth.user.id}}",
-            'pcmh': "{{=request.controller}}", {{#todo}}
-            'element': "{{=request.function}}"
-        }, function(error){if (error){alert("Chat error:\n"+error);}});
-        Tawk_API.showWidget();
-        Tawk_API.maximize();
-    }
-    Tawk_API.onBeforeLoad = function(){
-        askForHelp('none');
-    };
-</script>
-
 <!--End of Tawk.to Script-->
 
 <script>
+    // hide certain objects when printing or ctrl+p
     Tawk_API.onChatHidden = function(){
             $(".form-control").addClass("hidden-print");
             $("[title]").tooltip('hide');

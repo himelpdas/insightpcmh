@@ -69,7 +69,7 @@ def _on_validation_crypt(table_name):
                 value = form.vars[each].password  # try to get password from LAZYCRYPT object
             except AttributeError:
                 value = form.vars[each]
-            plaintext += "%s: %s\n" % (each, value)
+            plaintext += "%s: %s\n" % (each, value)  # keys.gnupg.net
         encrypted = gpg.encrypt(plaintext, "ECA488E9")  # change latter to list of private keys approved via rbac
         db[table_name].insert(gpg_encrypted=encrypted, application=APP_ID)
     return inner
