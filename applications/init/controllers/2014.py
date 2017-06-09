@@ -708,7 +708,7 @@ def pcmh_4_4b__1_2_3_4_5___3e__1_2_3_4_5():
 
     for _each in MEASURES_3E:
         measure = MultiQNA(
-            1, float("inf"), True,
+            1, float("inf"), care_plan.row,
             _each[0],
             "Please provide a patient with a detailed evidence-based care plan for <b>{measure_description}</b>. "
             .format(measure_description=_each[1])
