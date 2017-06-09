@@ -195,8 +195,7 @@ def pcmh_0_emr():
 
     return dict(documents={})
 
-# def pcmh_0_ncqa():
-#     """NCQA logins"""
+# def pcmh_0_ncqa():     """NCQA logins"""
 #     application = CryptQNA(
 #         1, 1,
 #         True,
