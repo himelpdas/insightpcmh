@@ -7,7 +7,7 @@ db.define_table("application",
     Field("status", default="New",
           requires=IS_IN_SET(["New", "Gap Analysis", "Training", "Documenting", "Reviewing", "Submitted", "Under Audit",
                               "Scoring Stage 1", "Scoring Stage 2", "Scoring Stage 3", "Scoring Stage 4",
-                              "Add On", "OIF", "Certified"],
+                              "Add On", "OIF", "Certified", "Practice Problem"],
                              zero=None)
           ),
     Field("owner_id", db.auth_user, comment="Enter primary contact's email address.", label="Primary Contact", required=True, writable=False, readable=False),
