@@ -402,7 +402,7 @@ def pcmh_1_1a__5():
 def pcmh_1_1b__1_2_3_4():
     """Clinical advice (telephone encounters)"""
 
-    telephone_encounter_table_url = URL('init', 'word', 'telephone_chart.doc',
+    telephone_encounter_table_url = URL('init', 'word', 'telephone_log.doc',
                                         vars=dict(type="meeting", **request.get_vars),
                                         hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id"])
 
