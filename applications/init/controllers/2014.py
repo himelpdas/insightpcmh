@@ -242,7 +242,7 @@ def pcmh_1_1a__1():
     block_days = sorted(set(map(lambda e: e.day_of_the_week, office_hour_rows)))  # can have multiple Thurs, make unique
 
     db.same_day_block.day_of_the_week.requires = \
-        IS_IN_SET(block_days, zero=None)
+        IS_IN_SET(block_days, zero=None, sort=True)
 
     same_day_appointments = MultiQNA(
         1, 1,
