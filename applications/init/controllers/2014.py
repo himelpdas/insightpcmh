@@ -239,7 +239,7 @@ def pcmh_1_1a__1():
 
     office_hour_rows = db(db.office_hours.application == APP_ID).select()
 
-    block_days = sorted(set(map(lambda e: e.day_of_the_week, office_hour_rows)))  # can have multiple Thurs, make unique
+    block_days = sorted(list(set(map(lambda e: e.day_of_the_week, office_hour_rows))))  # can have multiple Thurs, make unique
 
     db.same_day_block.day_of_the_week.requires = \
         IS_IN_SET(block_days, zero=None, sort=True)
