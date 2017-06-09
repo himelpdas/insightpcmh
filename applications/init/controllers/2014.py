@@ -909,7 +909,7 @@ def pcmh_5_5b__1_2_3_5_6_7_8_9_10():
     referral_blurb = MultiQNA(
         1, 1, True,
         'referral_blurb',
-        "Did {practice} template this <b>informal agreement</b> with <b>every out going referral</b> to a specialist's "
+        "Does {practice} template this <b>informal agreement</b> with <b>every out going referral</b> to a specialist's "
         "office? <small><p><ul><li>In referring this patient to your care, our office expects in return a full report "
         "regarding our patient’s visit within 7 days of the appointment. Additionally, please send any documentation "
         "regarding your diagnosis and any treatment options considered. If you have any questions please contact "
