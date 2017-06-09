@@ -692,13 +692,17 @@ def pcmh_4_4b__1_2_3_4_5___3e__1_2_3_4_5():
 
     care_plan.add_warning(
         getattr(care_plan.row, "please_choose", None) in NOT_YES,
-        "The following should be templated into <b>every care plan</b> and thoroughly answered when applicable:<ul>"
+        "The following should be templated into <b>every care plan</b> and thoroughly answered when applicable:<ol>"
         "<li>Has the patient been recently hospitalized or self-referred?</li>"
         "<li>Describe the patient's goals, preferences and any life-style changes discussed:</li>"
         "<li>Describe patient's barriers to treatment plan or medications and any solutions discussed:</i>"
         "<li>Describe the discussion of risk / reward / proper usage of medications / OTCs / Herbals with patient:</li>"
         "<li>Describe materials / resources given to patient or family:</li>"
-        "%s</ul?>"
+        "%s</ol>"
+        "The following should be templated to the <b>end of every care plan</b>: <ul><li>Reviewed Treatment Care Plan "
+        "and Treatment Goals. Assessed and addressed potential barriers to meeting treatment goals and medication "
+        "adherence. Printout of Care plan, information about new prescriptions, and progress note was given to "
+        "patient. Patient acknowledged understanding of prescribed medications and treatment care plan.</li></ul?>"
         % ("" if is_pediatrics else "<li>Describe the discussion of advanced care planning with the patient.</li>")
     )
 
