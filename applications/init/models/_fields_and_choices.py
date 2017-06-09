@@ -24,7 +24,7 @@ NOT_YES = ["No / Not sure / Need help"]
 
 DAY_FIELD = lambda label=None, comment=None: \
     Field("day_of_the_week",
-          requires=IS_IN_SET(DAYS_OF_THE_WEEK, zero=None),
+          requires=IS_IN_SET(DAYS_OF_THE_WEEK, zero=None, sort=True),
           label=label,
           comment=comment
     )
@@ -32,7 +32,7 @@ DAY_FIELD = lambda label=None, comment=None: \
 
 DAYS_OF_WEEK_FIELD = lambda label=None, comment=None: \
     Field("days_of_the_week", 'list:string',
-          requires=[IS_IN_SET(DAYS_OF_THE_WEEK, zero=None, multiple=True),
+          requires=[IS_IN_SET(DAYS_OF_THE_WEEK, zero=None, multiple=True, sort=True),
                     IS_NOT_EMPTY()],
           widget=SQLFORM.widgets.multiple.widget,
           label=label,
