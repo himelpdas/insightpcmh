@@ -162,7 +162,7 @@ def pcmh_0_emr():
         True,
         'account_created',
         "Insight Management requires access to <b>%s</b> via a login that has provider or admin level access. "
-        "Do you have this login information ready?" % APP.emr() if APP.emr_std != "other" else "the EMR"
+        "Do you have this login information ready?" % APP.emr if APP.emr_std != "other" else "the EMR"
     )
 
     account_created.set_template(
