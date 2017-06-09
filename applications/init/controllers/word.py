@@ -16,7 +16,7 @@ def tracking_chart():
 
 @auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id"]))
 # security to prevent SQL Injection attack
-def telephone_chart():
+def telephone_log():
     return dict(_type=request.get_vars["type"], **DOC_HEADER())
 
 
