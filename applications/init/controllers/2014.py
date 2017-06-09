@@ -632,8 +632,7 @@ def pcmh_3_3a__1_2_3_4_5_6_7_9_10_11_12_13_14():
     patient_demographics = MultiQNA(
         1, 1, True,
         'patient_demographics',
-        "Which of the following fields does %s capture during patient intake <b>at least 80%% "
-        "of the time</b>?" % APP.practice_name
+        "Which of the following demographic fields does %s record?" % APP.practice_name
     )
 
     choices = getattr(patient_demographics.row, "please_choose", None)
@@ -641,8 +640,8 @@ def pcmh_3_3a__1_2_3_4_5_6_7_9_10_11_12_13_14():
     if choices:
         patient_demographics.add_warning(
             len(choices) < minimum,
-            "{pc} needs to be able to meet <b>at least {min}</b> of these choices ({max} given): {li} Please "
-            "fill out more of these fields for your new and recent patients. Then "
+            "{pc} needs to be able to record <b>at least {min}</b> of these choices (only {max}/{min} picked): "
+            "{li} Please fill out more of these fields for your new and recent patients. Then "
             "come back and change your answer.".format(pc=APP.practice_name, min=minimum, max=len(choices),
                                                        li=OL(*map(lambda e: LI(e), patient_demographics_choices)))
         )
