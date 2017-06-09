@@ -974,7 +974,7 @@ def pcmh_6_6a__1_2_3_4():
         "Please upload QARR/HEDIS performance report cards from a <b>minimum of 3 health plans</b> (i.e. Health First, "
         "Fidelis, etc.) <b>Alternatively</b>, you may upload reporting from {emr} showing performance of "
         "<b>two immunization measures</b>, <b>two preventative care measures</b> and <b>two chronic care measures.</b> "
-        "Documents must be dated no older than 10 months.".format(emr=APP.emr())
+        "Documents must be dated no older than 10 months.".format(emr=APP.emr)
     )
 
     report_cards.set_template("{choose_file}")
