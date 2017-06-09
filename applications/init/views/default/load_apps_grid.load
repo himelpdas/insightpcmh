@@ -3,24 +3,5 @@
 {{block load_js}}
 {{super}}
 <script>
-  /**
- * Created by Himel on 12/1/2016.
- */
-$(document).ajaxStop(function() {
-    $('#application_authorized_representative').addClass('form-control');
-    $('#application_pps').addClass('form-control');
-    function _on_gname_change(evt) {
-        if ($('#application_application_size').val() == 'Corporate') {
-            $('#application_authorized_representative__row').slideDown();
-            $('#application_largest_practice__row').slideDown();
-        } else {
-            $('#application_authorized_representative__row').slideUp();
-            $('#application_largest_practice__row').slideUp();
-        }
-    }
-
-    $('#application_application_size').change(_on_gname_change);
-    _on_gname_change();
-})
 </script>
 {{end}}
