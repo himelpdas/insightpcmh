@@ -290,7 +290,6 @@ def _assigned_column(row):
                     $("#assign_participant_{row_id}").val('').multiselect({{
                         nonSelectedText: '<span class="glyphicon glyphicon-plus"></span>',
                         maxHeight: 200,
-                        dropUp: true,
                         enableFiltering: true,
                         enableCaseInsensitiveFiltering: true,
                         onChange: function(option, checked, select) {{
