@@ -162,7 +162,7 @@ def pcmh_0_emr():
         True,
         'account_created',
         "Insight Management requires access to <b>%s</b> via a login that has provider or admin level access. "
-        "Do you have this login information ready?" % APP.emr_std() if APP.emr != "Other" else "the EMR"
+        "Do you have this login information ready?" % APP.emr() if APP.emr_std != "other" else "the EMR"
     )
 
     account_created.set_template(
@@ -262,10 +262,10 @@ def pcmh_1_1a__1():
             carousel=CAROUSEL("same_day_appointments", [
                 ("1. Set the block", "Double-click an open slot on your scheduler and block some time for same-day "
                                      "appointments.",
-                 URL('static', 'pcmh/%s/same_day_appointment_setting.png' % APP.emr_std())),
+                 URL('static', 'pcmh/practice_fusion/same_day_appointment_setting.png')),
                 ("2. Repeat", "Repeat this for every day your practice is open. "
                               "You need at least one 15-minute block per day.",
-                 URL('static', 'pcmh/%s/same_day_appointment_set.png' % APP.emr_std()))
+                 URL('static', 'pcmh/practice_fusion/same_day_appointment_set.png'))
             ])
         )
     )
@@ -382,7 +382,7 @@ def pcmh_1_1a__5():
                 "no_show_emr",
                 [("Flag no-shows",
                   "If a patient does not show up to his/her scheduled appointment, DO NOT leave it as \"Pending "
-                  "Arrival\"", URL('static', 'pcmh/%s/mark_as_no_show.png' % APP.emr_std()))]
+                  "Arrival\"", URL('static', 'pcmh/practice_fusion/mark_as_no_show.png' ))]
             ),
         )
     )
@@ -425,11 +425,11 @@ def pcmh_1_1b__1_2_3_4():
                 "telephone_encounter",
                 [("1. Create Encounter",
                   "In the patient's chart, create a new encounter.",
-                  URL('static', 'pcmh/%s/telephone_encounter_create.png' % APP.emr_std())),
+                  URL('static', 'pcmh/practice_fusion/telephone_encounter_create.png')),
                  ("2. Describe Encounter",
                   "Describe when the call was received, when the call was ended satisfied, and a summary of the call. "
                   "Note if patient expresses understanding of the advice given.",
-                  URL('static', 'pcmh/%s/telephone_encounter_ex.png' % APP.emr_std()))]
+                  URL('static', 'pcmh/practice_fusion/telephone_encounter_ex.png'))]
             )
         )
     )
@@ -661,7 +661,7 @@ def pcmh_3_3d__1_2_3_4_5():
         "3 chronic/acute services, overdue visit and medication monitoring (i.e. Coumadin)</b>. Logs can be sourced "
         "from {emr}, QARR/HEDIS (from 3 or more health plans), and/or CIR recall lists. Documents must be dated "
         "within the last 10 months."
-        "".format(emr=APP.emr_std(), pc=APP.practice_name)
+        "".format(emr=APP.emr)
     )
 
     callback_list.set_template("{choose_file}")
@@ -991,7 +991,7 @@ def pcmh_6_6a__1_2_3_4():
         1, float("inf"), award.row,
         'award_document',
         "Please upload document containing an award or letter of recognition from an external entity regarding "
-        "practice or Quality Measure performance".format(emr=APP.emr_std())
+        "practice or Quality Measure performance".format()
     )
 
     award_document.set_template("{choose_file}")
