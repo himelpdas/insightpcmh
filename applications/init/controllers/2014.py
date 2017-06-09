@@ -680,7 +680,7 @@ def pcmh_4_4b__1_2_3_4_5___3e__1_2_3_4_5():
 
     care_plan = MultiQNA(
         1, 1, True, "care_plan",
-        ("For every care plan, does {practice} thoroughly discuss or assess <b>all</b> of the following? "
+        ("For <b>every care plan</b>, does {practice} thoroughly discuss or assess <b>all</b> of the following? "
          "<small><ul><li>Prescription and OTC risk / reward / usage / understanding</li>"
          "<li>Patient goals / preferences / life-style</li>"
          "<li>Patient barriers to maintaining treatment plan or medications, labs / screenings / referrals ordered</li>"
