@@ -347,7 +347,7 @@ def pcmh_1_1a__4():
     availability_of_appointments = MultiQNA(
         1, 1, True,
         'availability_of_appointments',
-        "What is the {practice}'s next available appointment for the "
+        "What is {practice}'s next available appointment for the "
         "following visit types?".format(practice=APP.practice_name)
     )
 
@@ -690,7 +690,8 @@ def pcmh_4_4b__1_2_3_4_5___3e__1_2_3_4_5():
         ("For <b>every care plan</b>, does {practice} thoroughly discuss or assess <b>all</b> of the following? "
          "<small><ul><li>Prescription and OTC risk / reward / usage / understanding</li>"
          "<li>Patient goals / preferences / life-style</li>"
-         "<li>Patient barriers to maintaining treatment plan or medications, labs / screenings / referrals ordered</li>"
+         "<li>Patient barriers to maintaining treatment plan or medications</li>"
+         "<li>labs / screenings / referrals ordered</li>"
          "<li>Resources or materials given to patient or family</li>"
          "<li>Recent hospitalizations or self-referrals</li>%s</small>" %
          (" " if is_pediatrics else "<li>Advanced care planning</li>")
