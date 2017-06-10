@@ -914,38 +914,23 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
 def pcmh_5_5b__1_2_3_5_6_7_8_9_10():
     """Care Coordination"""
 
-    referral_blurb = MultiQNA(
-        1, 1, True,
-        'referral_blurb',
-        "Does {practice} template this <b>informal agreement</b> with <b>every out going referral</b> to a specialist's "
-        "office? <small><p><ul><li>In referring this patient to your care, our office expects in return a full report "
-        "regarding our patient’s visit within 7 days of the appointment. Additionally, please send any documentation "
-        "regarding your diagnosis and any treatment options considered. If you have any questions please contact "
-        "our office.</small></li></ul>".format(practice=APP.practice_name)
-    )
+    temp = "Please upload a copy of a referral order to a <b>%s</b> that includes the latest patient " \
+           "demographics (i.e. latest care plan, medications, etc.), the latest lab/screening/test results and the " \
+           "following informal agreement.<small><p><ul><li>In referring this patient to your care, {practice} expects "\
+           "in return a full report regarding our patient’s visit within 7 days of the appointment. Additionally, " \
+           "please send any documentation regarding your diagnosis and any treatment options considered. If you " \
+           "have any questions please contact our office.</small></li></ul>".format(practice=APP.practice_name)
 
-    referral_blurb.set_template("{please_choose}")
-
-    referral_blurb.add_warning(getattr(referral_blurb.row, "please_choose", None) in NOT_YES,
-                               "Adding informal agreement to referral orders is a requirement in PCMH."
-                               )
-    
     psych_order_example = MultiQNA(
-        1, 1, referral_blurb.row,
-        'psych_order_example',
-        "Please upload a copy of a referral order to a specialist that includes the latest patient demographics (i.e. "
-        "latest care plan), the latest lab/screening/test results and the informal agreement (see first question)."
-        .format(practice=APP.practice_name)
+        1, 1, True,
+        'psych_order_example', temp % "psychiatrist"
     )
 
     psych_order_example.set_template("{choose_file}")
 
     specialist_order_example = MultiQNA(
-        1, 1, referral_blurb.row,
-        'specialist_order_example',
-        "Please upload a copy of a referral order to a specialist that includes the latest patient demographics (i.e. "
-        "latest care plan), the latest lab/screening/test results and the informal agreement (see first question)"
-        .format(practice=APP.practice_name)
+        1, 1, True,
+        'specialist_order_example', temp % "specialist"
     )
 
     specialist_order_example.set_template("{choose_file}")
