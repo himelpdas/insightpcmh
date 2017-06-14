@@ -230,6 +230,21 @@ class MultiQNA(QNA):
                     return func(key)
                 return inner
 
+            def _screenshot(func):
+                def inner(key):
+                    if key == "screenshot":
+                        if row["screenshot"]:
+                            return key, A("(SCREENSHOT)",
+                                          _href=URL("init", request.controller, "download",
+                                                    args=[row["screenshot"]],
+                                                    vars=dict(app_id=APP_ID)
+                                                    ))
+                        else:
+                            return key, ""
+                    return func(key)
+                return inner
+
+            @_screenshot
             @_print_file
             @_print_row_delete_icon
             @_print_auth_user

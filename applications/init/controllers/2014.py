@@ -473,7 +473,7 @@ def pcmh_1_1b__1_2_3_4():
         temp % (2, "s", "during")
     )
 
-    telephone_encounter_during_hours_example.set_template("{patient_name}: {patient_dob}")
+    telephone_encounter_during_hours_example.set_template("{patient_name}: {patient_dob} {screenshot}")
 
     telephone_encounter_after_hours_example = MultiQNA(
         1, 1, telephone_encounter_log.rows,
@@ -481,7 +481,7 @@ def pcmh_1_1b__1_2_3_4():
         temp % (1, "", "after")
     )
 
-    telephone_encounter_after_hours_example.set_template("{patient_name}: {patient_dob}")
+    telephone_encounter_after_hours_example.set_template("{patient_name}: {patient_dob} {screenshot}")
 
     return dict(documents={})
 
@@ -724,7 +724,7 @@ def pcmh_4_4b__1_2_3_4_5___3e__1_2_3_4_5():
             .format(measure_description=_each[1])
         )
 
-        measure.set_template("{patient_name}: {patient_dob}<br>Serviced on: {service_date}")
+        measure.set_template("{patient_name}: {patient_dob}<br>Serviced on: {service_date} {screenshot}")
 
     return dict(documents={})
 
