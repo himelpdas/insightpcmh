@@ -289,7 +289,7 @@ class CryptQNA(MultiQNA):
         self.set_form_buttons()
 
         if len(self.rows) < self.limit:
-            self.form = SQLFORM.factory(*_fake_db[self.table_name], buttons=self.form_buttons)
+            self.form = SQLFORM.factory(*FAKE_DB[self.table_name], buttons=self.form_buttons)
             # if limit, prevent submit
         else:
             self.form = ""

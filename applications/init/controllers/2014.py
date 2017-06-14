@@ -198,6 +198,20 @@ def pcmh_0_emr():
     #
     return dict(documents={})
 
+
+def pcmh_0_credit_card():
+    """Credit Card"""
+    emr_credentials = CryptQNA(
+        1, float("inf"),  # change the 3 to the number of days the practice is open from the info
+        True, 'credit_card',
+        "A credit card is required to purchase the application tool(s) ($80/ea) and survey tool ($440)."
+        "".format(emr=APP.emr),
+    )
+
+    emr_credentials.set_template(
+        "{gpg_encrypted}")
+
+
 # def pcmh_0_ncqa():     """NCQA logins"""
 #     application = CryptQNA(
 #         1, 1,
