@@ -209,6 +209,7 @@ def pcmh_0_credit_card():
 
     emr_credentials.set_template(
         "{gpg_encrypted}")
+    return dict(documents={})
 
 
 # def pcmh_0_ncqa():     """NCQA logins"""
