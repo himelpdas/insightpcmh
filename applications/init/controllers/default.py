@@ -221,7 +221,7 @@ def _assigned_column(row):
             title = "contributor"
             permission = "contribute"
             e_title = e_name + " (Contributor)"
-            e_title_html = e_name_html + " <span class='text-warning'>(Contributor)</span>"
+            e_title_html = e_name_html + " <span class='text-success'>(Contributor)</span>"
 
         assign_id = "%s_%s" % (title, e_id)
         assign_urls[assign_id] = URL("assign_user.html",

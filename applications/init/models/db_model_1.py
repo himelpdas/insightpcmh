@@ -2,8 +2,8 @@ db.define_table(
     "office_hours",
 
     DAY_FIELD(),
-    Field("start_time", "time", requires=_am_pm_time_validator, label="Opens"),
-    Field("end_time", "time", requires=_am_pm_time_validator, label="Closes"),
+    Field("start_time", "time", requires=AM_PM_VALIDATOR, label="Opens"),
+    Field("end_time", "time", requires=AM_PM_VALIDATOR, label="Closes"),
 
     # auth.signature  # not needed because db._common_fields.append(auth.signature)
 )
@@ -19,9 +19,9 @@ db.define_table(
     "same_day_block",
 
     DAY_FIELD(),
-    Field("start_time", "time", requires=_am_pm_time_validator),
+    Field("start_time", "time", requires=AM_PM_VALIDATOR),
     # DO NOT use IS_NOT_EMPTY, as it will be submitted as a String instead of a datetime.time object!
-    Field("end_time", "time", requires=_am_pm_time_validator),
+    Field("end_time", "time", requires=AM_PM_VALIDATOR),
 
 )
 
@@ -36,9 +36,9 @@ db.define_table(
     "after_hour_block",
 
     DAY_FIELD(),
-    Field("start_time", "time", requires=_am_pm_time_validator),
+    Field("start_time", "time", requires=AM_PM_VALIDATOR),
     # DO NOT use IS_NOT_EMPTY, as it will be submitted as a String instead of a datetime.time object!
-    Field("end_time", "time", requires=_am_pm_time_validator),
+    Field("end_time", "time", requires=AM_PM_VALIDATOR),
 
 )
 

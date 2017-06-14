@@ -70,7 +70,7 @@ def _on_validation_crypt(table_name):
             except AttributeError:
                 value = form.vars[each]
             plaintext += "%s: %s\n" % (each, value)  # keys.gnupg.net
-        encrypted = gpg.encrypt(plaintext, "ECA488E9")  # change latter to list of private keys approved via rbac
+        encrypted = gpg.encrypt(plaintext, "1A15A48BA8867A6B")  # change latter to list of private key approved via rbac
         db[table_name].insert(gpg_encrypted=encrypted, application=APP_ID)
     return inner
 
@@ -86,6 +86,6 @@ class IS_DIGITS:
         return value, self.e
 
 
-_am_pm_time_validator = IS_TIME("Enter time as HH:MM [AM/PM]")
+AM_PM_VALIDATOR = IS_TIME("Enter time as HH:MM [AM/PM]")
 
 DATE_VALIDATOR = IS_DATE(format=T('%m/%d/%Y'), error_message='must be MM/DD/YYYY!')

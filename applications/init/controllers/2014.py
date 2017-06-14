@@ -175,28 +175,28 @@ def pcmh_0_emr():
                                 XML(T(
                                     "Please create provide an account that has provider or admin level access.")))
 
-    # emr_credentials = CryptQNA(
-    #     1, float("inf"),  # change the 3 to the number of days the practice is open from the info
-    #     getattr(account_created.row, "please_choose", None) == "Yes",
-    #     'emr_credentials',
-    #     "Please provide the username and password to the {emr} account that was created for "
-    #     "Insight Management.".format(emr=APP.emr),
-    # )
-    #
-    # emr_credentials.set_template(
-    #     "{gpg_encrypted}")
-
-    emr_login = MultiQNA(
+    emr_credentials = CryptQNA(
         1, float("inf"),  # change the 3 to the number of days the practice is open from the info
         getattr(account_created.row, "please_choose", None) == "Yes",
-        'emr_login',
+        'emr_credentials',
         "Please provide the username and password to the {emr} account that was created for "
         "Insight Management.".format(emr=APP.emr),
     )
 
-    emr_login.set_template("Site: {website} <br>User: {username}<br>Password: {password}")
+    emr_credentials.set_template(
+        "{gpg_encrypted}")
 
-    return dict(documents={})
+    # emr_login = MultiQNA(
+    #     1, float("inf"),  # change the 3 to the number of days the practice is open from the info
+    #     getattr(account_created.row, "please_choose", None) == "Yes",
+    #     'emr_login',
+    #     "Please provide the username and password to the {emr} account that was created for "
+    #     "Insight Management.".format(emr=APP.emr),
+    # )
+    #
+    # emr_login.set_template("Site: {website} <br>User: {username}<br>Password: {password}")
+    #
+    # return dict(documents={})
 
 # def pcmh_0_ncqa():     """NCQA logins"""
 #     application = CryptQNA(
@@ -305,12 +305,11 @@ def pcmh_1_1a__1():
 def pcmh_1_1a__2():
     """After hours"""
 
-    extra = "<small>For example, in an office with typical business hours from 9AM - 5PM, " \
-            "the following examples are considered extended business hours for seeing patients:" \
+    extra = "For example, in an office with typical business hours from 9AM - 5PM, " \
+            "the following examples are considered extended business hours for seeing patients:<small>" \
             "<ul><li>Monday - Thursday 9AM - 5PM, Friday 10AM - 6PM (shift in hours for one day of the week)</li>" \
             "<li>Monday - Thursday 9AM - 5PM, Friday 9AM - 6PM (extra hours for one day of the week)</li>" \
-            "<li>Monday - Friday 9AM - 5PM, Saturday 9AM - 3PM (extra day during a weekend)</li>" \
-            "</ul></small>"
+            "<li>Monday - Friday 9AM - 5PM, Saturday 9AM - 3PM (extra day during a weekend)</li></ul></small>"
 
     after_hours = MultiQNA(
         1, 1, True,
@@ -322,7 +321,7 @@ def pcmh_1_1a__2():
 
     after_hours.add_warning(
         getattr(after_hours.row, "please_choose", None) in NOT_YES,
-        "In order to get credit for PCMH 1A2, the practice must see patients during extended business hours at least "
+        "The practice is recommended to see patients during extended business hours at least "
         "once a week. Please note, that this does not include the provider \"staying late\" on some days; this must be "
         "implemented as a policy of the practice." + extra
     )
@@ -660,6 +659,11 @@ def pcmh_3_3a__1_2_3_4_5_6_7_9_10_11_12_13_14():
     return dict(documents={})
 
 
+def pcmh_3_3c__1_2_3_4_5_6_7_9_10():
+    """Comprehensive Health Assessment"""
+    return dict(documents={})
+
+
 def pcmh_3_3d__1_2_3_4_5():
     """Patient callback"""
 
@@ -914,22 +918,34 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
 def pcmh_5_5b__1_2_3_5_6_7_8_9_10():
     """Care Coordination"""
 
-    temp = "Please upload a copy of a referral order to a <b>%s</b> that includes the latest patient " \
-           "demographics (i.e. latest care plan, medications, etc.), the latest lab/screening/test results and the " \
-           "following informal agreement.<small><p><ul><li>In referring this patient to your care, {practice} expects "\
-           "in return a full report regarding our patient’s visit within 7 days of the appointment. Additionally, " \
-           "please send any documentation regarding your diagnosis and any treatment options considered. If you " \
-           "have any questions please contact our office.</small></li></ul>".format(practice=APP.practice_name)
+    referral_blurb = MultiQNA(
+        1, 1, True,
+        'referral_blurb',
+        "When making a referral to a specialist's or psychiatritst's office, does {practice} include the patient's "
+        "latest demographics (i.e. care plan, medications, etc.), the latest lab/screening/test results and the "
+        "following informal agreement? <small><p><ul><li>In referring this patient to your care, our office "
+        "expects in return a full report regarding our patient’s visit within 7 days of the appointment. Additionally, "
+        "please send any documentation regarding your diagnosis and any treatment options considered. If you have any "
+        "questions please contact our office.</small></li></ul>".format(practice=APP.practice_name)
+    )
+
+    referral_blurb.set_template("{please_choose}")
+
+    referral_blurb.add_warning(getattr(referral_blurb.row, "please_choose", None) in NOT_YES,
+                               "Adding informal agreement to referral orders is a requirement in PCMH."
+                               )
+
+    temp = "Please upload a copy of a referral order recently sent to a <b>%s</b>".format(practice=APP.practice_name)
 
     psych_order_example = MultiQNA(
-        1, 1, True,
+        1, 1, referral_blurb.row,
         'psych_order_example', temp % "psychiatrist"
     )
 
     psych_order_example.set_template("{choose_file}")
 
     specialist_order_example = MultiQNA(
-        1, 1, True,
+        1, 1, referral_blurb.row,
         'specialist_order_example', temp % "specialist"
     )
 
