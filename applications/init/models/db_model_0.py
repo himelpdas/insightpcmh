@@ -44,7 +44,7 @@ db.define_table(  # todo - change back to gpg when gnupg binary and gpg certific
 
 FAKE_DB.update({"credit_card": [
     Field("account_holder", requires=IS_NOT_EMPTY(), comment="Must match exact name on card."),
-    Field("expiration_month", requires=IS_IN_SET(range(1, 13))),
+    Field("expiration_month", requires=IS_IN_SET(range(1, 13), zero=None)),
     Field("expiration_year", requires=[IS_LENGTH(4, 4),  IS_INT_IN_RANGE(2000, 2100,
                                                                          error_message='4-digit year required!')]),
     Field("card_number", requires=IS_NOT_EMPTY(), widget=SQLFORM.widgets.password.widget),
