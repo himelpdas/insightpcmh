@@ -196,7 +196,7 @@ def pcmh_0_emr():
     #
     # emr_login.set_template("Site: {website} <br>User: {username}<br>Password: {password}")
     #
-    # return dict(documents={})
+    return dict(documents={})
 
 # def pcmh_0_ncqa():     """NCQA logins"""
 #     application = CryptQNA(
