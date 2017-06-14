@@ -16,7 +16,7 @@ db.define_table(
     #                                              " tasks this provider conducts <i>(i.e. tracks referrals, "
     #                                              "makes call-backs, etc.)</i> outside of an examination."),
     #      requires=IS_LENGTH(minsize=140, maxsize=1000)),
-    NOTE_FIELD,
+    
     format=staff_format,
     # auth.signature  # not needed because db._common_fields.append(auth.signature)
 )
@@ -27,9 +27,9 @@ db.provider.bills_under.requires = IS_IN_DB(db(db.provider.application == APP_ID
 
 db.define_table(
     "other_staff",
-    APP_FIELD,
+    
     YES_NO_FIELD,
-    NOTE_FIELD,
+    
     auth.signature
 )
 
@@ -48,7 +48,7 @@ db.define_table(
     #                                              " tasks this employee conducts <i>(i.e. tracks referrals, "
     #                                              "makes call-backs, etc.)</i>."),
     #      requires=IS_LENGTH(minsize=140, maxsize=1000)),
-    NOTE_FIELD,
+    
     format=staff_format
 )
 
@@ -60,7 +60,7 @@ db.define_table(
     Field('choose_file', 'upload', uploadfield='file_data'),
     Field('file_data', 'blob'),
     Field('file_description', requires=IS_NOT_EMPTY()),
-    NOTE_FIELD,
+    
     )
 
 
@@ -70,7 +70,7 @@ db.define_table(
     Field('choose_file', 'upload', uploadfield='file_data'),
     Field('file_data', 'blob'),
     Field('file_description', requires=IS_NOT_EMPTY()),
-    NOTE_FIELD,
+    
     )
 
 
@@ -80,5 +80,5 @@ db.define_table(
     Field('choose_file', 'upload', uploadfield='file_data'),
     Field('file_data', 'blob'),
     Field('file_description', requires=IS_NOT_EMPTY()),
-    NOTE_FIELD,
+    
     )

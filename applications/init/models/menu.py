@@ -10,10 +10,10 @@ if not session.MY_SALT:
 
 if not auth.id_group("admins"):
     auth.add_group("admins", "Handles assigning trainers and app managers to applications. Automatically should given"
-                      "membership to all applications")
+                   "membership to all applications")
 
 if not auth.id_group("trainers"):
-    auth.add_group("trainers", "Handles many applications. Has some additional responsibilites from app managers")
+    auth.add_group("trainers", "Handles many applications. Has some additional responsibilities from app managers")
 
 if not auth.id_group("masters"):
     auth.add_group("masters", "Like admin, but bypasses permission")

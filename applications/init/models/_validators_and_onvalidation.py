@@ -87,3 +87,5 @@ class IS_DIGITS:
 
 
 _am_pm_time_validator = IS_TIME("Enter time as HH:MM [AM/PM]")
+
+DATE_VALIDATOR = IS_DATE(format=T('%m-%d-%Y'), error_message='must be MM-DD-YYYY!')

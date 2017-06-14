@@ -77,3 +77,6 @@ def PARTICIPATORS(row):
     ).select()
 
 APP_FIELD = Field("application", 'reference application', readable=False, writable=False)
+
+db._common_fields.append(APP_FIELD)
+db._common_fields.append(NOTE_FIELD)
