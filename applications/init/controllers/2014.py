@@ -204,8 +204,7 @@ def pcmh_0_credit_card():
     emr_credentials = CryptQNA(
         1, float("inf"),  # change the 3 to the number of days the practice is open from the info
         True, 'credit_card',
-        "A credit card is required to purchase the application tool(s) ($80/ea) and survey tool ($440)."
-        "".format(emr=APP.emr),
+        "A credit card is required to purchase the application tool(s) ($80/ea) and survey tool ($440).",
     )
 
     emr_credentials.set_template(
