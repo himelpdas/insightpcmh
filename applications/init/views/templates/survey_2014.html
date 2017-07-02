@@ -59,6 +59,12 @@
         <li role="presentation" {{if _element==e_storage.element:}}class="active"{{pass}}><a href="{{=e_storage.url}}">{{=e_storage.description}}</a></li> {{# credit card http://stackoverflow.com/questions/1146810/taking-credit-card-information-online-without-processing-how-best-to-do-so}}
     {{pass}}
 </ul>
+<div class="qrcode hidden-xs hidden-sm" style="text-align: center;">
+    <br>
+    <br>
+    <small>View in Mobile:</small><br>
+    <img style="display:inline-block;" class="thumbnail" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{=URL(vars=request.get_vars, host=True, scheme="https")}}">
+</div>
 {{end}}
 
 {{def QUESTION_PANEL(qna):}}
