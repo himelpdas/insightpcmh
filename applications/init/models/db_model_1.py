@@ -106,10 +106,13 @@ db.define_table(
 )
 
 db.define_table(
-    "telephone_encounter",
-
+    "telephone_encounter_log_usage",
     YES_NO_FIELD,
+)
 
+db.define_table(
+    "telephone_encounter_in_record",
+    YES_NO_FIELD,
 )
 
 db.define_table(

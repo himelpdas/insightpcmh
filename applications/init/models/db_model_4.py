@@ -19,3 +19,23 @@ for _each in MEASURES_3E:
         Field("service_date", "date", label="Service Date", requires=DATE_VALIDATOR),
         *SCREENSHOT_FIELDS
         )
+
+db.define_table(
+    'icd_behavioral',
+    Field("icd", label="ICD 10 Codes", requires=IS_NOT_EMPTY()),
+)
+
+db.define_table(
+    'icd_chronic',
+    Field("icd", label="ICD 10 Codes", requires=IS_NOT_EMPTY()),
+)
+
+db.define_table(
+    'icd_acute',
+    Field("icd", label="ICD 10 Codes", requires=IS_NOT_EMPTY()),
+)
+
+db.define_table(
+    'icd_well',
+    Field("icd", label="ICD 10 Codes", requires=IS_NOT_EMPTY()),
+)

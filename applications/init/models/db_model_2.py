@@ -1,7 +1,6 @@
 staff_format = '%(first_name)s %(last_name)s (%(role)s)'
 db.define_table(
     "provider",
-    APP_FIELD,
     Field("first_name", requires=IS_NOT_EMPTY()),
     Field("last_name", requires=IS_NOT_EMPTY()),
     Field("email", requires=IS_EMAIL()),
@@ -11,7 +10,7 @@ db.define_table(
     Field("role", requires=IS_IN_SET(["MD", "DO", "APRN (i.e. NP)", "PA"], sort=True, zero=None)),
     Field("bills_under", 'list:reference provider', label='Bills Under / Shares Patients Under'),
     DAYS_OF_WEEK_FIELD(label="Official days",
-                       comment="Only select the days when patients are seen by this provider"),
+                       comment="Only select the days when patients are seen by this provider in this location."),
     # Field("job_description", 'text', comment=XML("Enter a brief description of the <b>patient-centered</b>"
     #                                              " tasks this provider conducts <i>(i.e. tracks referrals, "
     #                                              "makes call-backs, etc.)</i> outside of an examination."),
@@ -36,7 +35,6 @@ db.define_table(
 
 db.define_table(
     "staff",
-    APP_FIELD,
     Field("first_name", requires=IS_NOT_EMPTY()),
     Field("last_name", requires=IS_NOT_EMPTY()),
     Field("role", requires=IS_IN_SET(
@@ -56,7 +54,6 @@ db.define_table(
 
 db.define_table(
     'huddle_sheet',
-    APP_FIELD,
     Field('choose_file', 'upload', uploadfield='file_data'),
     Field('file_data', 'blob'),
     Field('file_description', requires=IS_NOT_EMPTY()),
@@ -66,7 +63,6 @@ db.define_table(
 
 db.define_table(
     'meeting_sheet',
-    APP_FIELD,
     Field('choose_file', 'upload', uploadfield='file_data'),
     Field('file_data', 'blob'),
     Field('file_description', requires=IS_NOT_EMPTY()),
@@ -76,9 +72,14 @@ db.define_table(
 
 db.define_table(
     'training_sheet',
-    APP_FIELD,
     Field('choose_file', 'upload', uploadfield='file_data'),
     Field('file_data', 'blob'),
     Field('file_description', requires=IS_NOT_EMPTY()),
     
+    )
+
+
+db.define_table(
+    'patient_population',
+    Field('patients', requires=IS_INT_IN_RANGE(200, 20001)),
     )

@@ -45,13 +45,14 @@ db.define_table("application",
     Field("practice_zip", label="Zip", requires=IS_NOT_EMPTY()),
     Field("practice_state", label="State", requires=IS_IN_SET(LIST_OF_STATES, zero=None)),
     Field("website", requires=IS_EMPTY_OR(IS_URL()), comment="Optional"),
+    Field("force_complete", "list:string", readable=False, writable=False),
     common_filter=lambda query: db.application.is_active == True,
     format='%(practice_name)s (%(id)s)'
     # auth.signature  # not needed because db._common_fields.append(auth.signature)
 )
 
 db.application.emr_std = Field.Method(lambda row, emr=None:
-                                      (emr if emr else row.application.emr).replace("_", " ").lower())
+                                      (emr if emr else row.application.emr).replace(" ", "_").lower())
 
 db.application.owner_id.widget = SQLFORM.widgets.autocomplete(
     request, db.auth_user.email, limitby=(0, 10), min_length=0, distinct=True,

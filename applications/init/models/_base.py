@@ -115,6 +115,8 @@ class QNA(object):
 
     @require_show
     def has_warnings(self):
+        if self.table_name in APP.force_complete:
+            return False
         return bool(len(self.warnings))
 
     @require_show
@@ -160,6 +162,8 @@ class MultiQNA(QNA):
 
     @QNA.require_show  # returns False if we're not supposed to show this form
     def needs_answer(self):
+        if self.table_name in APP.force_complete:
+            return False
         if str(self.multi).isdigit() and self.multi <= len(self.rows):
             return False
         elif not self.multi:
@@ -406,8 +410,8 @@ def CAROUSEL(_id, values):
                        )
         items.append(DIV(
             IMG(_src=src, _class="img-thumbnail"),
-            DIV(H3(title), P(caption), _class="carousel-caption",
-                _style="background: rgba(0,0,0,0.5); border-radius: 20px; margin: 5px;"
+            DIV(H3(title), P(XML(caption)), _class="carousel-caption",
+                _style="background: rgba(0,0,0,0.75); border-radius: 20px; margin: 5px;"
                 ),
             _class="item%s" % ("" if i != 0 else " active"),
         ))
