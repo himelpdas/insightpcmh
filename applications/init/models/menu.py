@@ -90,7 +90,7 @@ response.menu = [
 ]
 
 
-@auth.requires(False, requires_login=False)
+@auth.requires(False, requires_login=True)
 def ACCESS_DENIED():
     pass
 
