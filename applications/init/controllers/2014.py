@@ -156,9 +156,9 @@ class Navigator:
 
 def pcmh_0_emr():
     """Electronic Medical Record Info"""
-
-    if APP.emr in CLOUD_EMRS:
-        db.emr_login.website.requires = IS_URL()
+    #
+    # if APP.emr in CLOUD_EMRS:
+    #     FAKE_DB['emr_credentials'].website.requires = IS_URL()
 
     account_created = MultiQNA(
         1,1,
@@ -201,13 +201,13 @@ def pcmh_0_emr():
 
 def pcmh_0_credit_card():
     """Credit Card"""
-    emr_credentials = CryptQNA(
+    credit_card = CryptQNA(
         1, float("inf"),  # change the 3 to the number of days the practice is open from the info
         True, 'credit_card',
         "A credit card is required to purchase the application tool(s) ($80/ea) and survey tool ($440).",
     )
 
-    emr_credentials.set_template(
+    credit_card.set_template(
         "{gpg_encrypted}")
     return dict(documents={})
 

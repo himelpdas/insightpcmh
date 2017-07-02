@@ -464,19 +464,20 @@ def load_logs_grid():
         db.logging.owner_id.readable = False
         query = db((db.logging.owner_id == db.auth_user.id) & (db.auth_user.id == auth.user.id))
 
-    logs_grid = SQLFORM.grid(query,
-                              formname="load_logs_grid",
-                              deletable=False if not IS_MASTER else True,
-                              editable=False if not IS_MASTER else True,
-                              fields=[db.logging.id, db.logging.application, db.logging.difficulty, db.logging.description,
-                                      db.logging.created_by, db.logging.created_on],
-                              #links=links,
-                              #onupdate=_user_onupdate,
-                              #oncreate=_user_oncreate,
-                              orderby=~db.logging.id,  # show latest first
-                              field_id=db.logging.id,
-                              # user_signature=False,  # this is handled by the controller
-                              links_placement='left')
+    logs_grid = SQLFORM.grid(
+        query,
+        formname="load_logs_grid",
+        deletable=False if not IS_MASTER else True,
+        editable=False if not IS_MASTER else True,
+        fields=[db.logging.id, db.logging.application, db.logging.difficulty, db.logging.description,
+                db.logging.created_by, db.logging.created_on],
+        #links=links,
+        #onupdate=_user_onupdate,
+        #oncreate=_user_oncreate,
+        orderby=~db.logging.id,  # show latest first
+        field_id=db.logging.id,
+        # user_signature=False,  # this is handled by the controller
+        links_placement='left')
 
 
     return dict(logs_grid=logs_grid)

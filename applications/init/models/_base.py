@@ -16,6 +16,7 @@ import logging
 import os
 
 logger = logging.getLogger("web2py.app.pcmh")
+logger.setLevel(logging.CRITICAL)
 # The numeric values of logging levels are given in the following table.
 # These are primarily of interest if you want to define your own levels,
 # and need them to have specific values relative to the predefined levels.
@@ -67,6 +68,9 @@ class QNA(object):
         self.warnings = []  #
         self.form_buttons = []
 
+        self.reuse_form_for_errors()
+
+    def reuse_form_for_errors(self):
         if getattr(self.__class__.reuse_form, 'table_name', None) == self.table_name:
             self.__class__.instances.append(self.__class__.reuse_form)  # keep track of instances
         else:
@@ -80,12 +84,13 @@ class QNA(object):
     def _form_process(self):
         if self.form:
             self.form.vars.application = APP_ID
-            if self.form.process(onvalidation=self.validator).accepted:
+            # formname not automatically unique for form factory (shows up as notable), only SQLFORM!
+            if self.form.process(onvalidation=self.validator, formname="qna_%s" % self.table_name).accepted:
                 session.flash = "Answer saved!"
                 redirect(URL(vars=request.get_vars))
             elif self.form.errors:
-                request.reuse_form = self
-                QNA.reuse_form = request.reuse_form  # form.process appears to happen before QNA.__init__
+                QNA.reuse_form = self  # form.process appears to happen before QNA.__init__
+                logger.critical("CryptQNA Reuse: Form has errors!")
 
     def preprocess(self):
         """Perform tasks related to Single or Multi forms before form_process"""
@@ -282,6 +287,7 @@ class CryptQNA(MultiQNA):
     def preprocess(self):
         # self.rows = db(self.table.id > 0).select(orderby=~db[self.table].id,limitby=(0,self.multi))
         # https://groups.google.com/forum/#!topic/web2py/U5mqgH_BO8k
+
         self.validator = _on_validation_crypt(self.table_name)
 
         self.set_rows()
