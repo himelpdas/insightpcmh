@@ -84,7 +84,7 @@
         <blockquote class="text-primary">{{=warning}}</blockquote>
     {{pass}}
     {{=qna.form}}
-{{else:}}{{=PRE("MARKED AS COMPLETE BY AN ADMIN.")}}{{pass}}
+{{else:}}{{=PRE("MARKED AS COMPLETE BY AN ADMIN.")}}<div class="history"></div>{{pass}}
         <small class="text-muted pull-left text-uppercase hidden-print"><i>#{{=qna.table_name}}</i></small>
         {{=TAG.button(SPAN(_class='glyphicon glyphicon-time'),  #_style="color: #BA55D3"),
             _title="See history of changes",
