@@ -67,6 +67,7 @@
     <div class="panel-heading question-box-heading"><span class="pull-right">&emsp;<span class="glyphicon glyphicon-{{if qna.table_name in APP.force_complete:}}edit{{elif qna.needs_answer():}}unchecked{{elif qna.has_warnings():}}warning-sign{{else:}}check{{pass}}" title="{{if qna.table_name in APP.force_complete:}}Marked As Completed{{elif qna.needs_answer():}}Incomplete{{elif qna.has_warnings():}}Needs Attention{{else:}}Answered{{pass}}"></span></span>
         <span class="glyphicon glyphicon-asterisk {{if qna.needs_answer() or qna.has_warnings():}}fa-spin{{pass}}"></span>&nbsp;{{=qna.question}}</div>
     <div class="panel-body">
+{{if not qna.table_name in APP.force_complete:}}
     {{if qna.rows:}}
         <h5>
         {{_bullet="ul" if qna.limit==1 else "ol"}}
@@ -82,9 +83,8 @@
     {{for warning in qna.warnings:}}
         <blockquote class="text-primary">{{=warning}}</blockquote>
     {{pass}}
-        {{if not qna.table_name in APP.force_complete:}}
-            {{=qna.form}}
-        {{pass}}
+    {{=qna.form}}
+{{pass}}
         <small class="text-muted pull-left text-uppercase hidden-print"><i>#{{=qna.table_name}}</i></small>
         {{=TAG.button(SPAN(_class='glyphicon glyphicon-time'),  #_style="color: #BA55D3"),
             _title="See history of changes",
