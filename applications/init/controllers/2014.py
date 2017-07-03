@@ -860,18 +860,19 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
            "to track <b>{order_type} orders</b>?"
     _imaging = "imaging (X-Ray, MRI, Sonogram, EKG etc.)"
 
-    # image tracking
-    image_table_url = URL('init', 'word', 'tracking_chart.doc', args=["image_order_tracking_chart"],
-                          vars=dict(type="image", **request.get_vars),
-                          hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id", "type"])
-    image_tracking = MultiQNA(
-        1, 1, True,
-        'image_tracking', temp.format(
-            practice=APP.practice_name, order_type=_imaging, table_url=image_table_url)
-    )
-    image_tracking.set_template("{please_choose}")
+    if not APP.emr_std() in ["mdland_iclinic"]:
+        # image tracking
+        image_table_url = URL('init', 'word', 'tracking_chart.doc', args=["image_order_tracking_chart"],
+                              vars=dict(type="image", **request.get_vars),
+                              hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id", "type"])
+        image_tracking = MultiQNA(
+            1, 1, True,
+            'image_tracking', temp.format(
+                practice=APP.practice_name, order_type=_imaging, table_url=image_table_url)
+        )
+        image_tracking.set_template("{please_choose}")
 
-    if not APP.emr_std() in ["mdland"]:
+    if not APP.emr_std() in ["mdland_iclinic"]:
         # lab tracking
         lab_table_url = URL('init', 'word', 'tracking_chart.doc', args=["lab_order_tracking_chart"],
                             vars=dict(type="lab", **request.get_vars),
@@ -898,12 +899,13 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
     temp = "{practice} should use <a href='{chart_url}'>this table</a> (or an equivalent tracking system) to track " \
            "{order_type} orders to best meet PCMH requirements"
 
-    image_tracking.add_warning(
-        getattr(image_tracking.row, "please_choose", None) in NOT_YES,
-        temp.format(practice=APP.practice_name, chart_url=image_table_url, order_type=_imaging)
-    )
+    if not APP.emr_std() in ["mdland_iclinic"]:
+        image_tracking.add_warning(
+            getattr(image_tracking.row, "please_choose", None) in NOT_YES,
+            temp.format(practice=APP.practice_name, chart_url=image_table_url, order_type=_imaging)
+        )
 
-    if not APP.emr_std() in ["mdland"]:
+    if not APP.emr_std() in ["mdland_iclinic"]:
 
         lab_tracking.add_warning(
             getattr(lab_tracking.row, "please_choose", None) in NOT_YES,
@@ -919,16 +921,17 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
            "start (order sent) to finish (results received). At least one row in the tables should depict an overdue " \
            "order and corresponding follow-up action."
 
-    # image tracking chart
-    image_tracking_chart = MultiQNA(
-        1, float('inf'), image_tracking.row,
-        'image_tracking_chart',
-        temp.format(order_type=_imaging)
-    )
+    if not APP.emr_std() in ["mdland_iclinic"]:
+        # image tracking chart
+        image_tracking_chart = MultiQNA(
+            1, float('inf'), image_tracking.row,
+            'image_tracking_chart',
+            temp.format(order_type=_imaging)
+        )
 
-    image_tracking_chart.set_template("{choose_file}")
+        image_tracking_chart.set_template("{choose_file}")
 
-    if not APP.emr_std() in ["mdland"]:
+    if not APP.emr_std() in ["mdland_iclinic"]:
         # lab tracking chart
         lab_tracking_chart = MultiQNA(
             1, float('inf'), lab_tracking.row,
@@ -950,7 +953,7 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
     temp = "Does {practice} contact patients every time when <b>%s results </b> arrive regardless if it's normal or " \
            "abnormal? ".format(practice=APP.practice_name)
 
-    if not APP.emr_std() in ["mdland"]:
+    if not APP.emr_std() in ["mdland_iclinic"]:
         # lab follow up
         lab_follow_up = MultiQNA(
             1, 1, lab_tracking.row,
@@ -958,12 +961,13 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
 
         lab_follow_up.set_template("{please_choose}")
 
-    # image follow up
-    image_follow_up = MultiQNA(
-        1, 1, image_tracking.row,
-        'image_follow_up', temp % _imaging)
+    if not APP.emr_std() in ["mdland_iclinic"]:
+        # image follow up
+        image_follow_up = MultiQNA(
+            1, 1, image_tracking.row,
+            'image_follow_up', temp % _imaging)
 
-    image_follow_up.set_template("{please_choose}")
+        image_follow_up.set_template("{please_choose}")
 
     # referral follow up
     referral_follow_up = MultiQNA(
@@ -976,14 +980,15 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
            "<b>abnormal</b> results. This contact must be captured as a telephone encounter or a letter in the " \
            "patient record."
 
-    if not APP.emr_std() in ["mdland"]:
+    if not APP.emr_std() in ["mdland_iclinic"]:
         lab_follow_up.add_warning(
             getattr(lab_follow_up.row, "please_choose", None) in NOT_YES,
             temp % "lab")
 
-    image_follow_up.add_warning(
-        getattr(image_follow_up.row, "please_choose", None) in NOT_YES,
-        temp % _imaging)
+    if not APP.emr_std() in ["mdland_iclinic"]:
+        image_follow_up.add_warning(
+            getattr(image_follow_up.row, "please_choose", None) in NOT_YES,
+            temp % _imaging)
     
     referral_follow_up.add_warning(
         getattr(referral_follow_up.row, "please_choose", None) in NOT_YES,
@@ -992,7 +997,7 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
     temp = "Please provide 3 patients where {practice} created a telephone encounter " \
            "or letter to the patient regarding <b>%s</b> in the patient's record.".format(practice=APP.practice_name)
 
-    if not APP.emr_std() in ["mdland"]:
+    if not APP.emr_std() in ["mdland_iclinic"]:
         # lab follow up example normal
         lab_follow_up_normal_example = MultiQNA(
             3, float('inf'), getattr(lab_follow_up.row, "please_choose", None) == "Yes",
@@ -1008,19 +1013,21 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
 
         lab_follow_up_abnormal_example.set_template("{patient_name}: {patient_dob}")
 
-    # image follow up example normal
-    image_follow_up_normal_example = MultiQNA(
-        3, float('inf'), getattr(image_follow_up.row, "please_choose", None) == "Yes",
-        'image_follow_up_normal_example', temp % "normal imaging results")
+    if not APP.emr_std() in ["mdland_iclinic"]:
 
-    image_follow_up_normal_example.set_template("{patient_name}: {patient_dob}")
+        # image follow up example normal
+        image_follow_up_normal_example = MultiQNA(
+            3, float('inf'), getattr(image_follow_up.row, "please_choose", None) == "Yes",
+            'image_follow_up_normal_example', temp % "normal imaging results")
 
-    # image follow up example abnormal
-    image_follow_up_abnormal_example = MultiQNA(
-        3, float('inf'), getattr(image_follow_up.row, "please_choose", None) == "Yes",
-        'image_follow_up_abnormal_example', temp % "abnormal imaging results")
+        image_follow_up_normal_example.set_template("{patient_name}: {patient_dob}")
 
-    image_follow_up_abnormal_example.set_template("{patient_name}: {patient_dob}")
+        # image follow up example abnormal
+        image_follow_up_abnormal_example = MultiQNA(
+            3, float('inf'), getattr(image_follow_up.row, "please_choose", None) == "Yes",
+            'image_follow_up_abnormal_example', temp % "abnormal imaging results")
+
+        image_follow_up_abnormal_example.set_template("{patient_name}: {patient_dob}")
 
     # referral follow up example normal
     referral_follow_up_normal_example = MultiQNA(
