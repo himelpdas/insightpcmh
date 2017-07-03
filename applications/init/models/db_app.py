@@ -46,7 +46,7 @@ db.define_table("application",
     Field("practice_state", label="State", requires=IS_IN_SET(LIST_OF_STATES, zero=None)),
     Field("website", requires=IS_EMPTY_OR(IS_URL()), comment="Optional"),
 
-    Field("force_complete", "list:string", readable=False, writable=False),
+    Field("force_complete", "list:string", readable=False, writable=False, default=[]),
 
     Field("certified_on", "date", writable=False),
     Field('practice_photo', 'upload', requires=IS_IMAGE(),
