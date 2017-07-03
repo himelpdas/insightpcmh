@@ -321,6 +321,8 @@ def certify():
     db.application.certified_on.writable = True
     db.application.certified_on.readable = True
     db.application.practice_name.readable = True
+    db.application.status.readable = True
+    db.application.status.readable = True
 
     form = SQLFORM.grid(db.application, create=False, deletable=False)
 
