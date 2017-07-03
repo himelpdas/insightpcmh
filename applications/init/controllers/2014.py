@@ -730,13 +730,13 @@ def pcmh_3_3c__1_2_3_4_5_6_7_9_10():
 
     family_history = MultiQNA(
         1, float("inf"), True,
-        "medical_history",
+        "family_history",
         "Please provide patient(s) with a detailed cultural, social, medical and mental health history of the <b>"
         "family member(s)</b>."
         .format(measure_description=_each[1])
     )
 
-    medical_history.set_template("{patient_name}: {patient_dob}<br>Serviced on: {service_date} {screenshot}")
+    family_history.set_template("{patient_name}: {patient_dob}<br>Serviced on: {service_date} {screenshot}")
 
 
     return dict(documents={})
