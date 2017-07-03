@@ -70,10 +70,20 @@ db.define_table(
     )
 
 db.define_table(
+    'developmental_screening',
+
+    Field("patient_name", requires=IS_NOT_EMPTY()),
+    Field("patient_dob", "date", label="Patient DOB", requires=DATE_VALIDATOR),
+    Field("service_date", "date", label="Service Date", requires=DATE_VALIDATOR),
+    *SCREENSHOT_FIELDS
+)
+
+db.define_table(
     'lab_follow_up_normal_example',
      
     Field("patient_name", requires=IS_NOT_EMPTY()),
     Field("patient_dob", "date", label="Patient DOB", requires=DATE_VALIDATOR),
+    Field("service_date", "date", label="Service Date", requires=DATE_VALIDATOR),
     *SCREENSHOT_FIELDS
     )
 
@@ -82,6 +92,7 @@ db.define_table(
     
     Field("patient_name", requires=IS_NOT_EMPTY()),
     Field("patient_dob", "date", label="Patient DOB", requires=DATE_VALIDATOR),
+    Field("service_date", "date", label="Service Date", requires=DATE_VALIDATOR),
     *SCREENSHOT_FIELDS
     )
 
@@ -90,6 +101,7 @@ db.define_table(
      
     Field("patient_name", requires=IS_NOT_EMPTY()),
     Field("patient_dob", "date", label="Patient DOB", requires=DATE_VALIDATOR),
+    Field("service_date", "date", label="Service Date", requires=DATE_VALIDATOR),
     *SCREENSHOT_FIELDS
     )
 
@@ -98,6 +110,7 @@ db.define_table(
     
     Field("patient_name", requires=IS_NOT_EMPTY()),
     Field("patient_dob", "date", label="Patient DOB", requires=DATE_VALIDATOR),
+    Field("service_date", "date", label="Service Date", requires=DATE_VALIDATOR),
     *SCREENSHOT_FIELDS
     )
 
@@ -106,6 +119,7 @@ db.define_table(
      
     Field("patient_name", requires=IS_NOT_EMPTY()),
     Field("patient_dob", "date", label="Patient DOB", requires=DATE_VALIDATOR),
+    Field("service_date", "date", label="Service Date", requires=DATE_VALIDATOR),
     *SCREENSHOT_FIELDS
     )
 
@@ -114,6 +128,7 @@ db.define_table(
     
     Field("patient_name", requires=IS_NOT_EMPTY()),
     Field("patient_dob", "date", label="Patient DOB", requires=DATE_VALIDATOR),
+    Field("service_date", "date", label="Service Date", requires=DATE_VALIDATOR),
     *SCREENSHOT_FIELDS
     )
 

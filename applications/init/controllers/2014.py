@@ -517,7 +517,8 @@ def pcmh_1_1b__1_2_3_4():
         temp % (2, "s", "during")
     )
 
-    telephone_encounter_during_hours_example.set_template("{patient_name}: {patient_dob} {screenshot}")
+    telephone_encounter_during_hours_example\
+        .set_template("{patient_name}: {patient_dob}<br>Serviced on: {service_date} {screenshot}")
 
     telephone_encounter_after_hours_example = MultiQNA(
         1, 1, telephone_encounter_log.rows,
@@ -525,7 +526,8 @@ def pcmh_1_1b__1_2_3_4():
         temp % (1, "", "after")
     )
 
-    telephone_encounter_after_hours_example.set_template("{patient_name}: {patient_dob} {screenshot}")
+    telephone_encounter_after_hours_example \
+        .set_template("{patient_name}: {patient_dob}<br>Serviced on: {service_date} {screenshot}")
 
     return dict(documents={})
 
@@ -861,6 +863,17 @@ def pcmh_4_4b__1_2_3_4_5___3e__1_2_3_4_5():
 
 def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
     """Lab, Image, Referral Tracking & Follow-Up"""
+
+    if APP.practice_specialty == "Pediatrics":
+        developmental_screening = MultiQNA(
+            1, 1, True,
+            'developmental_screening',
+            "Please enter an infant patient where a completed developmental screening tool can be found in the "
+            "patient's portal. <b>Alternatively</b>, enter an infant patient where sequential and thorough care notes "
+            "tracking the development of the infant can be found in the patient's portal."
+        )
+        developmental_screening.set_template("{please_choose}")
+
     temp = "Does {practice} use <a href='{table_url}'>this {order_type} tracking table</a> (or an equivalent system) " \
            "to track <b>{order_type} orders</b>?"
     _imaging = "imaging (X-Ray, MRI, Sonogram, EKG etc.)"
@@ -1009,14 +1022,16 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
             'lab_follow_up_normal_example', temp % "normal lab results"
             )
 
-        lab_follow_up_normal_example.set_template("{patient_name}: {patient_dob}")
+        lab_follow_up_normal_example\
+            .set_template("{patient_name}: {patient_dob}<br>Serviced on: {service_date} {screenshot}")
 
         # lab follow up example abnormal
         lab_follow_up_abnormal_example = MultiQNA(
             3, float('inf'), getattr(lab_follow_up.row, "please_choose", None) == "Yes",
             'lab_follow_up_abnormal_example', temp % "abnormal lab results")
 
-        lab_follow_up_abnormal_example.set_template("{patient_name}: {patient_dob}")
+        lab_follow_up_abnormal_example.\
+            set_template("{patient_name}: {patient_dob}<br>Serviced on: {service_date} {screenshot}")
 
     if not APP.emr_std() in ["mdland_iclinic"]:
 
@@ -1025,14 +1040,16 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
             3, float('inf'), getattr(image_follow_up.row, "please_choose", None) == "Yes",
             'image_follow_up_normal_example', temp % "normal imaging results")
 
-        image_follow_up_normal_example.set_template("{patient_name}: {patient_dob}")
+        image_follow_up_normal_example.\
+            set_template("{patient_name}: {patient_dob}<br>Serviced on: {service_date} {screenshot}")
 
         # image follow up example abnormal
         image_follow_up_abnormal_example = MultiQNA(
             3, float('inf'), getattr(image_follow_up.row, "please_choose", None) == "Yes",
             'image_follow_up_abnormal_example', temp % "abnormal imaging results")
 
-        image_follow_up_abnormal_example.set_template("{patient_name}: {patient_dob}")
+        image_follow_up_abnormal_example.\
+            set_template("{patient_name}: {patient_dob}<br>Serviced on: {service_date} {screenshot}")
 
     # referral follow up example normal
     referral_follow_up_normal_example = MultiQNA(
@@ -1040,14 +1057,16 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
         'referral_follow_up_normal_example', temp % "normal referral results"
         )
 
-    referral_follow_up_normal_example.set_template("{patient_name}: {patient_dob}")
+    referral_follow_up_normal_example.\
+        set_template("{patient_name}: {patient_dob}<br>Serviced on: {service_date} {screenshot}")
 
     # referral follow up example abnormal
     referral_follow_up_abnormal_example = MultiQNA(
         3, float('inf'), getattr(referral_follow_up.row, "please_choose", None) == "Yes",
         'referral_follow_up_abnormal_example', temp % "abnormal referral results")
 
-    referral_follow_up_abnormal_example.set_template("{patient_name}: {patient_dob}")
+    referral_follow_up_abnormal_example.\
+        set_template("{patient_name}: {patient_dob}<br>Serviced on: {service_date} {screenshot}")
 
     # todo - add new born screening for peds
 

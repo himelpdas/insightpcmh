@@ -139,6 +139,9 @@ middle_column = {0: mc0, 1: mc1, 2: mc2}[
         ampmNames: [' AM', ' PM']
     });  {{#show24Hours: false,}}
 </script>
+<script>
+    var w2p_ajax_date_format = "{{=T('%m/%d/%Y')}}";
+</script>  {{# http://bit.ly/2tC1IOw}}
 {{end page_js}}
 {{if response.google_analytics_id:}}
 <!-- Analytics ==================================== -->
