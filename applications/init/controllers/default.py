@@ -354,7 +354,7 @@ def load_apps_grid():
         db.application.status.writable = False
     if IS_MASTER or IS_ADMIN:
         db.application.owner_id.writable = True
-    if IS_MASTER:  # remove not after testing non-master mode
+    # if IS_MASTER:  # remove not after testing non-master mode
         my_apps_grid = db(db.application.id > 0)
     else:
         my_group_id = auth.id_group("user_%s" % auth.user.id)
