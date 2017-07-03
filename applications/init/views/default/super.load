@@ -33,10 +33,10 @@ even if the function is called via ajax.
 
 {{block load_js}}
 <script>  {{#http://bit.ly/2itgFxG}}
-$(document).ajaxStop(function() {  {{#http://bit.ly/2itnmzG - call when all outstanding ajax complete, no need to call same code for each table}}
+$(document).ready(function() {  {{#http://bit.ly/2itnmzG - call when all outstanding ajax complete, no need to call same code for each table}}
     $('[title]').tooltip({html: true});
     $('.multiselect.dropdown-toggle').attr({'data-original-title': 'edit'});
-    $(".web2py_htmltable").animate({"max-height": "33em", 'background-color': "#FBF9FF"}).append("{{=XML('<br>'*10)}}");  {{# http://bit.ly/2ithnuW}}
+    $(".web2py_htmltable").animate({"min-height": "50em", 'background-color': "#FBF9FF"});  {{# http://bit.ly/2ithnuW}}
     //$("[multiple='multiple'][class!='autocomplete']").multiselect({maxHeight: 200});  {{# select all multi widgets, but not with those hidden autocomplete dropdowns (also has multiple=multiple attr))}}
 
 {{#$( "input[name^='_autocomplete_']" ).addClass('form-control');}}  {{#starts with selector https://api.jquery.com/attribute-starts-with-selector/}}
