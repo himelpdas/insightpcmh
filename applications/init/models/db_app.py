@@ -45,7 +45,13 @@ db.define_table("application",
     Field("practice_zip", label="Zip", requires=IS_NOT_EMPTY()),
     Field("practice_state", label="State", requires=IS_IN_SET(LIST_OF_STATES, zero=None)),
     Field("website", requires=IS_EMPTY_OR(IS_URL()), comment="Optional"),
+
     Field("force_complete", "list:string", readable=False, writable=False),
+
+    Field("certified_on", "date", writable=False),
+    Field('practice_photo', 'upload', requires=IS_IMAGE(), uploadfield='file_data', readable=False, writable=False),
+    Field('file_data', 'blob'),
+
     common_filter=lambda query: db.application.is_active == True,
     format='%(practice_name)s (%(id)s)'
     # auth.signature  # not needed because db._common_fields.append(auth.signature)

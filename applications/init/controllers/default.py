@@ -336,6 +336,12 @@ def load_apps_grid():
         db.application.status.writable = False
     if IS_MASTER or IS_ADMIN:
         db.application.owner_id.writable = True
+
+        db.application.certified_on.readable = True
+        if "view" in request.args or "edit" in request.args:
+            db.application.practice_photo.readable = True
+            db.application.practice_photo.writable = True
+            db.application.certified_on.writable = True
     if IS_MASTER:  # remove not after testing non-master mode
         my_apps_grid = db(db.application.id > 0)
     else:

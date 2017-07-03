@@ -204,74 +204,26 @@
                 <h2><i class="fa fa-fw fa-clock-o"></i>Recently PCMH Certified</h2>
                 <hr class="small">
                 <div class="row">
+                    {{certified = db((db.application.id>0) & (db.application.certified_on != None)).select(orderby=~db.application.id, limitby=(0, 4))}}
+                    {{for app in certified:}}
                     <div class="col-md-6">
                         <div class="portfolio-item">
                         <div class="carousel slide" data-ride="carousel">
                             <div class="carousel-inner">
                                 <div class="item active">
-                                    <img src="{{=URL('static','home/img/portfolio-1.jpg')}}" alt=""
+                                    <img src="{{=URL('download', args=[app.practice_photo])}}" alt=""
                                          class="img-responsive" style="filter:brightness(88%) blur(3px); -webkit-filter: brightness(88%) blur(3px);">
                                     <div class="carousel-caption" style="text-shadow: 2px 2px #000000">
-                                        <h2>St. John's Medical & Dental Offices</h2>
-                                        <h3>Brooklyn, NY</h3>
-                                        <h4><span class="glyphicon glyphicon-certificate"></span> Certified September, 2016</h4>
+                                        <h2>{{=app.practice_name}}</h2>
+                                        <h3>{{=app.practice_city}}, {{=app.practice_state}}</h3>
+                                        <h4><span class="glyphicon glyphicon-certificate"></span> Certified {{=app.certified_on.month}} {{=app.certified_on.year}}</h4>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="portfolio-item">
-                        <div class="carousel slide" data-ride="carousel">
-                            <div class="carousel-inner">
-                                <div class="item active">
-                                    <img src="{{=URL('static','home/img/portfolio-2.jpg')}}" alt=""
-                                         class="img-responsive" style="filter:brightness(88%) blur(3px); -webkit-filter: brightness(88%) blur(3px);">
-                                    <div class="carousel-caption" style="text-shadow: 2px 2px #000000">
-                                        <h2>Babubhai Patel MD PC</h2>
-                                        <h3>New York, NY</h3>
-                                        <h4><span class="glyphicon glyphicon-certificate"></span> Certified October, 2016</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="portfolio-item">
-                        <div class="carousel slide" data-ride="carousel">
-                            <div class="carousel-inner">
-                                <div class="item active">
-                                    <img src="{{=URL('static','home/img/portfolio-3.jpg')}}" alt=""
-                                         class="img-responsive" style="filter:brightness(88%) blur(3px); -webkit-filter: brightness(88%) blur(3px);">
-                                    <div class="carousel-caption" style="text-shadow: 2px 2px #000000">
-                                        <h2>Jothiandan Kanthimathi MD</h2>
-                                        <h3>Bronx, NY</h3>
-                                        <h4><span class="glyphicon glyphicon-certificate"></span> Certified September, 2016</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="portfolio-item">
-                        <div class="carousel slide" data-ride="carousel">
-                            <div class="carousel-inner">
-                                <div class="item active">
-                                    <img src="{{=URL('static','home/img/portfolio-4.jpg')}}" alt=""
-                                         class="img-responsive" style="filter:brightness(88%) blur(3px); -webkit-filter: brightness(88%) blur(3px);">
-                                    <div class="carousel-caption" style="text-shadow: 2px 2px #000000;">
-                                        <h2>Parchester Medical PC</h2>
-                                        <h3>Bronx, NY</h3>
-                                        <h4><span class="glyphicon glyphicon-certificate"></span> Renewed April, 2016</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        </div>
-                    </div>
+                    {{pass}}
                 </div>
                 <!-- /.row (nested) -->
                 <a href="#contact" class="btn btn-lg btn-dark">Still not convinced? Just give us a ring!</a>
