@@ -871,16 +871,18 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
     )
     image_tracking.set_template("{please_choose}")
 
-    # lab tracking
-    lab_table_url = URL('init', 'word', 'tracking_chart.doc', args=["lab_order_tracking_chart"],
-                        vars=dict(type="lab", **request.get_vars),
-                        hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id", "type"])
-    lab_tracking = MultiQNA(
-        1, 1, True,
-        'lab_tracking', temp.format(
-            practice=APP.practice_name, order_type="lab", table_url=lab_table_url)
-    )
-    lab_tracking.set_template("{please_choose}")
+    if not APP.emr_std() in ["mdland"]:
+        # lab tracking
+        lab_table_url = URL('init', 'word', 'tracking_chart.doc', args=["lab_order_tracking_chart"],
+                            vars=dict(type="lab", **request.get_vars),
+                            hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id", "type"])
+
+        lab_tracking = MultiQNA(
+            1, 1, True,
+            'lab_tracking', temp.format(
+                practice=APP.practice_name, order_type="lab", table_url=lab_table_url)
+        )
+        lab_tracking.set_template("{please_choose}")
     
     # referral tracking
     referral_table_url = URL('init', 'word', 'tracking_chart.doc', args=["referral_order_tracking_chart"],
@@ -900,11 +902,13 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
         getattr(image_tracking.row, "please_choose", None) in NOT_YES,
         temp.format(practice=APP.practice_name, chart_url=image_table_url, order_type=_imaging)
     )
-    
-    lab_tracking.add_warning(
-        getattr(lab_tracking.row, "please_choose", None) in NOT_YES,
-        temp.format(practice=APP.practice_name, chart_url=lab_table_url, order_type="lab")
-    )
+
+    if not APP.emr_std() in ["mdland"]:
+
+        lab_tracking.add_warning(
+            getattr(lab_tracking.row, "please_choose", None) in NOT_YES,
+            temp.format(practice=APP.practice_name, chart_url=lab_table_url, order_type="lab")
+        )
 
     referral_tracking.add_warning(
         getattr(referral_tracking.row, "please_choose", None) in NOT_YES,
@@ -924,14 +928,15 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
 
     image_tracking_chart.set_template("{choose_file}")
 
-    # lab tracking chart
-    lab_tracking_chart = MultiQNA(
-        1, float('inf'), lab_tracking.row,
-        'lab_tracking_chart',
-        temp.format(order_type="lab")
-    )
+    if not APP.emr_std() in ["mdland"]:
+        # lab tracking chart
+        lab_tracking_chart = MultiQNA(
+            1, float('inf'), lab_tracking.row,
+            'lab_tracking_chart',
+            temp.format(order_type="lab")
+        )
 
-    lab_tracking_chart.set_template("{choose_file}")
+        lab_tracking_chart.set_template("{choose_file}")
 
     # referral tracking chart
     referral_tracking_chart = MultiQNA(
@@ -945,12 +950,13 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
     temp = "Does {practice} contact patients every time when <b>%s results </b> arrive regardless if it's normal or " \
            "abnormal? ".format(practice=APP.practice_name)
 
-    # lab follow up
-    lab_follow_up = MultiQNA(
-        1, 1, lab_tracking.row,
-        'lab_follow_up', temp % "lab")
+    if not APP.emr_std() in ["mdland"]:
+        # lab follow up
+        lab_follow_up = MultiQNA(
+            1, 1, lab_tracking.row,
+            'lab_follow_up', temp % "lab")
 
-    lab_follow_up.set_template("{please_choose}")
+        lab_follow_up.set_template("{please_choose}")
 
     # image follow up
     image_follow_up = MultiQNA(
@@ -970,9 +976,10 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
            "<b>abnormal</b> results. This contact must be captured as a telephone encounter or a letter in the " \
            "patient record."
 
-    lab_follow_up.add_warning(
-        getattr(lab_follow_up.row, "please_choose", None) in NOT_YES,
-        temp % "lab")
+    if not APP.emr_std() in ["mdland"]:
+        lab_follow_up.add_warning(
+            getattr(lab_follow_up.row, "please_choose", None) in NOT_YES,
+            temp % "lab")
 
     image_follow_up.add_warning(
         getattr(image_follow_up.row, "please_choose", None) in NOT_YES,
@@ -985,20 +992,21 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
     temp = "Please provide 3 patients where {practice} created a telephone encounter " \
            "or letter to the patient regarding <b>%s</b> in the patient's record.".format(practice=APP.practice_name)
 
-    # lab follow up example normal
-    lab_follow_up_normal_example = MultiQNA(
-        3, float('inf'), getattr(lab_follow_up.row, "please_choose", None) == "Yes",
-        'lab_follow_up_normal_example', temp % "normal lab results"
-        )
+    if not APP.emr_std() in ["mdland"]:
+        # lab follow up example normal
+        lab_follow_up_normal_example = MultiQNA(
+            3, float('inf'), getattr(lab_follow_up.row, "please_choose", None) == "Yes",
+            'lab_follow_up_normal_example', temp % "normal lab results"
+            )
 
-    lab_follow_up_normal_example.set_template("{patient_name}: {patient_dob}")
+        lab_follow_up_normal_example.set_template("{patient_name}: {patient_dob}")
 
-    # lab follow up example abnormal
-    lab_follow_up_abnormal_example = MultiQNA(
-        3, float('inf'), getattr(lab_follow_up.row, "please_choose", None) == "Yes",
-        'lab_follow_up_abnormal_example', temp % "abnormal lab results")
+        # lab follow up example abnormal
+        lab_follow_up_abnormal_example = MultiQNA(
+            3, float('inf'), getattr(lab_follow_up.row, "please_choose", None) == "Yes",
+            'lab_follow_up_abnormal_example', temp % "abnormal lab results")
 
-    lab_follow_up_abnormal_example.set_template("{patient_name}: {patient_dob}")
+        lab_follow_up_abnormal_example.set_template("{patient_name}: {patient_dob}")
 
     # image follow up example normal
     image_follow_up_normal_example = MultiQNA(
