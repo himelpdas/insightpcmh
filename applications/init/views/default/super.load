@@ -33,7 +33,7 @@ even if the function is called via ajax.
 
 {{block load_js}}
 <script>  {{#http://bit.ly/2itgFxG}}
-$(document).ready(function() {  {{#http://bit.ly/2itnmzG - call when all outstanding ajax complete, no need to call same code for each table}}
+$(document).ajaxStop(function() {  {{#http://bit.ly/2itnmzG - call when all outstanding ajax complete, no need to call same code for each table}}
     $('[title]').tooltip({html: true});
     $('.multiselect.dropdown-toggle').attr({'data-original-title': 'edit'});
     $(".web2py_htmltable").animate({"min-height": "50em", 'background-color': "#FBF9FF"});  {{# http://bit.ly/2ithnuW}}
