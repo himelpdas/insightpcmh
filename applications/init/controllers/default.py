@@ -457,6 +457,9 @@ def load_logs_grid():
     db.logging.created_by.readable=True
     db.application.id.represent = lambda v, r: "%s (%s)" % (r.application.practice_name, r.application.id)
 
+    db.logging.application.readable = True
+    db.logging.application.writable = True
+
     if IS_MASTER or IS_ADMIN:
         db.logging.owner_id.readable = True
         query = db(db.logging.id > 0)
