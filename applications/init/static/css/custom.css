@@ -21,14 +21,6 @@
     border-bottom:1px dotted;
 }
 
-.panel-warning > .panel-heading {
-    background-color: #a17f1a;
-}
-
-.text-warning {
-    color: #a17f1a;
-}
-
 /*
 .panel .question-box-title-done:hover {
     color: #d1d1d1;
