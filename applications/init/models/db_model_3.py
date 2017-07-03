@@ -12,12 +12,17 @@ db.define_table(
           ),
 )
 
-db.define_table(
-    'callback_list',
-    Field('choose_file', 'upload', uploadfield='file_data'),
-    Field('file_data', 'blob'),
-    Field('file_description', requires=IS_NOT_EMPTY()),
-)
+SERVICES = [("immunization", "vaccinations/immunizations"),
+            ("preventative", "preventative"),
+            ("chronic", "chronic/acute")]
+
+for svc in SERVICES:
+    db.define_table(
+        'callback_list_%s' % svc[0],
+        Field('choose_file', 'upload', uploadfield='file_data'),
+        Field('file_data', 'blob'),
+        Field('file_description', requires=IS_NOT_EMPTY()),
+    )
 
 db.define_table(
     "medical_history",

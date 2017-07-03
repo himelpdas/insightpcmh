@@ -743,17 +743,22 @@ def pcmh_3_3c__1_2_3_4_5_6_7_9_10():
 def pcmh_3_3d__1_2_3_4_5():
     """Patient callback"""
 
-    callback_list = MultiQNA(
-        1, float("inf"), True,
-        'callback_list',
-        "Please upload callback lists for <b>2 vaccinations/immunizations, 2 preventative care services, "
-        "3 chronic/acute services, overdue visit and medication monitoring (i.e. Coumadin)</b>. Logs can be sourced "
-        "from {emr}, QARR/HEDIS (from 3 or more health plans), and/or CIR recall lists. Documents must be dated "
-        "within the last 10 months."
-        "".format(emr=APP.emr)
-    )
+    services = [("immunization", "vaccinations/immunizations"),
+                ("preventative", "preventative"),
+                ("chronic", "chronic/acute")]
 
-    callback_list.set_template("{choose_file}")
+    temp = "Please upload callback / missing service lists for <b>2 {svc}</b> measures. Logs can be sourced " \
+        "from {emr}, QARR/HEDIS (from 3 or more health plans), and/or CIR recall lists. Documents must be dated " \
+        "within the last 10 months."
+
+    for svc in services:
+        qna = MultiQNA(
+            1, float("inf"), True,
+            'callback_list_%s' % svc[0],
+            temp.format(emr=APP.emr, svc=svc[1])
+        )
+
+        qna.set_template("{choose_file}")
 
     return dict(documents={})
 
@@ -1111,16 +1116,19 @@ def pcmh_5_5c__3():
 # (6)###################################################
 def pcmh_6_6a__1_2_3_4():
     """Performance reports"""
-    report_cards = MultiQNA(
-        1, float("inf"), True,
-        'report_card',
-        "Please upload QARR/HEDIS performance report cards from a <b>minimum of 3 health plans</b> (i.e. Health First, "
-        "Fidelis, etc.) <b>Alternatively</b>, you may upload reporting from {emr} showing performance of "
-        "<b>two immunization measures</b>, <b>two preventative care measures</b> and <b>two chronic care measures.</b> "
-        "Documents must be dated no older than 10 months.".format(emr=APP.emr)
-    )
 
-    report_cards.set_template("{choose_file}")
+    temp = "Please upload performance reports for <b>2 {svc}</b> measures. Logs can be sourced " \
+        "from {emr}, QARR/HEDIS (from 3 or more health plans), and/or CIR. Documents must be dated " \
+        "within the last 10 months."
+
+    for svc in SERVICES:
+        report_cards = MultiQNA(
+            1, float("inf"), True,
+            'report_card_%s' % svc[0],
+            temp.format(emr=APP.emr, svc=svc[1])
+        )
+
+        report_cards.set_template("{choose_file}")
 
     award = MultiQNA(
         1, 1, True,
