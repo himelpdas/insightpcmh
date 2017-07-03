@@ -311,7 +311,23 @@ def _assigned_column(row):
     return container
 
 
-#@_disable_rbac_fields
+@auth.requires(IS_ADMIN or IS_MASTER, requires_login=True)
+def certify():
+    for field in db.application:
+        field.readable = False
+        field.writable = False
+    db.application.practice_photo.readable = True
+    db.application.practice_photo.writable = True
+    db.application.certified_on.writable = True
+    db.application.certified_on.readable = True
+    db.application.practice_name.readable = True
+
+    form = SQLFORM.grid(db.application, create=False, deletable=False)
+
+    return dict(form=form)
+
+
+# @_disable_rbac_fields
 # @auth.requires_signature()
 def load_apps_grid():
     # db.application.modified_by.readable = True
@@ -336,12 +352,6 @@ def load_apps_grid():
         db.application.status.writable = False
     if IS_MASTER or IS_ADMIN:
         db.application.owner_id.writable = True
-
-        db.application.certified_on.readable = True
-        if "view" in request.args or "edit" in request.args:
-            db.application.practice_photo.readable = True
-            db.application.practice_photo.writable = True
-            db.application.certified_on.writable = True
     if IS_MASTER:  # remove not after testing non-master mode
         my_apps_grid = db(db.application.id > 0)
     else:

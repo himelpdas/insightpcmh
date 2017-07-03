@@ -1,0 +1,19 @@
+{{extend 'layout.html'}}
+
+{{block head}}
+{{super}}
+<link rel="stylesheet" href="{{=URL('static','css/custom/bootstrap-multiselect.css')}}"/>
+<style>
+    .alert.alert-default {
+        border: 1px dashed #ccc;
+    }
+</style>
+{{end}}
+
+{{include}}
+
+{{block page_js}}
+{{super}}
+    <script src="{{=URL('static','js/custom/bootstrap-multiselect.js')}}"></script>
+    <script src="{{=URL('static','js/custom/jquery.color.js')}}"></script>  {{# http://bit.ly/2itnmzG}}
+{{end}}

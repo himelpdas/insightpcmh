@@ -1,22 +1,13 @@
-{{extend 'layout.html'}}
-
-{{block head}}
-{{super}}
-<link rel="stylesheet" href="{{=URL('static','css/custom/bootstrap-multiselect.css')}}"/>
-<style>
-    .alert.alert-default {
-        border: 1px dashed #ccc;
-    }
-</style>
-{{end}}
+{{extend 'default/super.html'}}
 
 <div class="alert text-strong alert-default">
     <strong><span class="glyphicon glyphicon-briefcase"></span> Manage PCMH Applications</strong>
-    <span class="pull-right text-muted">
+    <msp; class="pull-right text-muted">
         <span class="text-danger">&#9632;</span> Trainer&emsp;
         <span class="text-warning">&#9632;</span> App Manager&emsp;
         <span class="text-success">&#9632;</span> Contributor&emsp;
         <span class="text-primary">&#9632;</span> Visitor&emsp;
+        {{if IS_ADMIN or IS_MASTER:}}<a href="{{=URL(f="certify.html")}}"><span class="glyphicon glyphicon-certificate text-primary"></span></a>&emsp;{{pass}}
     </span>
 </div>
     {{=LOAD('default', 'load_apps_grid.load', ajax=True, user_signature=True)}}  {{# keep signature so we don't have to check for permission again to allow access to this grid}}
@@ -37,9 +28,3 @@
     {{=LOAD('default', 'load_logs_grid.load', ajax=True, user_signature=True)}}  {{# keep signature so we don't have to check for permission again to allow access to this grid}}
 <hr><br>
 {{pass}}
-
-{{block page_js}}
-{{super}}
-    <script src="{{=URL('static','js/custom/bootstrap-multiselect.js')}}"></script>
-    <script src="{{=URL('static','js/custom/jquery.color.js')}}"></script>  {{# http://bit.ly/2itnmzG}}
-{{end}}
