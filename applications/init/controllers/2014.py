@@ -732,7 +732,7 @@ def pcmh_3_3c__1_2_3_4_5_6_7_9_10():
         1, float("inf"), True,
         "medical_history",
         "Please provide patient(s) with a detailed cultural, social, medical and mental health history of the <b>"
-        "patient's family</b>."
+        "family member(s)</b>."
         .format(measure_description=_each[1])
     )
 
