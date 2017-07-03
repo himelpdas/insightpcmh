@@ -212,7 +212,7 @@
                             <div class="carousel-inner">
                                 <div class="item active">
                                     <img src="{{=URL('download', args=[app.practice_photo])}}" alt=""
-                                         class="img-responsive" style="filter:brightness(88%) blur(3px); -webkit-filter: brightness(88%) blur(3px);">
+                                         class="img-responsive" width="640" height="480" style="filter:brightness(88%) blur(3px); -webkit-filter: brightness(88%) blur(3px); object-fit: cover;">  {{# http://bit.ly/2tCfrEY}}
                                     <div class="carousel-caption" style="text-shadow: 2px 2px #000000">
                                         <h2>{{=app.practice_name}}</h2>
                                         <h3>{{=app.practice_city}}, {{=app.practice_state}}</h3>
