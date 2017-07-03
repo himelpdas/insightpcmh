@@ -204,7 +204,7 @@
                 <h2><i class="fa fa-fw fa-clock-o"></i>Recently PCMH Certified</h2>
                 <hr class="small">
                 <div class="row">
-                    {{certified = db((db.application.id>0) & (db.application.certified_on != None)).select(orderby=~db.application.id, limitby=(0, 6))}}
+                    {{certified = db((db.application.id>0) & (db.application.certified_on != None)).select(orderby=~db.application.certified_on, limitby=(0, 6))}}
                     {{for app in certified:}}
                     <div class="col-md-6">
                         <div class="portfolio-item">
