@@ -30,11 +30,12 @@ db.define_table("application",
     #      label=SPAN("Largest Site?", _title="Applies to corporate tool only"),
     #      requires=IS_NOT_EMPTY() if request.post_vars.application_size == "Multi" else None),
     Field("emr", label="Primary EMR", requires=IS_IN_SET(EMRS, sort=True, zero=None)),
-    Field("other_software", label="Secondary Software", comment=XML("If you use more than one software to run your "
-                                                                    "practice, enter the name of the software here, "
-                                                                    "otherwise <b>leave blank</b>. For example, some "
-                                                                    "practices use a 2nd EMR as a scheduler or has a "
-                                                                    "separate software for billing.")),
+    Field("other_software", label="Secondary Software", default="None",
+          comment=XML("If you use more than one software to run your "
+                      "practice, enter the name of the software here, "
+                      "otherwise <b>leave blank</b>. For example, some "
+                      "practices use a 2nd EMR as a scheduler or has a "
+                      "separate software for billing.")),
     Field("practice_specialty", label="Speciality",
           requires=IS_IN_SET(['Internal Medicine', 'Pediatrics', 'Family Medicine'], sort=True, zero=None)),
     Field("practice_phone", label="Phone", requires=PHONE_VALIDATOR),
