@@ -126,7 +126,7 @@ class QNA(object):
         MAILER(
             map(lambda y: y.auth_group.role.split("user_")[1], active_user_groups),
             title,
-            "{first_name} {last}. ({title}) just made some changes in {practice}'s PCMH questionnaire!"
+            "{first_name} {last}. ({title}) just answered a question in {practice}'s PCMH questionnaire!"
             .format(first_name=auth.user.first_name, last=auth.user.last_name[0].upper(),
                     title=auth.user.title, practice=APP.practice_name),
             title,
