@@ -360,16 +360,17 @@ def load_apps_grid():
         my_apps_grid = db(db.application.id > 0)
     else:
         my_group_id = auth.id_group("user_%s" % auth.user.id)
-        my_apps_disinct = db((db.application.id == db.auth_permission.record_id) &  # same application id will show up
-                             # twice because multiple permissions of same user can be set for the same application (i.e.
-                             # when you see HD1 XXX HD1 in master mode *WARNING*
-                     (db.auth_permission.name.belongs(["manage", "contribute", "administrate", "train"])) &
-                     (db.auth_permission.group_id == my_group_id)).select(groupby=db.application.id)  # distinct gives near "ON" operational error, just use groupby http://bit.ly/2h0Ou3Z
+        my_apps_distinct = db((db.application.id == db.auth_permission.record_id) &  # same application id will show up
+                              # twice because multiple permissions of same user can be set for the same application (ie
+                              # when you see HD1 XXX HD1 in master mode *WARNING*
+                              (db.auth_permission.name.belongs(["manage", "contribute", "administrate", "train"])) &
+                              (db.auth_permission.group_id == my_group_id)).select(groupby=db.application.id)
+        # distinct gives near "ON" operational error, just use groupby http://bit.ly/2h0Ou3Z
         # groupby http://bit.ly/2h0Ou3Z
 
-        logger.info(my_apps_disinct)
+        logger.info(my_apps_distinct)
 
-        my_apps_grid = db.application.id.belongs(map(lambda r: r.application.id, my_apps_disinct))  # will have to
+        my_apps_grid = db.application.id.belongs(map(lambda r: r.application.id, my_apps_distinct))  # will have to
         # double query because grid does not have distinct and groupby disables CUD
 
     links.append(dict(

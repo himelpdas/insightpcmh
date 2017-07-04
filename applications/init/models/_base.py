@@ -88,9 +88,11 @@ class QNA(object):
             if self.form.process(onvalidation=self.validator, formname="qna_%s" % self.table_name).accepted:
                 session.flash = "Answer saved!"
                 redirect(URL(vars=request.get_vars))
+                return True
             elif self.form.errors:
                 QNA.reuse_form = self  # form.process appears to happen before QNA.__init__
                 logger.critical("CryptQNA Reuse: Form has errors!")
+        return False
 
     def preprocess(self):
         """Perform tasks related to Single or Multi forms before form_process"""
@@ -111,7 +113,23 @@ class QNA(object):
             session.flash = "Deleted answer (%s) question from question #%s" % (id, table_name)
             redirect(URL(request.controller, request.function, vars=request.get_vars))  # TODO
         self.preprocess()
-        self._form_process()
+        if self._form_process():
+            active_user_groups = db((db.application.id == db.auth_permission.record_id) &
+                                    (db.auth_permission.name.belongs(["manage", "contribute", "train"])) &
+                                    (db.auth_permission.group_id == db.auth_group.id) &
+                                    (db.auth_group.role.startswith("user_")) & (db.application.id==8))
+
+            title = "InsightPCMH: New activity in {practice}'s PCMH questionnaire!".format(practice=APP.practice_name)
+            MAILER(
+                map(lambda y: y.auth_group.role.split("user_")[1], active_user_groups),
+                title,
+                "{first_name} {last}. ({title}) just made some changes in {practice}'s PCMH questionnaire!"
+                .format(first_name=auth.user.first_name, last=auth.user.last_name[0].upper(),
+                        title=auth.user.title, practice=APP.practice_name),
+                title,
+                URL(scheme="https", host=True),
+                "Click here to see the changes!"
+            )
 
     @require_show
     def has_warnings(self):
@@ -322,7 +340,7 @@ class CryptQNA(MultiQNA):
                                             _type="submit", _class="btn btn-%s pull-right" % btn_class))
 
 
-def mailer(user_ids, subject, message, summary, action_url, call_to_action):
+def MAILER(user_ids, subject, message, summary, action_url, call_to_action):
     users = db(db.auth_user.id.belongs(user_ids)).select()
     assert users, "Expected users before email!"
     for user in users:
