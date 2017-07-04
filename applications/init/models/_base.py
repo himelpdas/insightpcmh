@@ -358,7 +358,7 @@ def MAILER(user_ids, subject, message, summary, action_url, call_to_action):
         mail.send(to=[email],
                   subject=subject,
                   message=rendered,
-                  mime="text/html")
+                  headers={'Content-Type' : 'text/html'})
 
 
 def DOC_HEADER():
