@@ -378,11 +378,11 @@ def load_apps_grid():
     app_grid = SQLFORM.grid(my_apps_grid,
                             onvalidation=_app_onvalidation,
                             oncreate=_app_oncreate,
-                            create=IS_ADMIN or IS_MASTER or IS_CONTRIB,
+                            create=IS_ADMIN or IS_MASTER or IS_CONTRIB or IS_TRAINER,
                             formname="load_apps_grid",
                             links=links,
-                            deletable=IS_ADMIN or IS_MASTER or IS_CONTRIB,
-                            editable=IS_ADMIN or IS_MASTER or IS_CONTRIB,
+                            deletable=IS_ADMIN or IS_MASTER,
+                            editable=IS_ADMIN or IS_MASTER,
                             # groupby=db.application.id, # groupby by itself behaves like distinct http://bit.ly/2h0Ou3Z
                             field_id=db.application.id,
                             links_placement='left')
@@ -500,10 +500,10 @@ def load_logs_grid():
         # user_signature=False,  # this is handled by the controller
         links_placement='left')
 
-
     return dict(logs_grid=logs_grid)
 
-#@_disable_rbac_fields
+
+# @_disable_rbac_fields
 # @auth.requires_signature()
 def load_users_grid():
     links = []
@@ -520,7 +520,7 @@ def load_users_grid():
                               oncreate=_user_oncreate,
                               orderby=~db.auth_user.is_insight | db.auth_user.id,  # show insight first
                               field_id=db.auth_user.id,
-                              #user_signature=False,  # this is handled by the controller
+                              # user_signature=False,  # this is handled by the controller
                               links_placement='left')
 
     return dict(users_grid=users_grid)
