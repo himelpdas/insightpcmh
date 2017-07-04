@@ -324,7 +324,7 @@ def certify():
 
     def onvalidation(form):
         form.vars.status = "Certified"
-        form.vars.progress = "100.0%"
+        form.vars.progress = 100.0
 
     form = SQLFORM.grid(db.application, onvalidation=onvalidation, create=False, deletable=False)
 
