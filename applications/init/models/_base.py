@@ -130,7 +130,7 @@ class QNA(object):
             .format(first_name=auth.user.first_name, last=auth.user.last_name[0].upper(),
                     title=auth.user.title, practice=APP.practice_name),
             title,
-            URL(scheme="https", host=True),
+            URL(scheme="https", host=True, args=dict(app_id=APP_ID)),
             "Click here to see the changes!"
         )
 
@@ -358,7 +358,7 @@ def MAILER(user_ids, subject, message, summary, action_url, call_to_action):
         mail.send(to=[email],
                   subject=subject,
                   message=rendered,
-                  headers={'Content-Type' : 'text/html'})
+                  headers={'Content-Type': 'text/html'})
 
 
 def DOC_HEADER():
