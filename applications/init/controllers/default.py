@@ -321,10 +321,11 @@ def certify():
     db.application.certified_on.writable = True
     db.application.certified_on.readable = True
     db.application.practice_name.readable = True
-    db.application.status.readable = True
-    db.application.status.writable = True
 
-    form = SQLFORM.grid(db.application, create=False, deletable=False)
+    def onvalidation(form):
+        form.vars.status = "Certified"
+
+    form = SQLFORM.grid(db.application, onvalidation=onvalidation, create=False, deletable=False)
 
     return dict(form=form)
 
