@@ -387,7 +387,8 @@ def load_apps_grid():
                             editable=IS_ADMIN or IS_MASTER,
                             # groupby=db.application.id, # groupby by itself behaves like distinct http://bit.ly/2h0Ou3Z
                             field_id=db.application.id,
-                            links_placement='left')
+                            links_placement='left',
+                            buttons_placement='left')
 
     return dict(app_grid=app_grid)
 
@@ -494,9 +495,9 @@ def load_logs_grid():
         # editable=False if not IS_MASTER else True,
         fields=[db.logging.id, db.logging.application, db.logging.difficulty, db.logging.description,
                 db.logging.people_involved, db.logging.created_by, db.logging.created_on],
-        #links=links,
-        #onupdate=_user_onupdate,
-        #oncreate=_user_oncreate,
+        # links=links,
+        # onupdate=_user_onupdate,
+        # oncreate=_user_oncreate,
         orderby=~db.logging.id,  # show latest first
         field_id=db.logging.id,
         # user_signature=False,  # this is handled by the controller
