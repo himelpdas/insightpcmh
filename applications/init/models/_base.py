@@ -130,7 +130,7 @@ class QNA(object):
             .format(first_name=auth.user.first_name, last=auth.user.last_name[0].upper(),
                     title=auth.user.title, practice=APP.practice_name),
             title,
-            URL(scheme="https", host=True, args=dict(app_id=APP_ID)),
+            URL(scheme="https", host=True, vars=dict(app_id=APP_ID)),
             "Click here to see the changes!"
         )
 
