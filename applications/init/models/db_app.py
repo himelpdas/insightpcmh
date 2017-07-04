@@ -48,7 +48,7 @@ db.define_table("application",
 
     Field("force_complete", "list:string", readable=False, writable=False, default=[]),
 
-    Field("certified_on", "date", writable=False),
+    Field("certified_on", "date", writable=False, requires=DATE_VALIDATOR),
     Field('practice_photo', 'upload', requires=IS_IMAGE(),
           uploadfield='file_data', readable=False, writable=False),
     Field('file_data', 'blob', readable=False, writable=False),

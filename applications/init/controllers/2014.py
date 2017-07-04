@@ -37,7 +37,8 @@ class Navigator:
         self.init_menu()
         self.init_title()
 
-        db(db.application.id == APP_ID).update(progress='{:.1%}'.format(self.numerator/self.denominator))
+        progress = 100.0 if APP.status == "certified" else self.numerator/self.denominator
+        db(db.application.id == APP_ID).update(progress='{:.1%}'.format(progress))
 
     def init_title(self):
         if self.get_pcmh_from_request():
