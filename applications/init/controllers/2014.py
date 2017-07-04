@@ -37,7 +37,7 @@ class Navigator:
         self.init_menu()
         self.init_title()
 
-        progress = 100.0 if APP.status == "certified" else self.numerator/self.denominator
+        progress = 100.0 if APP.status == "Certified" else self.numerator/self.denominator
         db(db.application.id == APP_ID).update(progress='{:.1%}'.format(progress))
 
     def init_title(self):
