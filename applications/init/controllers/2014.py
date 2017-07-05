@@ -1126,7 +1126,7 @@ def pcmh_5_5b__1_2_3_5_6_7_8_9_10():
         'referral_blurb',
         "When making a referral to a specialist's or psychiatrist's office, does {practice} include the patient's "
         "latest demographics (i.e. care plan, medications, etc.), the latest lab/screening/test results and the "
-        "following informal agreement? <small><p><ul><li>In referring this patient to your care, our office "
+        "following <b>informal agreement?</b> <small><p><ul><li>In referring this patient to your care, our office "
         "expects in return a full report regarding our patient’s visit within 7 days of the appointment. Additionally, "
         "please send any documentation regarding your diagnosis and any treatment options considered. If you have any "
         "questions please contact our office.</small></li></ul>".format(practice=APP.practice_name)
@@ -1138,7 +1138,8 @@ def pcmh_5_5b__1_2_3_5_6_7_8_9_10():
                                "Adding informal agreement to referral orders is a requirement in PCMH."
                                )
 
-    temp = "Please upload a copy of a referral order recently sent to a <b>%s</b>.".format(practice=APP.practice_name)
+    temp = "Please upload a copy of a referral order recently sent to a <b>%s</b>. Make sure it includes the patient " \
+           "demographics, latest lab results and the informal agreement".format(practice=APP.practice_name)
 
     psych_order_example = MultiQNA(
         1, 1, referral_blurb.row,
