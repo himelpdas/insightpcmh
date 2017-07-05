@@ -1139,7 +1139,8 @@ def pcmh_5_5b__1_2_3_5_6_7_8_9_10():
                                )
 
     temp = "Please upload a copy of a referral order recently sent to a <b>%s</b>. Make sure it includes the patient " \
-           "demographics, latest lab results and the informal agreement.".format(practice=APP.practice_name)
+           "demographics, latest lab/screening/test results and the informal agreement."\
+           .format(practice=APP.practice_name)
 
     psych_order_example = MultiQNA(
         1, 1, referral_blurb.row,
