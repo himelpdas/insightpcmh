@@ -489,7 +489,7 @@ def pcmh_1_1b__1_2_3_4():
                   "In the patient's chart, create a new encounter.",
                   URL('static', _get_emr_image_rel_url('telephone_encounter_create2.png'))),
                  ("2. Describe Encounter",
-                  "Describe when the call was received, when the call was ended satisfied, and a summary of the call. "
+                  "Describe when the call was received, when the call was ended/addressed, and a summary of the call. "
                   "Note if patient expresses understanding of the advice given.",
                   URL('static', _get_emr_image_rel_url('telephone_encounter_ex.png')))]
             )
