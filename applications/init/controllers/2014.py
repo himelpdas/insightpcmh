@@ -636,7 +636,7 @@ def pcmh_2_2d__3_5_6_7_8():
 
     # referral tracking chart
     huddle_sheet = MultiQNA(
-        1, float('inf'), True,
+        5, float('inf'), True,
         'huddle_sheet',
         "Please upload a minimum of 5 days' worth of <a href='{url}'>daily huddle sheets</a>. The huddles must filled "
         "out every morning discussing tasks / reminders regarding a particular patient or a population of "
