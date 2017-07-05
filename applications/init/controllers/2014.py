@@ -199,7 +199,7 @@ def pcmh_0_emr():
     #
     # emr_login.set_template("Site: {website} <br>User: {username}<br>Password: {password}")
     #
-    return dict(documents={})
+    return dict(documents=[])
 
 
 def pcmh_0_credit_card():
@@ -212,7 +212,7 @@ def pcmh_0_credit_card():
 
     credit_card.set_template(
         "{gpg_encrypted}")
-    return dict(documents={})
+    return dict(documents=[])
 
 
 # def pcmh_0_ncqa():     """NCQA logins"""
@@ -234,7 +234,7 @@ def pcmh_0_credit_card():
 #     iss.set_template(
 #         "{gpg_encrypted}")
 #
-#     return dict(documents={})
+#     return dict(documents=[])
 
 
 # (1a)###################################################
@@ -314,9 +314,9 @@ def pcmh_1_1a__1():
         diff = set(map(lambda e: e.day_of_the_week, same_day_block_rows)).symmetric_difference(block_days)
         same_day_blocks.add_warning(diff, "You are missing same-day block(s) for %s." % ", ".join(sorted(diff)))
 
-    return dict(documents={
+    return dict(documents=[
         # ("PCMH_1A_4.doc", URL("init", "policy", "PCMH_1A_4.doc"))
-    })
+    ])
 
 
 def pcmh_1_1a__2():
@@ -354,7 +354,7 @@ def pcmh_1_1a__2():
     after_hour_blocks.set_template("{day_of_the_week} {start_time:%I}:{start_time:%M} "
                                    "{start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}")
 
-    return dict(documents={})
+    return dict(documents=[])
 
 
 def pcmh_1_1a__4():
@@ -375,7 +375,7 @@ def pcmh_1_1a__4():
                                               "<li>Same-day: {same_day} day(s)</li>"
                                               "</ul>")
 
-    return dict(documents={})
+    return dict(documents=[])
 
 
 def pcmh_1_1a__5():
@@ -421,7 +421,14 @@ def pcmh_1_1a__5():
     #     "statuses (i.e. seen, no-show)"
     # )
 
-    return dict(documents={})
+    return dict(documents=[
+        dict(
+            description="1A5 Monitoring No-Show Policy.doc",
+            url=URL('init', 'word', 'no_show_policy.doc',
+                    vars=dict(**request.get_vars), hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id"]),
+            permissions=["IS_MANAGER"]
+        ),
+    ])
 
 
 # (1b)###################################################\
@@ -530,7 +537,7 @@ def pcmh_1_1b__1_2_3_4():
     telephone_encounter_after_hours_example \
         .set_template("{patient_name}: {patient_dob}<br>Serviced on: {service_date} {screenshot}")
 
-    return dict(documents={})
+    return dict(documents=[])
 
 
 # def pcmh_1_1c__1_2_3_4_5_6():
@@ -544,7 +551,7 @@ def pcmh_1_1b__1_2_3_4():
 #
 #     meaningful_use.set_template("{choose_file}")
 #
-#     return dict(documents={})
+#     return dict(documents=[])
 
 
 # (2)###################################################
@@ -613,7 +620,7 @@ def pcmh_2_2d__1_2():
     #
     # see_assigned_pcp.set_template("{please_choose}")
 
-    return dict(documents={})
+    return dict(documents=[])
 
 
 def pcmh_2_2d__3_5_6_7_8():
@@ -664,7 +671,7 @@ def pcmh_2_2d__3_5_6_7_8():
 
     training_sheet.set_template("{choose_file}")
 
-    return dict(documents={})
+    return dict(documents=[])
 
 
 def pcmh_2_2c__1___4a__6():
@@ -676,7 +683,7 @@ def pcmh_2_2c__1___4a__6():
 
     patient_population.set_template("{patients}")
 
-    return dict(documents={})
+    return dict(documents=[])
 
 # (3)###################################################
 
@@ -715,7 +722,7 @@ def pcmh_3_3a__1_2_3_4_5_6_7_9_10_11_12_13_14():
         )
 
     patient_demographics.set_template("{please_choose}")
-    return dict(documents={})
+    return dict(documents=[])
 
 
 def pcmh_3_3c__1_2_3_4_5_6_7_9_10():
@@ -740,7 +747,7 @@ def pcmh_3_3c__1_2_3_4_5_6_7_9_10():
     family_history.set_template("{patient_name}: {patient_dob}<br>Serviced on: {service_date} {screenshot}")
 
 
-    return dict(documents={})
+    return dict(documents=[])
 
 
 def pcmh_3_3d__1_2_3_4_5():
@@ -763,7 +770,7 @@ def pcmh_3_3d__1_2_3_4_5():
 
         qna.set_template("{choose_file}")
 
-    return dict(documents={})
+    return dict(documents=[])
 
 # (4)###################################################
 
@@ -802,7 +809,7 @@ def pcmh_4_4a__1_2_3():
 
     icd_well.set_template("{icd}")
 
-    return dict(documents={})
+    return dict(documents=[])
 
 
 def pcmh_4_4b__1_2_3_4_5___3e__1_2_3_4_5():
@@ -857,7 +864,7 @@ def pcmh_4_4b__1_2_3_4_5___3e__1_2_3_4_5():
 
         measure.set_template("{patient_name}: {patient_dob}<br>Serviced on: {service_date} {screenshot}")
 
-    return dict(documents={})
+    return dict(documents=[])
 
 # (5)###################################################
 
@@ -1071,7 +1078,7 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
 
     # todo - add new born screening for peds
 
-    return dict(documents={})
+    return dict(documents=[])
 
 
 def pcmh_5_5b__1_2_3_5_6_7_8_9_10():
@@ -1110,7 +1117,7 @@ def pcmh_5_5b__1_2_3_5_6_7_8_9_10():
 
     specialist_order_example.set_template("{choose_file}")
 
-    return dict(documents={})
+    return dict(documents=[])
 
 
 def pcmh_5_5c__3():
@@ -1130,7 +1137,7 @@ def pcmh_5_5c__3():
 
     er_ip_log.set_template("{choose_file}")
 
-    return dict(documents={})
+    return dict(documents=[])
 
 
 # (6)###################################################
@@ -1169,7 +1176,7 @@ def pcmh_6_6a__1_2_3_4():
 
     award_document.set_template("{choose_file}")
 
-    return dict(documents={})
+    return dict(documents=[])
 
 # (end)###################################################
 

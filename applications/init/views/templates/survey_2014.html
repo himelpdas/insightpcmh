@@ -156,7 +156,9 @@
             {{if not has_action:}}
                 <li>You have completed this section!</li>
                 {{for doc in documents:}}
-                    <li>Download <a href="{{=doc[1]}}">{{=doc[0]}}</a></li>
+                    {{if any(map(lambda permission: globals()[permission], doc["permissions"])) or IS_ADMIN:}}  {{# if IS_MANAGER}}
+                        <li>Download <a href="{{=doc["url"]}}">{{=doc["description"]}}</a></li>
+                    {{pass}}
                 {{pass}}
             {{pass}}
         </ul>

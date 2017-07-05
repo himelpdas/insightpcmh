@@ -1,6 +1,7 @@
 from gluon import contenttype
 import docx
 from cStringIO import StringIO
+import datetime
 
 # response.headers['Content-Type'] = contenttype.CONTENT_TYPE['.doc']
 if not request.extension.lower() == 'doc':
@@ -124,5 +125,36 @@ def huddle_sheet():
     doc.add_paragraph("_______________________________________________________________________________________________")
     doc.add_paragraph("_______________________________________________________________________________________________")
 
+    doc.save(output)
+    return output.getvalue()
+
+
+@auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id"]))
+def no_show_policy():
+    output = StringIO()
+    doc = _docx_header()
+    h = doc.add_heading("Monitor No-Show Rate Policy", 0)
+    h.alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.CENTER
+    date = (datetime.date.today() + datetime.timedelta(6 * 365 / 12))
+    doc.add_heading("%s/%s/%s" % (date.month, date.day, date.year), 3)
+    doc.add_paragraph("")
+    doc.add_paragraph("At the offices of Hector Rodriguez Navarro MD, we have created the following workflow regarding "
+                      "no show patients:")
+
+    doc.add_paragraph("The medical assistant will review the patients on the no show list and will call those patients "
+                      "and make arrangements for a new appointment.  For those patients that are high priority will be "
+                      "asked to come in the next day as a walk-in.",
+                      style="ListNumber")
+
+    doc.add_paragraph("In the cases where the patient is not available by telephone, the medical assistant will be "
+                      "responsible for documenting the following in the patient's electronic health record (EHR):",
+                      style="ListNumber")
+
+    doc.add_paragraph("A 'missing you' letter will be sent to the patient address with a scanned copy in the "
+                      "patient EHR.",
+                      style="ListBullet2")
+    doc.add_paragraph("If non-responsive, a follow-up letter, sent registered mail, return receipt will be sent "
+                      "(5) business days later.",
+                      style="ListBullet2")
     doc.save(output)
     return output.getvalue()
