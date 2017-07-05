@@ -156,15 +156,31 @@
             {{if not has_action:}}
                 <li>You have completed this section!</li>
             {{pass}}
-            {{for doc in documents:}}
-                {{if any(map(lambda permission: globals()[permission], doc["permissions"])) or IS_ADMIN:}}  {{# if IS_MANAGER}}
-                    <li>Download <a href="{{=doc["url"]}}">{{=doc["description"]}}</a></li>
-                {{pass}}
-            {{pass}}
         </ul>
     </div>
 </div>
 
+{{doc_links = []}}
+{{for doc in documents:}}
+    {{if any(map(lambda permission: globals()[permission], doc["permissions"])) or IS_ADMIN:}}  {{# if IS_MANAGER}}
+        {{doc_links.append(LI("Download", " ", A(doc["description"],_href=doc["url"])))}}
+    {{pass}}
+{{pass}}
+{{if doc_links:}}
+<div class="panel panel-primary panel-info hidden-print">
+    <div class="panel-heading question-box-heading" style="text-transform: none; font-size:17px">
+        <span class="glyphicon glyphicon-info-circle"></span>
+        <span class="glyphicon glyphicon-folder"></span>
+    Documents available</div>
+    <div class="panel-body">
+        <ul>
+            {{for doc_link in doc_links:}}
+                {{=doc_link}}
+            {{pass}}
+        </ul>
+    </div>
+</div>
+{{pass}}
 {{for qna in reversed(QNA.instances):}}
 
     {{QUESTION_PANEL(qna)}}
