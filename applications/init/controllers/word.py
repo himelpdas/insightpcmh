@@ -138,8 +138,8 @@ def no_show_policy():
     date = (datetime.date.today() - datetime.timedelta(6 * 365 / 12))
     doc.add_heading("%s/%s/%s" % (date.month, date.day, date.year), 3)
     doc.add_paragraph("")
-    doc.add_paragraph("At the offices of Hector Rodriguez Navarro MD, we have created the following workflow regarding "
-                      "no show patients:")
+    doc.add_paragraph("At the offices of {practice_name}, we have created the following workflow regarding "
+                      "no show patients:".format(practice_name=APP.practice_name))
 
     doc.add_paragraph("The medical assistant will review the patients on the no show list and will call those patients "
                       "and make arrangements for a new appointment.  For those patients that are high priority will be "
