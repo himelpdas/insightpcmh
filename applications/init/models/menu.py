@@ -105,6 +105,8 @@ if APP_ID:
                      auth.has_permission('administrate', 'application', APP_ID)):
             ACCESS_DENIED()
     APP = db(db.application.id == APP_ID).select().last()
+    if not APP:
+        ACCESS_DENIED()
 elif request.controller in ["2014", "2017"]:  # do not let them access a survey without app id
     ACCESS_DENIED()
 
