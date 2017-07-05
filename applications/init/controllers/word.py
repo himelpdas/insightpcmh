@@ -135,7 +135,7 @@ def no_show_policy():
     doc = _docx_header()
     h = doc.add_heading("Monitor No-Show Rate Policy", 0)
     h.alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.CENTER
-    date = (datetime.date.today() + datetime.timedelta(6 * 365 / 12))
+    date = (datetime.date.today() - datetime.timedelta(6 * 365 / 12))
     doc.add_heading("%s/%s/%s" % (date.month, date.day, date.year), 3)
     doc.add_paragraph("")
     doc.add_paragraph("At the offices of Hector Rodriguez Navarro MD, we have created the following workflow regarding "
