@@ -537,8 +537,13 @@ def pcmh_1_1b__1_2_3_4():
     telephone_encounter_after_hours_example \
         .set_template("{patient_name}: {patient_dob}<br>Serviced on: {service_date} {screenshot}")
 
-    return dict(documents=[])
-
+    return dict(documents=[
+        dict(
+            description="Telephone Encounter Log",
+            url=telephone_encounter_table_url,
+            permissions=["IS_TEAM"]
+        ),
+    ])
 
 # def pcmh_1_1c__1_2_3_4_5_6():
 #     """Meaningful use"""
@@ -1096,18 +1101,18 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
 
     return dict(documents=[
         dict(
-            description="Referral Order Tracking Chart",
+            description="Referral Order Tracking Log",
             url=referral_table_url,
             permissions=["IS_TEAM"]
         ),
         dict(
-            description="Image Order Tracking Chart",
+            description="Image Order Tracking Log",
             url=image_table_url,
             permissions=["IS_TEAM"]
         ),
         dict(
-            description="Lab Order Tracking Chart",
-            url=lab_tracking_chart,
+            description="Lab Order Tracking Log",
+            url=lab_table_url,
             permissions=["IS_TEAM"]
         ),
 
@@ -1169,8 +1174,13 @@ def pcmh_5_5c__3():
 
     er_ip_log.set_template("{choose_file}")
 
-    return dict(documents=[])
-
+    return dict(documents=[
+        dict(
+            description="Emergency Room / Inpatient Tracking Log",
+            url=er_ip_log_url,
+            permissions=["IS_TEAM"]
+        ),
+    ])
 
 # (6)###################################################
 def pcmh_6_6a__1_2_3_4():
