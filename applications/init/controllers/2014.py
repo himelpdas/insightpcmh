@@ -423,9 +423,8 @@ def pcmh_1_1a__5():
 
     return dict(documents=[
         dict(
-            description="1A5 Monitoring No-Show Policy.doc",
+            description="1A5 Monitoring No-Show Policy",
             url=URL('init', 'word', 'no_show_policy.doc',
-                    args=["1A5 Monitoring No-Show Policy.doc"],
                     vars=dict(**request.get_vars), hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id"]),
             permissions=["IS_MANAGER"]
         ),
