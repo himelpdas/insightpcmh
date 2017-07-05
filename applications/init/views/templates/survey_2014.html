@@ -155,10 +155,10 @@
             {{pass}}
             {{if not has_action:}}
                 <li>You have completed this section!</li>
-                {{for doc in documents:}}
-                    {{if any(map(lambda permission: globals()[permission], doc["permissions"])) or IS_ADMIN:}}  {{# if IS_MANAGER}}
-                        <li>Download <a href="{{=doc["url"]}}">{{=doc["description"]}}</a></li>
-                    {{pass}}
+            {{pass}}
+            {{for doc in documents:}}
+                {{if any(map(lambda permission: globals()[permission], doc["permissions"])) or IS_ADMIN:}}  {{# if IS_MANAGER}}
+                    <li>Download <a href="{{=doc["url"]}}">{{=doc["description"]}}</a></li>
                 {{pass}}
             {{pass}}
         </ul>
