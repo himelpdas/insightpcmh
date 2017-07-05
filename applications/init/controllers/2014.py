@@ -301,8 +301,8 @@ def pcmh_1_1a__1():
         len(block_days), float("inf"),  # change the 3 to the number of days the practice is open from the info
         getattr(same_day_appointments.row, "please_choose", None) == "Yes",
         'same_day_block',
-        "Enter your same-day appointment blocks. Remember, there should be a same-day appointment block for <b>each "
-        "day of the week when patients are seen.</b>",
+        "Enter your same-day appointment blocks. Remember, there should be at least one same-day appointment block "
+        "for <b>each day of the week when patients are seen.</b>",
         validator=_validate_start_end_time,
     )
 
