@@ -671,8 +671,24 @@ def pcmh_2_2d__3_5_6_7_8():
 
     training_sheet.set_template("{choose_file}")
 
-    return dict(documents=[])
+    return dict(documents=[
+        dict(
+            description="Daily Huddle Sheet",
+            url=huddle_sheet_url,
+            permissions=["IS_TEAM"]
+        ),
+                dict(
+            description="Training Sign-in Sheet",
+            url=training_sheet_url,
+            permissions=["IS_TEAM"]
+        ),
+                dict(
+            description="Meeting Sign-in Sheet",
+            url=meeting_sheet_url,
+            permissions=["IS_TEAM"]
+        ),
 
+    ])
 
 def pcmh_2_2c__1___4a__6():
     """Patient Population"""
@@ -1078,8 +1094,24 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
 
     # todo - add new born screening for peds
 
-    return dict(documents=[])
+    return dict(documents=[
+        dict(
+            description="Referral Order Tracking Chart",
+            url=referral_table_url,
+            permissions=["IS_TEAM"]
+        ),
+        dict(
+            description="Image Order Tracking Chart",
+            url=image_table_url,
+            permissions=["IS_TEAM"]
+        ),
+        dict(
+            description="Lab Order Tracking Chart",
+            url=lab_tracking_chart,
+            permissions=["IS_TEAM"]
+        ),
 
+    ])
 
 def pcmh_5_5b__1_2_3_5_6_7_8_9_10():
     """Care Coordination"""
