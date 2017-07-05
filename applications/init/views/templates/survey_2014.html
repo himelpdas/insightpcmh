@@ -163,7 +163,7 @@
 {{doc_links = []}}
 {{for doc in documents:}}
     {{if any(map(lambda permission: globals()[permission], doc["permissions"])) or IS_ADMIN:}}  {{# if IS_MANAGER}}
-        {{doc_links.append(LI("Download", " ", A(doc["description"],_href=doc["url"])))}}
+        {{doc_links.append(LI(A(doc["description"],_href=doc["url"])))}}
     {{pass}}
 {{pass}}
 {{if doc_links:}}
