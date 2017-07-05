@@ -55,7 +55,13 @@ def _validate_start_end_time(form, start_field_name="start_time", end_field_name
 
 def _on_validation_crypt(table_name):
     """must initialize GPG public key to system's GPG keys...
-    gpg = gnupg.GPG()
+    from gnupg import GPG
+    gpg = GPG("C:\Program Files (x86)\GNU\GnuPG\pub\gpg.exe")
+    gpg.list_keys()
+    [{'dummy': u'', 'keyid': u'1A15A48BA8867A6B', 'expires': u'', 'sigs': [], 'subkeys': [[u'71940ABC9085F643', u'e',
+    u'8DDAB8A716E7341A4F9B921571940ABC9085F643']], 'length': u'2048', 'ownertrust': u'u', 'sig': u'', 'algo': u'1',
+    'fingerprint': u'0A05C9D8E517D61233E2F3CA1A15A48BA8867A6B', 'date': u'1497421008', 'trust': u'u', 'type': u'pub',
+    'uids': [u'Himel (InsightPCMH) <himel@insightmanagement.org>']}]
     #on local system, generate public/private keys (certificate) in kleopatra or do it in python http://bit.ly/2iyal7g
     gpg.export_keys("3E2FD6EB", False)  # pass id of the certificate, get public key # True will return private key
     u'-----BEGIN PGP PUBLIC KEY BLOCK-----\r\nVersion: GnuPG v2\r\n\r\nmQENBFf0YFcBCA...... #key_data

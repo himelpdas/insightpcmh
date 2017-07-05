@@ -893,6 +893,9 @@ def pcmh_4_4b__1_2_3_4_5___3e__1_2_3_4_5():
 def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
     """Lab, Image, Referral Tracking & Follow-Up"""
 
+    documents = [
+    ]
+
     if APP.practice_specialty == "Pediatrics":
         developmental_screening = MultiQNA(
             1, 1, True,
@@ -912,6 +915,15 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
         image_table_url = URL('init', 'word', 'tracking_chart.doc', args=["image_order_tracking_chart"],
                               vars=dict(type="image", **request.get_vars),
                               hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id", "type"])
+
+        documents.append(
+            dict(
+                description="Image Order Tracking Log",
+                url=image_table_url,
+                permissions=["IS_TEAM"]
+            )
+        )
+
         image_tracking = MultiQNA(
             1, 1, True,
             'image_tracking', temp.format(
@@ -925,6 +937,14 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
                             vars=dict(type="lab", **request.get_vars),
                             hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id", "type"])
 
+        documents.append(
+            dict(
+                description="Lab Order Tracking Log",
+                url=lab_table_url,
+                permissions=["IS_TEAM"]
+            )
+        )
+
         lab_tracking = MultiQNA(
             1, 1, True,
             'lab_tracking', temp.format(
@@ -936,6 +956,14 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
     referral_table_url = URL('init', 'word', 'tracking_chart.doc', args=["referral_order_tracking_chart"],
                              vars=dict(type="referral", **request.get_vars),
                              hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id", "type"])
+
+    documents.append(
+        dict(
+            description="Referral Order Tracking Log",
+            url=referral_table_url,
+            permissions=["IS_TEAM"]
+        ))
+
     referral_tracking = MultiQNA(
         1, 1, True,
         'referral_tracking', temp.format(
@@ -1099,24 +1127,7 @@ def pcmh_5_5a__1_2_3_4_5_6___5b__5_6_8():
 
     # todo - add new born screening for peds
 
-    return dict(documents=[
-        dict(
-            description="Referral Order Tracking Log",
-            url=referral_table_url,
-            permissions=["IS_TEAM"]
-        ),
-        dict(
-            description="Image Order Tracking Log",
-            url=image_table_url,
-            permissions=["IS_TEAM"]
-        ),
-        dict(
-            description="Lab Order Tracking Log",
-            url=lab_table_url,
-            permissions=["IS_TEAM"]
-        ),
-
-    ])
+    return dict(documents=documents)
 
 def pcmh_5_5b__1_2_3_5_6_7_8_9_10():
     """Care Coordination"""
