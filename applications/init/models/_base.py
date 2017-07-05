@@ -301,8 +301,7 @@ class MultiQNA(QNA):
 
 class CryptQNA(MultiQNA):
     pre_template = "<span>Encrypted on {created_on}&mdash;<i>{created_by}</i> " \
-                   "</span>&emsp;<span class='text-muted'>" \
-                   "{note}</span><pre class='text-success'>" \
+                   "</span>&emsp;<pre class='text-success'>" \
                    "<span class='text-danger pull-right'>" \
                    "&emsp;{delete_table_row}</span>%s</pre>"
 
