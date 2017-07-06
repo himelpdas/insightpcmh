@@ -620,7 +620,8 @@ def pcmh_2_2d__1_2():
     #
     # see_assigned_pcp.add_warning(
     #     getattr(see_assigned_pcp.row, "please_choose", None) in NOT_YES,
-    #     "In a multi-PCP setting, the pactice should implement a policy to allow patients to see their assigned PCP in "
+    #     "In a multi-PCP setting, the pactice should implement a policy to allow patients to see their assigned PCP
+    # in "
     #     "order to receive credit for PCMH 2A."
     # )
     #
@@ -696,6 +697,7 @@ def pcmh_2_2d__3_5_6_7_8():
 
     ])
 
+
 def pcmh_2_2c__1___4a__6():
     """Patient Population"""
     patient_population = MultiQNA(
@@ -708,6 +710,7 @@ def pcmh_2_2c__1___4a__6():
     return dict(documents=[])
 
 # (3)###################################################
+
 
 def pcmh_3_3a__1_2_3_4_5_6_7_9_10_11_12_13_14():
     """Patient Demographics"""

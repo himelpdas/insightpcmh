@@ -22,14 +22,12 @@ YES_NO_FIELD = Field("please_choose", requires=IS_IN_SET(["Yes", "No / Not sure 
 
 NOT_YES = ["No / Not sure / Need help"]
 
-
 DAY_FIELD = lambda label=None, comment=None: \
     Field("day_of_the_week",
           requires=IS_IN_SET(DAYS_OF_THE_WEEK, zero=None),
           label=label,
           comment=comment
           )
-
 
 DAYS_OF_WEEK_FIELD = lambda label=None, comment=None: \
     Field("days_of_the_week", 'list:string',
