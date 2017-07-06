@@ -24,6 +24,14 @@
         .text-primary {
             color: #2950e0;
         }
+
+        .panel-danger > .panel-heading {
+            background-color: #e02950;
+        }
+
+        .text-danger {
+            color: #e02950;
+        }
     </style>
 {{end}}
 
@@ -150,7 +158,7 @@
         has_action = bool(actions)
 }}
 
-<div class="panel panel-primary panel-{{if has_action:}}danger{{else:}}success{{pass}}">
+<div class="panel panel-{{if has_action:}}danger{{else:}}success{{pass}}">
     <div class="panel-heading question-box-heading" style="text-transform: none; font-size:17px"><a href="javascript:void(0);" class="pull-right
     hidden-print" title="Print page" style="color:white;" onclick="Tawk_API.hideWidget();">
         <span class="glyphicon glyphicon-print"></span></a>
@@ -175,7 +183,7 @@
     {{pass}}
 {{pass}}
 {{if doc_links:}}
-<div class="panel panel-primary panel-info hidden-print">
+<div class="panel panel-info hidden-print">
     <div class="panel-heading question-box-heading" style="text-transform: none; font-size:17px">
         <span class="glyphicon glyphicon-folder-open"></span> Documents available!</div>
     <div class="panel-body">
