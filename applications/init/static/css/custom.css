@@ -29,11 +29,19 @@
     color: #e0ba29;
 }
 
+.btn-warning {
+    color: #e0ba29;
+}
+
 .panel-primary > .panel-heading {
     background-color: #2950e0;
 }
 
 .text-primary {
+    color: #2950e0;
+}
+
+.btn-primary {
     color: #2950e0;
 }
 
@@ -45,11 +53,19 @@
     color: #e02950;
 }
 
+.btn-danger {
+    color: #e02950;
+}
+
 .panel-success > .panel-heading {
     background-color: #abe029;
 }
 
 .text-success {
+    color: #abe029;
+}
+
+.btn-success {
     color: #abe029;
 }
 
