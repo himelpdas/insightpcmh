@@ -474,7 +474,7 @@ def pcmh_1_1b__1_2_3_4():
         1, 1,
         True,
         'telephone_encounter_in_record',
-        "Does {practice} document advice given to patients into the patient record?"
+        "Does {practice} document advice telephone advice given to patients into the patient record?"
         .format(practice=APP.practice_name, url=telephone_encounter_table_url)
     )
 
@@ -707,7 +707,76 @@ def pcmh_2_2c__1___4a__6():
 
     patient_population.set_template("{patients}")
 
-    return dict(documents=[])
+    race = MultiQNA(
+        1, 1, True, "race",
+        "Out of <b>100 patients</b>, what is the estimated number of patients in {practice} "
+        "who represent each of the following races? The total of these numbers must add up to 100."
+        .format(practice=APP.practice_name)
+    )
+
+    race.set_template("<ul>"
+                      "<li>Native American {native_american}</li>"
+                      "<li>Pacific Islander {pacific_islander}</li>"
+                      "<li>Black {black}</li>"
+                      "<li>White {white}</li>"
+                      "<li>East Asian {east_asian}</li>"
+                      "<li>South Asian {south_asian}</li>"
+                      "</ul>")
+
+    ethnicity = MultiQNA(
+        1, 1, True, "ethnicity",
+        "Out of <b>100 patients</b>, what is the estimated number of patients in {practice} "
+        "who represent each of the following ethnicities? The total of these numbers must add up to 100."
+        .format(practice=APP.practice_name)
+    )
+
+    ethnicity.set_template("<ul>"
+                           "<li>Non-Hisanic {non_hispanic}</li>"
+                           "<li>Hispanic {hispanic}</li>"
+                           "</ul>")
+
+    gender = MultiQNA(
+        1, 1, True, "gender",
+        "Out of <b>100 patients</b>, what is the estimated number of patients in {practice} "
+        "who represent each of the following genders? The total of these numbers must add up to 100."
+        .format(practice=APP.practice_name)
+    )
+
+    gender.set_template("<ul>"
+                           "<li>Male</li>"
+                           "<li>Female</li>"
+                           "<li>Other</li>"
+                           "</ul>")
+
+    documents = []
+
+    if patient_population.row and ethnicity.row and race.row:
+        demographic_report_url = \
+            URL('init', 'word', 'pcmh_2c_factor_1_2.doc',
+                vars=dict(denominator=patient_population.row["patients"],
+                          hispanic=ethnicity.row["hispanic"],
+                          non_hispanic=ethnicity.row["non_hispanic"],
+                          black=race.row["black"],
+                          white=race.row["white"],
+                          native_american=race.row["native_american"],
+                          pacific_islander=race.row["pacific_islander"],
+                          south_asian=race.row["south_asian"],
+                          east_asian=race.row["east_asian"],
+                          male=gender.row["male"],
+                          female=gender.row["female"],
+                          other=gender.row["other"],
+                          **request.get_vars),
+                hmac_key=MY_KEY, salt=session.MY_SALT,
+                hash_vars=["app_id",
+                           "denominator", "hispanic", "non_hispanic", "black", "white", "native_american",
+                           "pacific_islander", "south_asian", "east_asian", "male", "female", "other"])
+        documents.append(dict(
+            description="pcmh_2c_factor_1_2.doc",
+            url=demographic_report_url,
+            permissions=["IS_TEAM"]
+        ))
+
+    return dict(documents=documents)
 
 # (3)###################################################
 

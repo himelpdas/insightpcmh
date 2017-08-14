@@ -83,3 +83,29 @@ db.define_table(
     'patient_population',
     Field('patients', requires=IS_INT_IN_RANGE(200, 20001)),
     )
+
+
+db.define_table(
+    'race',
+    Field('native_american', label="Native American", requires=IS_INT_IN_RANGE(0, 101)),
+    Field('pacific_islander', label="Pacific Islander", requires=IS_INT_IN_RANGE(0, 101)),
+    Field('black', label="Black or African American", requires=IS_INT_IN_RANGE(0, 101)),
+    Field('white', label="White or Caucasian", requires=IS_INT_IN_RANGE(0, 101)),
+    Field('south_asian', label="South Asian", requires=IS_INT_IN_RANGE(0, 101)),
+    Field('east_asian', label="East Asian", requires=IS_INT_IN_RANGE(0, 101)),
+    )
+
+
+db.define_table(
+    'ethnicity',
+    Field('hispanic', requires=IS_INT_IN_RANGE(0, 101)),
+    Field('non_hispanic', label="Non-Hispanic", requires=IS_INT_IN_RANGE(0, 101)),
+    )
+
+
+db.define_table(
+    'gender',
+    Field('male', requires=IS_INT_IN_RANGE(0, 101)),
+    Field('female', requires=IS_INT_IN_RANGE(0, 101)),
+    Field('other', requires=IS_INT_IN_RANGE(0, 101)),
+    )

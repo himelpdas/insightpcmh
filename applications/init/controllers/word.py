@@ -2,6 +2,7 @@ from gluon import contenttype
 import docx
 from cStringIO import StringIO
 import datetime
+from math import floor, ceil
 
 # response.headers['Content-Type'] = contenttype.CONTENT_TYPE['.doc']
 if not request.extension.lower() == 'doc':
@@ -175,6 +176,69 @@ def no_show_report():
     doc.add_paragraph("The medical assistant will review the patients on the no show list and will call those patients "
                       "and make arrangements for a new appointment.  For those patients that are high priority will be "
                       "asked to come in the next day as a walk-in.")
+
+    doc.save(output)
+    return output.getvalue()
+
+
+@auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT,
+                          hash_vars=["app_id",
+                                     "denominator", "hispanic", "non_hispanic", "black", "white", "native_american",
+                                     "pacific_islander", "south_asian", "east_asian", "male", "female", "other"]))
+def pcmh_2c_factor_1_2():
+    output = StringIO()
+    doc = _docx_header()
+    h = doc.add_heading("Racial, Ethnic and Language Needs to Population", 0)
+    h.alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.CENTER
+    date = datetime.date.today()
+    doc.add_heading("%s/%s/%s" % (date.month, date.day, date.year), 3)
+    doc.add_heading("[***ADD SCREENSHOT OF PATIENT SEARCH***]", 1)
+    doc.add_heading("[***ADD SCREENSHOT OF DENOMINATOR***]", 1)
+    doc.add_heading("Ethnicity", 1)
+    ethnicities = ["hispanic", "non_hispanic"]
+    ethnicity_table = doc.add_table(rows=len(ethnicities)+1, cols=4)
+    ethnicity_hdr_cells = ethnicity_table.rows[0].cells
+    ethnicity_hdr_cells[0].text = 'Subset'
+    ethnicity_hdr_cells[1].text = 'Numerator'
+    ethnicity_hdr_cells[2].text = 'Denominator'
+    ethnicity_hdr_cells[3].text = 'Percent of Total Patients'
+    for i, ethnicity in enumerate(ethnicities):
+        ethnicity_cells = ethnicity_table.rows[1+i].cells
+        ethnicity_cells[0].text = ethnicity.upper().replace("_", "-")
+        ethnicity_cells[1].text = "%.0f" % (ceil(float(request.get_vars[ethnicity]) / 100.0 * float(request.get_vars["denominator"])))
+        ethnicity_cells[2].text = request.get_vars["denominator"]
+        ethnicity_cells[3].text = "%.0f%%" % (ceil(float(request.get_vars[ethnicity])))
+
+    doc.add_heading("Race", 1)
+    races = ["black", "white", "native_american", "pacific_islander", "south_asian", "east_asian"]
+    race_table = doc.add_table(rows=len(races)+1, cols=4)
+    race_hdr_cells = race_table.rows[0].cells
+    race_hdr_cells[0].text = 'Subset'
+    race_hdr_cells[1].text = 'Numerator'
+    race_hdr_cells[2].text = 'Denominator'
+    race_hdr_cells[3].text = 'Percent of Total Patients'
+    for i, race in enumerate(races):
+        print race, request.get_vars[race]
+        race_cells = race_table.rows[1+i].cells
+        race_cells[0].text = race.replace("_", " ").upper()
+        race_cells[1].text = "%.0f" % (ceil(float(request.get_vars[race]) / 100.0 * float(request.get_vars["denominator"])))
+        race_cells[2].text = request.get_vars["denominator"]
+        race_cells[3].text = "%.0f%%" % (ceil(float(request.get_vars[race])))
+
+    doc.add_heading("Gender", 1)
+    genders = ["male", "female", "other"]
+    gender_table = doc.add_table(rows=len(genders)+1, cols=4)
+    gender_hdr_cells = gender_table.rows[0].cells
+    gender_hdr_cells[0].text = 'Subset'
+    gender_hdr_cells[1].text = 'Numerator'
+    gender_hdr_cells[2].text = 'Denominator'
+    gender_hdr_cells[3].text = 'Percent of Total Patients'
+    for i, gender in enumerate(genders):
+        gender_cells = gender_table.rows[1+i].cells
+        gender_cells[0].text = gender.upper()
+        gender_cells[1].text = "%.0f" % (ceil(float(request.get_vars[gender]) / 100.0 * float(request.get_vars["denominator"])))
+        gender_cells[2].text = request.get_vars["denominator"]
+        gender_cells[3].text = "%.0f%%" % (ceil(float(request.get_vars[gender])))
 
     doc.save(output)
     return output.getvalue()
