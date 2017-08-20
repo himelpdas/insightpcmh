@@ -4,6 +4,10 @@ from cStringIO import StringIO
 import datetime
 from math import floor, ceil
 
+DATE_3_MONTHS_BEFORE = (datetime.date.today() - datetime.timedelta(3 * 365 / 12))
+DATE_6_MONTHS_BEFORE = (datetime.date.today() - datetime.timedelta(6 * 365 / 12))
+DATE_9_MONTHS_BEFORE = (datetime.date.today() - datetime.timedelta(9 * 365 / 12))
+
 # response.headers['Content-Type'] = contenttype.CONTENT_TYPE['.doc']
 if not request.extension.lower() == 'doc':
     redirect(URL(f=request.function + ".doc", args=request.args, vars=request.get_vars))
@@ -131,12 +135,12 @@ def huddle_sheet():
 
 
 @auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id"]))
-def no_show_policy():
+def policy_1a5_no_show():
     output = StringIO()
     doc = _docx_header()
     h = doc.add_heading("Monitor No-Show Rate Policy", 0)
     h.alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.CENTER
-    date = (datetime.date.today() - datetime.timedelta(6 * 365 / 12))
+    date = DATE_6_MONTHS_BEFORE
     doc.add_heading("%s/%s/%s" % (date.month, date.day, date.year), 3)
     doc.add_paragraph("")
     doc.add_paragraph("At the offices of {practice_name}, we have created the following workflow regarding "
@@ -162,7 +166,7 @@ def no_show_policy():
 
 
 @auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id"]))
-def no_show_report():
+def report_1a5_no_show():
     output = StringIO()
     doc = _docx_header()
     h = doc.add_heading("Monitor No-Show Rate Policy", 0)
@@ -181,11 +185,43 @@ def no_show_report():
     return output.getvalue()
 
 
+def policy_1a2_after_hours():
+    output = StringIO()
+    doc = _docx_header()
+    h = doc.add_heading("PCMH 1A Factor 2: After-hours", 0)
+    h.alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.CENTER
+    date = DATE_6_MONTHS_BEFORE
+    doc.add_heading("%s/%s/%s" % (date.month, date.day, date.year), 3)
+    doc.add_paragraph("")
+    office_hours = db(db.office_hours.application == APP_ID).select()
+    doc.add_paragraph("The office hours of {pc} is as follows:".format(pc=APP.practice_name))
+    for hour in office_hours:
+        doc.add_paragraph("{day_of_the_week} {start_time:%I}:{start_time:%M} {start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}".format(
+            start_time=hour.start_time, end_time=hour.end_time, day_of_the_week=hour.day_of_the_week
+        ))
+    doc.save(output)
+    return output.getvalue()
+
+def report_1a1_same_day():
+    output = StringIO()
+    doc = _docx_header()
+    h = doc.add_heading("PCMH 1A Factor 1: Same Day Appointments", 0)
+    h.alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.CENTER
+    date = datetime.date.today()
+    doc.add_heading("%s/%s/%s" % (date.month, date.day, date.year), 3)
+    doc.add_paragraph("")
+    doc.add_paragraph("At {practice_name}, we reserve time for same-day appointments, everyday when patients are seen. "
+                      "The practice reserves time visibly on the scheduler on the following days"
+                      .format(practice_name=APP.practice_name))
+    doc.add_heading("[***ADD SCREENSHOT OF DENOMINATOR***]", 1)
+
+
 @auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT,
                           hash_vars=["app_id",
                                      "denominator", "hispanic", "non_hispanic", "black", "white", "native_american",
-                                     "pacific_islander", "south_asian", "east_asian", "male", "female", "other"]))
-def pcmh_2c_factor_1_2():
+                                     "pacific_islander", "south_asian", "east_asian", "male", "female", "other",
+                                     "english", "spanish", "chinese", "hindi", "bengali", "arabic", "african"]))
+def report_2c_factor_1_2_demographics():
     output = StringIO()
     doc = _docx_header()
     h = doc.add_heading("Racial, Ethnic and Language Needs to Population", 0)
@@ -225,6 +261,22 @@ def pcmh_2c_factor_1_2():
         race_cells[2].text = request.get_vars["denominator"]
         race_cells[3].text = "%.0f%%" % (ceil(float(request.get_vars[race])))
 
+    doc.add_heading("language", 1)
+    languages = ["english", "spanish", "chinese", "hindi", "bengali", "arabic", "african"]
+    language_table = doc.add_table(rows=len(languages)+1, cols=4)
+    language_hdr_cells = language_table.rows[0].cells
+    language_hdr_cells[0].text = 'Subset'
+    language_hdr_cells[1].text = 'Numerator'
+    language_hdr_cells[2].text = 'Denominator'
+    language_hdr_cells[3].text = 'Percent of Total Patients'
+    for i, language in enumerate(languages):
+        print language, request.get_vars[language]
+        language_cells = language_table.rows[1+i].cells
+        language_cells[0].text = language.replace("_", " ").upper()
+        language_cells[1].text = "%.0f" % (ceil(float(request.get_vars[language]) / 100.0 * float(request.get_vars["denominator"])))
+        language_cells[2].text = request.get_vars["denominator"]
+        language_cells[3].text = "%.0f%%" % (ceil(float(request.get_vars[language])))
+
     doc.add_heading("Gender", 1)
     genders = ["male", "female", "other"]
     gender_table = doc.add_table(rows=len(genders)+1, cols=4)
@@ -242,3 +294,7 @@ def pcmh_2c_factor_1_2():
 
     doc.save(output)
     return output.getvalue()
+
+
+def policy_2d9_staff_involvement():
+    return

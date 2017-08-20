@@ -323,7 +323,7 @@ def pcmh_1_1a__1():
 def pcmh_1_1a__2():
     """After hours"""
 
-    extra = "For example, in an office with typical business hours from 9AM - 5PM, " \
+    extra = " For example, in an office with typical business hours from 9AM - 5PM, " \
             "the following examples are considered extended business hours for seeing patients:<small>" \
             "<ul><li>Monday - Thursday 9AM - 5PM, Friday 10AM - 6PM (shift in hours for one day of the week)</li>" \
             "<li>Monday - Thursday 9AM - 5PM, Friday 9AM - 6PM (extra hours for one day of the week)</li>" \
@@ -355,7 +355,17 @@ def pcmh_1_1a__2():
     after_hour_blocks.set_template("{day_of_the_week} {start_time:%I}:{start_time:%M} "
                                    "{start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}")
 
-    return dict(documents=[])
+    documents = []
+
+    if len(db(db.office_hours.application == APP_ID).select()) >= 3 and after_hour_blocks.rows:
+        documents.append(dict(
+            description="policy_1a2_after_hours.doc",
+            url=URL('init', 'word', 'policy_1a2_after_hours.doc',
+                        vars=dict(**request.get_vars), hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id"]),
+            permissions=["IS_TEAM"]
+        ))
+
+    return dict(documents=documents)
 
 
 def pcmh_1_1a__4():
@@ -424,8 +434,8 @@ def pcmh_1_1a__5():
 
     return dict(documents=[
         dict(
-            description="1A5 Monitoring No-Show Policy",
-            url=URL('init', 'word', 'no_show_policy.doc',
+            description="policy_1a5_no_show.doc",
+            url=URL('init', 'word', 'policy_1a5_no_show.doc',
                     vars=dict(**request.get_vars), hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id"]),
             permissions=["IS_MANAGER"]
         ),
@@ -711,7 +721,10 @@ def pcmh_2_2c__1___4a__6():
         1, 1, True, "race",
         "Out of <b>100 patients</b>, what is the estimated number of patients in {practice} "
         "who represent each of the following races? The total of these numbers must add up to 100."
-        .format(practice=APP.practice_name)
+        .format(practice=APP.practice_name),
+        validator=lambda form:
+        _on_validation_100(form, fields=["native_american", "pacific_islander", "black", "white", "east_asian",
+                                         "south_asian"]),
     )
 
     race.set_template("<ul>"
@@ -727,7 +740,9 @@ def pcmh_2_2c__1___4a__6():
         1, 1, True, "ethnicity",
         "Out of <b>100 patients</b>, what is the estimated number of patients in {practice} "
         "who represent each of the following ethnicities? The total of these numbers must add up to 100."
-        .format(practice=APP.practice_name)
+        .format(practice=APP.practice_name),
+        validator=lambda form:
+        _on_validation_100(form, fields=["non_hispanic", "hispanic"]),
     )
 
     ethnicity.set_template("<ul>"
@@ -743,16 +758,35 @@ def pcmh_2_2c__1___4a__6():
     )
 
     gender.set_template("<ul>"
-                           "<li>Male</li>"
-                           "<li>Female</li>"
-                           "<li>Other</li>"
+                           "<li>Male {male}</li>"
+                           "<li>Female {female}</li>"
+                           "<li>Other {other}</li>"
                            "</ul>")
 
+    language = MultiQNA(
+        1, 1, True, "languages",
+        "Out of <b>100 patients</b>, what is the estimated number of patients in {practice} "
+        "who represent each of the following languages? The total of these numbers must add up to 100."
+        .format(practice=APP.practice_name),
+        validator=lambda form:
+        _on_validation_100(form, fields=["english", "spanish", "chinese", "hindi", "bengali", "arabic", "african"]),
+    )
+
+    language.set_template("<ul>"
+                          "<li>English {english}</li>"
+                          "<li>Spanish {spanish}</li>"
+                          "<li>Chinese {chinese}</li>"
+                          "<li>Hindi {hindi}</li>"
+                          "<li>Bengali {bengali}</li>"
+                          "<li>Arabic {arabic}</li>"
+                          "<li>African {african}</li>"
+                          "</ul>"
+                          )
     documents = []
 
-    if patient_population.row and ethnicity.row and race.row:
+    if patient_population.row and ethnicity.row and race.row and language.row:
         demographic_report_url = \
-            URL('init', 'word', 'pcmh_2c_factor_1_2.doc',
+            URL('init', 'word', 'report_2c_factor_1_2_demographics.doc',
                 vars=dict(denominator=patient_population.row["patients"],
                           hispanic=ethnicity.row["hispanic"],
                           non_hispanic=ethnicity.row["non_hispanic"],
@@ -765,13 +799,21 @@ def pcmh_2_2c__1___4a__6():
                           male=gender.row["male"],
                           female=gender.row["female"],
                           other=gender.row["other"],
+                          english=language.row["english"], 
+                          spanish=language.row["spanish"],
+                          chinese=language.row["chinese"],
+                          hindi=language.row["hindi"],
+                          bengali=language.row["bengali"],
+                          arabic=language.row["arabic"],
+                          african=language.row["african"],
                           **request.get_vars),
                 hmac_key=MY_KEY, salt=session.MY_SALT,
                 hash_vars=["app_id",
                            "denominator", "hispanic", "non_hispanic", "black", "white", "native_american",
-                           "pacific_islander", "south_asian", "east_asian", "male", "female", "other"])
+                           "pacific_islander", "south_asian", "east_asian", "male", "female", "other",
+                           "english", "spanish", "chinese", "hindi", "bengali", "arabic", "african"])
         documents.append(dict(
-            description="pcmh_2c_factor_1_2.doc",
+            description="report_2c_factor_1_2_demographics.doc",
             url=demographic_report_url,
             permissions=["IS_TEAM"]
         ))
@@ -851,7 +893,7 @@ def pcmh_3_3d__1_2_3_4_5():
                 ("preventative", "preventative"),
                 ("chronic", "chronic/acute")]
 
-    temp = "Please upload callback / missing service lists for <b>2 {svc}</b> measures. Logs can be sourced " \
+    temp = "Please upload callback / missing service lists for <b>2 {svc}</b> measures. Documents can be sourced " \
         "from {emr}, QARR/HEDIS (from 3 or more health plans), and/or CIR recall lists. Documents must be dated " \
         "within the last 10 months."
 
@@ -1272,7 +1314,7 @@ def pcmh_5_5c__3():
 def pcmh_6_6a__1_2_3_4():
     """Performance reports"""
 
-    temp = "Please upload performance reports for <b>2 {svc}</b> measures. Logs can be sourced " \
+    temp = "Please upload performance reports for <b>2 {svc}</b> measures. Documents can be sourced " \
         "from {emr}, QARR/HEDIS (from 3 or more health plans), and/or CIR. Documents must be dated " \
         "within the last 10 months."
 

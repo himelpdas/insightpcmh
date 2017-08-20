@@ -104,6 +104,18 @@ db.define_table(
 
 
 db.define_table(
+    'languages',
+    Field('english', requires=IS_INT_IN_RANGE(0, 101)),
+    Field('spanish', requires=IS_INT_IN_RANGE(0, 101)),
+    Field('chinese', requires=IS_INT_IN_RANGE(0, 101)),
+    Field('hindi', requires=IS_INT_IN_RANGE(0, 101)),
+    Field('bengali', requires=IS_INT_IN_RANGE(0, 101)),
+    Field('arabic', requires=IS_INT_IN_RANGE(0, 101)),
+    Field('african', requires=IS_INT_IN_RANGE(0, 101)),
+    )
+
+
+db.define_table(
     'gender',
     Field('male', requires=IS_INT_IN_RANGE(0, 101)),
     Field('female', requires=IS_INT_IN_RANGE(0, 101)),

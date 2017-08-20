@@ -95,3 +95,13 @@ class IS_DIGITS:
 AM_PM_VALIDATOR = IS_TIME("Enter time as HH:MM [AM/PM]")
 
 DATE_VALIDATOR = IS_DATE(format=T('%m/%d/%Y'), error_message='must be MM/DD/YYYY!')
+
+
+def _on_validation_100(form, fields):
+    total = 0
+    for f in fields:
+        total += float(form.vars[f] or 0)
+    if not total == 100:
+        for f in fields:
+            form.errors[f] = "Values do not add up to 100!"
+
