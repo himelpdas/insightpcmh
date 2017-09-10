@@ -135,6 +135,16 @@ def huddle_sheet():
 
 
 @auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id"]))
+def report_1a1_same_day():
+    output = StringIO()
+    doc = _docx_header()
+    h = doc.add_heading("Monitor No-Show Rate Policy", 0)
+    h.alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.CENTER
+    date = DATE_6_MONTHS_BEFORE
+    doc.add_heading("%s/%s/%s" % (date.month, date.day, date.year), 3)
+    doc.add_paragraph("")
+
+@auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["app_id"]))
 def policy_1a5_no_show():
     output = StringIO()
     doc = _docx_header()
@@ -220,7 +230,8 @@ def report_1a1_same_day():
                           hash_vars=["app_id",
                                      "denominator", "hispanic", "non_hispanic", "black", "white", "native_american",
                                      "pacific_islander", "south_asian", "east_asian", "male", "female", "other",
-                                     "english", "spanish", "chinese", "hindi", "bengali", "arabic", "african"]))
+                                     "english", "spanish", "chinese", "hindi", "bengali", "arabic", "african",
+                                     "south_central_american"]))
 def report_2c_factor_1_2_demographics():
     output = StringIO()
     doc = _docx_header()

@@ -344,6 +344,23 @@ def load_apps_grid():
     db.application.created_on.readable = True
     db.application.owner_id.readable = True
 
+    def _progress(v, r):
+        color = "info"
+        if v < .25:
+            color = "danger"
+        elif v < .75:
+            color = "warning"
+        elif v < .99:
+            color = "success"
+        return DIV(
+            "%s%%" % (v*100),
+            DIV(_class="progress-bar progress-bar-striped active progress-bar-%s" % color,
+                _role="progressbar", _style="width: %s%%;" % (v*100)),
+            _class="progress"
+        )
+
+    db.application.progress.represent = _progress
+
     links = [dict(header='',  # header is col title
                   body=lambda row:
                   A(SPAN(_class="glyphicon glyphicon-play"),
@@ -380,6 +397,7 @@ def load_apps_grid():
 
     app_grid = SQLFORM.grid(my_apps_grid,
                             onvalidation=_app_onvalidation,
+                            maxtextlength=50,
                             oncreate=_app_oncreate,
                             create=IS_ADMIN or IS_MASTER or IS_CONTRIB or IS_TRAINER,
                             formname="load_apps_grid",
@@ -492,10 +510,11 @@ def load_logs_grid():
     logs_grid = SQLFORM.grid(
         query,
         formname="load_logs_grid",
+        maxtextlength=50,
         deletable=False if not IS_MASTER else True,
         # editable=False if not IS_MASTER else True,
-        fields=[db.logging.id, db.logging.application, db.logging.difficulty, db.logging.description,
-                db.logging.people_involved, db.logging.created_by, db.logging.created_on],
+        # fields=[db.logging.id, db.logging.application, db.logging.difficulty, db.logging.description,
+        #         db.logging.people_involved, db.logging.created_by, db.logging.created_on],
         # links=links,
         # onupdate=_user_onupdate,
         # oncreate=_user_oncreate,
@@ -519,6 +538,7 @@ def load_users_grid():
 
     users_grid = SQLFORM.grid(db.auth_user,
                               formname="load_users_grid",
+                              maxtextlength=50,
                               links=links,
                               onupdate=_user_onupdate,
                               oncreate=_user_oncreate,

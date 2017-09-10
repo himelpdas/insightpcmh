@@ -93,6 +93,7 @@ db.define_table(
     Field('white', label="White or Caucasian", requires=IS_INT_IN_RANGE(0, 101)),
     Field('south_asian', label="South Asian", requires=IS_INT_IN_RANGE(0, 101)),
     Field('east_asian', label="East Asian", requires=IS_INT_IN_RANGE(0, 101)),
+    Field('south_central_american', label="East Asian", requires=IS_INT_IN_RANGE(0, 101)),
     )
 
 

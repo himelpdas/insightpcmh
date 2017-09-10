@@ -215,6 +215,35 @@ def pcmh_0_credit_card():
     return dict(documents=[])
 
 
+def pcmh_0_agreements():
+    """agreements"""
+
+    office_hours = MultiQNA(
+        2, float("inf"),
+        True,
+        'agreements',
+        "Please review and sign this BAA agreement and this transformation process agreement.".format(
+            practice=APP.practice_name),
+        validator=_validate_start_end_time,
+    )
+
+    office_hours.set_template("{day_of_the_week} {start_time:%I}:{start_time:%M} "
+                              "{start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}")
+
+    return dict(documents=[
+        dict(
+            description="insight_pcmh_baa.doc",
+            url=URL('init', 'static', 'documents/insight_pcmh_baa.DOC'),
+            permissions=["IS_TEAM"]
+        ),
+        dict(
+            description="pcmh_transformation_process_practice_letter.pdf",
+            url=URL('init', 'static', 'documents/pcmh_transformation_process_practice_letter.pdf'),
+            permissions=["IS_TEAM"]
+        ),
+    ])
+
+
 # def pcmh_0_ncqa():     """NCQA logins"""
 #     application = CryptQNA(
 #         1, 1,
@@ -806,12 +835,14 @@ def pcmh_2_2c__1___4a__6():
                           bengali=language.row["bengali"],
                           arabic=language.row["arabic"],
                           african=language.row["african"],
+                          south_central_american=race.row["south_central_american"],
                           **request.get_vars),
                 hmac_key=MY_KEY, salt=session.MY_SALT,
                 hash_vars=["app_id",
                            "denominator", "hispanic", "non_hispanic", "black", "white", "native_american",
                            "pacific_islander", "south_asian", "east_asian", "male", "female", "other",
-                           "english", "spanish", "chinese", "hindi", "bengali", "arabic", "african"])
+                           "english", "spanish", "chinese", "hindi", "bengali", "arabic", "african",
+                           "south_central_american"])
         documents.append(dict(
             description="report_2c_factor_1_2_demographics.doc",
             url=demographic_report_url,
