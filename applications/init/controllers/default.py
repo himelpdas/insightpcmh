@@ -345,18 +345,25 @@ def load_apps_grid():
     db.application.owner_id.readable = True
 
     def _progress(v, r):
-        color = "info"
+        percent = "%0.0f%%" % (v*100)
+        active = " active"
         if v < .25:
             color = "danger"
         elif v < .75:
             color = "warning"
         elif v < .99:
             color = "success"
-        return DIV(
-            "%0.2f%%" % (v*100),
-            DIV(_class="progress-bar progress-bar-striped active progress-bar-%s" % color,
-                _role="progressbar", _style="width: %0.2f%%;" % (v*100)),
-            _class="progress"
+        else:
+            color = "info"
+            active = ""
+        return SPAN(
+            percent,
+            DIV(
+                SPAN(percent, _class="sr-only"),
+                DIV(_class="progress-bar progress-bar-striped progress-bar-%s%s" % (color, active),
+                    _role="progressbar", _style="width: %s;" % percent),
+                _class="progress"
+            )
         )
 
     db.application.progress.represent = _progress
