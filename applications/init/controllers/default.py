@@ -355,7 +355,7 @@ def load_apps_grid():
         return DIV(
             "%s%%" % (v*100),
             DIV(_class="progress-bar progress-bar-striped active progress-bar-%s" % color,
-                _role="progressbar", _style="width: %s%%;" % (v*100)),
+                _role="progressbar", _style="width: %0.2f%%;" % (v*100)),
             _class="progress"
         )
 
