@@ -373,6 +373,7 @@ def load_apps_grid():
                   A(SPAN(_class="glyphicon glyphicon-play"),
                     _class="btn btn-sm btn-default",
                     _title="Start Portal",
+                    _style="background-color:#BA55D3;",
                     _href=URL("2014", 'index.html', args=[0],  # todo- set 2014/2017 standards here table may or may not be joined
                               vars=dict(app_id=getattr(row, "application", row).id))))]
 
@@ -404,6 +405,7 @@ def load_apps_grid():
 
     app_grid = SQLFORM.grid(my_apps_grid,
                             onvalidation=_app_onvalidation,
+                            orderby=~db.application.id,
                             maxtextlength=50,
                             oncreate=_app_oncreate,
                             create=IS_ADMIN or IS_MASTER or IS_CONTRIB or IS_TRAINER,
@@ -549,7 +551,7 @@ def load_users_grid():
                               links=links,
                               onupdate=_user_onupdate,
                               oncreate=_user_oncreate,
-                              orderby=~db.auth_user.is_insight | db.auth_user.id,  # show insight first
+                              orderby=~db.auth_user.is_insight | ~db.auth_user.id,  # show insight first
                               field_id=db.auth_user.id,
                               # user_signature=False,  # this is handled by the controller
                               links_placement='left')
