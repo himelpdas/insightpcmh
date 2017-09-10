@@ -12,7 +12,7 @@ db.define_table("application",
                              zero=None)
           ),
     Field("certified_on", "date", writable=False, requires=DATE_VALIDATOR),
-    Field("owner_id", db.auth_user, comment="Enter primary contact's email address.", label="Primary Contact", required=True, writable=False, readable=False),
+    Field("owner_id", db.auth_user, comment="Enter primary contact's email address.", label="Primary Contact's Email", required=True, writable=False, readable=False),
     # Field("status", requires=IS_IN_SET(["1st Training Complete", "2nd Training Complete", "3rd Training Complete",
     #                                     "4th Training Complete", "Ready for Application Manager",
     #                                     "Working on Application", "Awaiting Documents from Practice"
