@@ -151,3 +151,15 @@ auth.settings.reset_password_requires_verification = True
 # after defining tables, uncomment below to enable auditing
 # -------------------------------------------------------------------------
 # auth.enable_record_versioning(db)
+
+
+# https://groups.google.com/forum/#!topic/web2py/fV05UBWiWUE
+def reset_email_lower(form):
+    if form.vars.email:
+        form.vars.email = form.vars.email.lower()
+
+auth.settings.login_onvalidation = [reset_email_lower]
+auth.settings.register_onvalidation = [reset_email_lower]
+auth.settings.profile_onvalidation = [reset_email_lower]
+auth.settings.retrieve_password_onvalidation = [reset_email_lower]
+auth.settings.reset_password_onvalidation = [reset_email_lower]
