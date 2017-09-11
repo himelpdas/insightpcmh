@@ -503,7 +503,7 @@ def _employee_group_links(row):
 def load_logs_grid():
     db.logging.owner_id.default=auth.user.id
     db.logging.owner_id.writable=False
-    if NOT_GRID:
+    if IS_GRID:
         db.logging.created_on.readable = True
     db.logging.created_by.readable=False
     db.application.id.represent = lambda v, r: "%s (%s)" % (r.application.practice_name, r.application.id)
