@@ -355,12 +355,13 @@ def load_apps_grid():
             color = "success"
         else:
             color = "info"
-            active = ""
+            if 0:  # enable/disable spin for 100%
+                active = ""
         return SPAN(
             percent,
             DIV(
                 SPAN(percent, _class="sr-only"),
-                DIV(_class="progress-bar progress-bar-striped progress-bar-%s active" % color,
+                DIV(_class="progress-bar progress-bar-striped progress-bar-%s%s" % (color, active),
                     _role="progressbar", _style="width: %s;" % percent),
                 _class="progress"
             )
@@ -503,7 +504,7 @@ def load_logs_grid():
     db.logging.owner_id.default=auth.user.id
     db.logging.owner_id.writable=False
     db.logging.created_on.readable=True
-    db.logging.created_by.readable=True
+    db.logging.created_by.readable=False
     db.application.id.represent = lambda v, r: "%s (%s)" % (r.application.practice_name, r.application.id)
 
     db.logging.application.readable = True
