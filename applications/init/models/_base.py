@@ -344,7 +344,7 @@ class CryptQNA(MultiQNA):
 
 def MAILER(user_ids, subject, message, summary, action_url, call_to_action):
     users = db(db.auth_user.id.belongs(user_ids)).select()
-    assert users, "Expected users before email!"
+    # assert users, "Expected users before email!"
     for user in users:
         if not user.allow_email_updates:
             continue

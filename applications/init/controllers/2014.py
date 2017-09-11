@@ -866,7 +866,7 @@ def pcmh_3_3a__1_2_3_4_5_6_7_9_10_11_12_13_14():
     patient_demographics_choices = ['Date of birth', 'Sex', 'Race', 'Ethnicity', 'Preferred language',
                                     'Telephone numbers', 'E-mail address', 'Occupation',
                                     'Dates of previous clinical visits', 'Legal guardian/health care proxy',
-                                    'Primary caregiver', 'Presence of advance directives',
+                                    'Primary caregiver', 'Presence of advance directives (pediatrics only)',
                                     'Health insurance information', 'Name and contact information of other health care '
                                                                     'professionals involved in patient\'s care.']
     minimum = 10
@@ -880,7 +880,8 @@ def pcmh_3_3a__1_2_3_4_5_6_7_9_10_11_12_13_14():
     patient_demographics = MultiQNA(
         1, 1, True,
         'patient_demographics',
-        "Which of the following demographic fields does %s record?" % APP.practice_name
+        "For each patient, which of the following demographic fields does %s record either in the patient's care notes "
+        "or in structured fields?" % APP.practice_name
     )
 
     choices = getattr(patient_demographics.row, "please_choose", None)
@@ -888,9 +889,9 @@ def pcmh_3_3a__1_2_3_4_5_6_7_9_10_11_12_13_14():
     if choices:
         patient_demographics.add_warning(
             len(choices) < minimum,
-            "{pc} needs to be able to record <b>at least {min}</b> of these choices (only {max}/{min} picked): "
-            "{li} Please fill out more of these fields for your new and recent patients. Then "
-            "come back and change your answer.".format(pc=APP.practice_name, min=minimum, max=len(choices),
+            "{pc} <b>must record at least {min}</b> of these choices either in the care notes or in structured fields "
+            "(only {max}/{min} picked): {li} Please fill out more of these fields for your new and recent patients. "
+            "Then come back and change your answer.".format(pc=APP.practice_name, min=minimum, max=len(choices),
                                                        li=OL(*map(lambda e: LI(e), patient_demographics_choices)))
         )
 
