@@ -505,6 +505,8 @@ def load_logs_grid():
     db.logging.owner_id.writable=False
     if IS_GRID:
         db.logging.created_on.readable = True
+    else:
+        db.logging.created_on.readable = False
     db.logging.created_by.readable=False
     db.application.id.represent = lambda v, r: "%s (%s)" % (r.application.practice_name, r.application.id)
 
