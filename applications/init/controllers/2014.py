@@ -1012,7 +1012,7 @@ def pcmh_4_4b__1_2_3_4_5___3e__1_2_3_4_5():
          "<li>labs / screenings / referrals ordered</li>"
          "<li>Resources or materials given to patient or family</li>"
          "<li>Recent hospitalizations or self-referrals</li>%s</small>" %
-         (" " if is_pediatrics else "<li>Advanced care planning</li>")
+         (" " if is_pediatrics else "<li>Advanced directives</li>")
          ).format(practice=APP.practice_name)
     )
 
