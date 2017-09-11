@@ -238,7 +238,7 @@ def pcmh_0_agreements():
         1, float("inf"),
         True,
         'tpa',
-        "Please review and sign this <a href='{tpa}'>transformation process agreement.</a>".format(
+        "Please review and sign this <a href='{tpa}'>transformation process agreement</a>.".format(
             practice=APP.practice_name,
             baa=baa_url,
             tpa=tpa_url,
