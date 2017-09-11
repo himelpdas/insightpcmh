@@ -215,33 +215,39 @@ def pcmh_0_credit_card():
     return dict(documents=[])
 
 
-# def pcmh_0_agreements():
-#     """agreements"""
-#
-#     office_hours = MultiQNA(
-#         2, float("inf"),
-#         True,
-#         'agreements',
-#         "Please review and sign this BAA agreement and this transformation process agreement.".format(
-#             practice=APP.practice_name),
-#         validator=_validate_start_end_time,
-#     )
-#
-#     office_hours.set_template("{day_of_the_week} {start_time:%I}:{start_time:%M} "
-#                               "{start_time:%p} - {end_time:%I}:{end_time:%M} {end_time:%p}")
-#
-#     return dict(documents=[
-#         dict(
-#             description="insight_pcmh_baa.doc",
-#             url=URL('init', 'static', 'documents/insight_pcmh_baa.DOC'),
-#             permissions=["IS_TEAM"]
-#         ),
-#         dict(
-#             description="pcmh_transformation_process_practice_letter.pdf",
-#             url=URL('init', 'static', 'documents/pcmh_transformation_process_practice_letter.pdf'),
-#             permissions=["IS_TEAM"]
-#         ),
-#     ])
+def pcmh_0_agreements():
+    """agreements"""
+
+    baa = URL('init', 'static', 'documents/insight_pcmh_baa.DOC')
+    tpa = URL('init', 'static', 'documents/pcmh_transformation_process_practice_letter.pdf')
+
+    agreements = MultiQNA(
+        2, float("inf"),
+        True,
+        'agreements',
+        "Please review and sign <a href='{baa}'>this BAA agreement</a> and this <a href='{tpa}'>transformation process "
+        "agreement.</a>".format(
+            practice=APP.practice_name,
+            baa=baa,
+            tpa=tpa,
+        ),
+        validator=_validate_start_end_time,
+    )
+
+    agreements.set_template("{choose_file}")
+
+    return dict(documents=[
+        dict(
+            description="insight_pcmh_baa.doc",
+            url=baa,
+            permissions=["IS_TEAM"]
+        ),
+        dict(
+            description="pcmh_transformation_process_practice_letter.pdf",
+            url=tpa,
+            permissions=["IS_TEAM"]
+        ),
+    ])
 
 
 # def pcmh_0_ncqa():     """NCQA logins"""

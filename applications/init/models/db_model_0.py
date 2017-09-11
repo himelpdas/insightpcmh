@@ -50,3 +50,12 @@ db.define_table(
     Field("gpg_encrypted", "text"),
     auth.signature
 )
+
+db.define_table(
+    'agreements',
+
+    Field('choose_file', 'upload', uploadfield='file_data'),
+    Field('file_data', 'blob'),
+    Field('file_description', requires=IS_NOT_EMPTY()),
+
+)
