@@ -360,7 +360,7 @@ def load_apps_grid():
             percent,
             DIV(
                 SPAN(percent, _class="sr-only"),
-                DIV(_class="progress-bar progress-bar-striped progress-bar-%s%s" % (color, active),
+                DIV(_class="progress-bar progress-bar-striped progress-bar-%s active" % color,
                     _role="progressbar", _style="width: %s;" % percent),
                 _class="progress"
             )
