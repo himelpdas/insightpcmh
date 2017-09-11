@@ -231,7 +231,6 @@ def pcmh_0_agreements():
             baa=baa,
             tpa=tpa,
         ),
-        validator=_validate_start_end_time,
     )
 
     agreements.set_template("{choose_file}")

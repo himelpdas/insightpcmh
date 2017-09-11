@@ -40,7 +40,6 @@ FAKE_DB.update({"credit_card": [
     Field("verify_card_number", requires=[IS_EQUAL_TO(request.vars.card_number), IS_NOT_EMPTY()],
           widget=SQLFORM.widgets.password.widget),
     Field("cvv_code", requires=IS_NOT_EMPTY(), widget=SQLFORM.widgets.password.widget),
-    NOTE_FIELD,
     auth.signature
 ]})
 
