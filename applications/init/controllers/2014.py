@@ -218,32 +218,44 @@ def pcmh_0_credit_card():
 def pcmh_0_agreements():
     """agreements"""
 
-    baa = URL('init', 'static', 'documents/insight_pcmh_baa.DOC')
-    tpa = URL('init', 'static', 'documents/pcmh_transformation_process_practice_letter.pdf')
+    baa_url = URL('init', 'static', 'documents/insight_pcmh_baa.DOC')
+    tpa_url = URL('init', 'static', 'documents/pcmh_transformation_process_practice_letter.pdf')
 
-    agreements = MultiQNA(
-        2, float("inf"),
+    baa = MultiQNA(
+        1, float("inf"),
         True,
-        'agreements',
-        "Please review and sign <a href='{baa}'>this BAA agreement</a> and this <a href='{tpa}'>transformation process "
-        "agreement.</a>".format(
+        'baa',
+        "Please review and sign <a href='{baa}'>this BAA agreement</a>.".format(
             practice=APP.practice_name,
-            baa=baa,
-            tpa=tpa,
+            baa=baa_url,
+            tpa=tpa_url,
         ),
     )
 
-    agreements.set_template("{choose_file}")
+    baa.set_template("{choose_file}")
+
+    tpa = MultiQNA(
+        1, float("inf"),
+        True,
+        'tpa',
+        "Please review and sign this <a href='{tpa}'>transformation process agreement.</a>".format(
+            practice=APP.practice_name,
+            baa=baa_url,
+            tpa=tpa_url,
+        ),
+    )
+
+    tpa.set_template("{choose_file}")
 
     return dict(documents=[
         dict(
             description="insight_pcmh_baa.doc",
-            url=baa,
+            url=baa_url,
             permissions=["IS_TEAM"]
         ),
         dict(
             description="pcmh_transformation_process_practice_letter.pdf",
-            url=tpa,
+            url=tpa_url,
             permissions=["IS_TEAM"]
         ),
     ])

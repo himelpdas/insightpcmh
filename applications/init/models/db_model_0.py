@@ -51,7 +51,16 @@ db.define_table(
 )
 
 db.define_table(
-    'agreements',
+    'baa',
+
+    Field('choose_file', 'upload', uploadfield='file_data'),
+    Field('file_data', 'blob'),
+    Field('file_description', requires=IS_NOT_EMPTY()),
+
+)
+
+db.define_table(
+    'tpa',
 
     Field('choose_file', 'upload', uploadfield='file_data'),
     Field('file_data', 'blob'),
