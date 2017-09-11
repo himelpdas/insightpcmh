@@ -530,7 +530,7 @@ def pcmh_1_1b__1_2_3_4():
         1, 1,
         True,
         'telephone_encounter_in_record',
-        "Does {practice} document advice telephone advice given to patients into the patient record?"
+        "Does {practice} document telephone advice given to patients into the patient record?"
         .format(practice=APP.practice_name, url=telephone_encounter_table_url)
     )
 
