@@ -12,9 +12,10 @@ db.define_table("application",
                              zero=None)
           ),
     Field("certified_on", "date", writable=False, requires=DATE_VALIDATOR),
-    Field("owner_id", db.auth_user, comment="Enter primary contact's email address. This account email <b>must</b> "
-                                            "exist in our system. If you haven't done so, please ensure the primary "
-                                            "contact's account is created before continuing here.",
+    Field("owner_id", db.auth_user, comment=XML(
+        "Enter primary contact's email address. This account email <b>must</b> exist in our system. If you haven't "
+        "done so, please ensure the primary contact's account is created before continuing here."
+    ),
           label="Primary Contact's Email", required=True, writable=False, readable=False),
     # Field("status", requires=IS_IN_SET(["1st Training Complete", "2nd Training Complete", "3rd Training Complete",
     #                                     "4th Training Complete", "Ready for Application Manager",

@@ -379,9 +379,9 @@ def load_apps_grid():
 
     if not IS_STAFF:  # add contributor
         db.application.status.writable = False
-    if IS_MASTER or IS_ADMIN:
+    if IS_MASTER or IS_ADMIN or IS_TRAINER:
         db.application.owner_id.writable = True
-    # if IS_MASTER:  # remove not after testing non-master mode
+    if IS_MASTER or IS_ADMIN:  # remove not after testing non-master mode
         my_apps_grid = db(db.application.id > 0)
     else:
         my_group_id = auth.id_group("user_%s" % auth.user.id)
@@ -421,8 +421,8 @@ def load_apps_grid():
     return dict(app_grid=app_grid)
 
 
-@auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["group", "action",
-                                                                                           "user_id"]))
+@auth.requires(URL.verify(request, hmac_key=MY_KEY, salt=session.MY_SALT, hash_vars=["group", "action", "user_id"]))
+@auth.requires(IS_ADMIN or IS_MASTER or IS_HIMEL)
 def add_remove_user():
     u = request.get_vars["user_id"]
     a = request.get_vars["action"]
@@ -553,6 +553,8 @@ def load_users_grid():
                               oncreate=_user_oncreate,
                               orderby=~db.auth_user.is_insight | ~db.auth_user.id,  # show insight first
                               field_id=db.auth_user.id,
+                              deletable=IS_ADMIN or IS_MASTER or IS_HIMEL,
+                              editable=IS_ADMIN or IS_MASTER or IS_HIMEL,
                               # user_signature=False,  # this is handled by the controller
                               links_placement='left')
 
@@ -616,6 +618,8 @@ def _user_oncreate(form):
     self_group = "user_%s" % id
     auth.add_group(self_group, description="Group for user %s. Created in admin panel" % self_group)
     auth.add_membership(role=self_group, user_id=id)
+    if not form.vars.is_insight:  # don't make insight employee contributor
+        auth.add_membership(role="contributors", user_id=id)  # auto add to contributors if made from grid, not register
 
 
 def _app_oncreate(form):
@@ -623,7 +627,17 @@ def _app_oncreate(form):
 
     if not IS_STAFF:
         auth.add_permission(0, "contribute", 'application', app_id)  # 0 means user_1
-        #auth.add_membership(role="contributor", user_id=auth.user_id)
+        # auth.add_membership(role="contributor", user_id=auth.user_id)
+
+    if IS_TRAINER:
+        auth.add_permission(0, "train", 'application', app_id)  # 0 means user_1
+        # add primary contact
+        if not auth.user.id == form.vars.owner_id:
+            # make primary contact a contributor
+            app_owner = db(db.auth_user.id == form.vars.owner_id)
+            if not app_owner.is_insight:  # make sure owner is contributor, i.e. registrant
+                auth.add_membership(role="contributors", user_id=form.vars.owner_id)
+                auth.add_permission(form.vars.owner_id, "contribute", 'application', app_id)
 
     admins = db((db.auth_group.id == db.auth_membership.group_id) &
                 (db.auth_group.role == "admins") &
@@ -632,9 +646,9 @@ def _app_oncreate(form):
 
     for admin in admins:
         auth.add_permission(auth.id_group("user_%s" % admin.auth_user.id), "administrate", 'application', app_id)  # 0 means user_1
-    #auth.add_permission(auth.id_group("masters"), "administrate", 'application', app_id)
+    # auth.add_permission(auth.id_group("masters"), "administrate", 'application', app_id)
     # app_url = URL('application', vars=dict(app_id=form.vars.id), hmac_key=MY_KEY)
-    #redirect(URL(0, "index.html", vars=dict(app_id=form.vars.id)))  # redir user to his app
+    # redirect(URL(0, "index.html", vars=dict(app_id=form.vars.id)))  # redir user to his app
 
 
 @cache.action()

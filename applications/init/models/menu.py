@@ -4,6 +4,7 @@
 MY_KEY = "Himel123"
 TALK_TO_API_KEY = "e3730573ebe8f86994e9a07e49f1b0fe5a0fe2af"
 MASTER_EMAILS = ["himel@insightmanagement.org", "aspencer@insightmanagement.org"]  # "himel@insightpcmh.org", "himel.p.das@gmail.com", "himeldas@live.com"
+HIMEL_EMAILS = ["himel@insightmanagement.org"]
 
 if not session.MY_SALT:
     session.MY_SALT = os.urandom(8)
@@ -36,8 +37,11 @@ if auth.is_logged_in():
             db(db.auth_user.id == auth.user.id).select().last().update_record(is_insight=True)
         for _role in {"masters", "admins", "trainers", "app_managers"}: #.symmetric_difference(auth.user_groups.values()):
             auth.add_membership(role=_role, user_id=auth.user.id)
-        for _role in {"observers"}:
+        for _role in {"contributors"}:
             auth.del_membership(role=_role, user_id=auth.user.id)
+    if auth.user.email in HIMEL_EMAILS:
+        auth.add_membership(role="himel", user_id=auth.user.id)
+
 
 APP = None
 INSIGHT_ADDR = "660 Whiteplains Rd, Tarrytown, NY 10591"

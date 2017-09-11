@@ -13,7 +13,7 @@
     {{=LOAD('default', 'load_apps_grid.load', ajax=True, user_signature=True)}}  {{# keep signature so we don't have to check for permission again to allow access to this grid}}
 <hr><br>
 
-{{if auth.has_membership(user_id=auth.user.id, role="admins"):}}
+{{if IS_ADMIN or IS_MASTER or IS_HIMEL or IS_TRAINER:}}
 <div class="alert alert-default">
     <strong><span class="glyphicon glyphicon-user"></span> Manage Users</strong>
 </div>
