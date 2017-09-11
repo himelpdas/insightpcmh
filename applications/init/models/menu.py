@@ -53,7 +53,7 @@ IS_TRAINER = auth.has_membership("trainers")
 IS_CONTRIB = auth.has_membership("contributors")
 IS_STAFF = IS_TRAINER or IS_MANAGER or IS_ADMIN
 IS_TEAM = IS_STAFF or IS_CONTRIB
-NOT_GRID = request.args in ["edit", "view", "new"]
+NOT_GRID = "new" in request.args or "edit" in request.args or "view" in request.args
 IS_GRID = not NOT_GRID
 
 if IS_MASTER or IS_ADMIN:
