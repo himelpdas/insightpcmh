@@ -638,8 +638,11 @@ def _app_oncreate(form):
             # make primary contact a contributor
             app_owner = db(db.auth_user.id == form.vars.owner_id).select().last()
             if app_owner and not app_owner.is_insight:  # make sure owner is contributor, i.e. registrant
-                group = next(group for group in auth.user_groups.values() if "user_" in group)
-                if group:
+                try:
+                    group = next(group for group in auth.user_groups.values() if "user_" in group)
+                except StopIteration:
+                    pass
+                else:
                     auth.add_membership(role="contributors", user_id=app_owner.id)
                     auth.add_permission(group, "contribute", 'application', app_id)
 
