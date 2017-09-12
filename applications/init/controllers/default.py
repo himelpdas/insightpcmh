@@ -639,7 +639,7 @@ def _app_oncreate(form):
             app_owner = db(db.auth_user.id == form.vars.owner_id).select().last()
             if app_owner and not app_owner.is_insight:  # make sure owner is contributor, i.e. registrant
                 auth.add_membership(role="contributors", user_id=form.vars.owner_id)
-                auth.add_permission(form.vars.owner_id, "contribute", 'application', app_id)
+                auth.add_permission(app_owner.id, "contribute", 'application', app_id)
 
     admins = db((db.auth_group.id == db.auth_membership.group_id) &
                 (db.auth_group.role == "admins") &
