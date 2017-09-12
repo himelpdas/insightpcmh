@@ -641,7 +641,7 @@ def _app_oncreate(form):
                 group = next(group for group in auth.user_groups.values() if "user_" in group)
                 if group:
                     auth.add_membership(role="contributors", user_id=app_owner.id)
-                    auth.add_permission(app_owner.id, "contribute", 'application', app_id)
+                    auth.add_permission(group, "contribute", 'application', app_id)
 
     admins = db((db.auth_group.id == db.auth_membership.group_id) &
                 (db.auth_group.role == "admins") &
