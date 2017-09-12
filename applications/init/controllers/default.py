@@ -638,8 +638,10 @@ def _app_oncreate(form):
             # make primary contact a contributor
             app_owner = db(db.auth_user.id == form.vars.owner_id).select().last()
             if app_owner and not app_owner.is_insight:  # make sure owner is contributor, i.e. registrant
-                auth.add_membership(role="contributors", user_id=form.vars.owner_id)
-                auth.add_permission(app_owner.id, "contribute", 'application', app_id)
+                group = next(group for group in auth.user_groups.values() if "user_" in group)
+                if group:
+                    auth.add_membership(role="contributors", user_id=app_owner.id)
+                    auth.add_permission(app_owner.id, "contribute", 'application', app_id)
 
     admins = db((db.auth_group.id == db.auth_membership.group_id) &
                 (db.auth_group.role == "admins") &
@@ -671,27 +673,3 @@ def call():
     """
     return service()
 
-import docx
-from cStringIO import StringIO
-def test_word():
-    output = StringIO()
-    doc = docx.Document()
-    doc.add_heading('Document Title', 0)
-
-    p = doc.add_paragraph('A plain paragraph having some ')
-    p.add_run('bold').bold = True
-    p.add_run(' and some ')
-    p.add_run('italic.').italic = True
-
-    doc.add_heading('Heading, level 1', level=1)
-    doc.add_paragraph('Intense quote', style='IntenseQuote')
-
-    doc.add_paragraph(
-        'first item in unordered list', style='ListBullet'
-    )
-    doc.add_paragraph(
-        'first item in ordered list', style='ListNumber'
-    )
-    doc.save(output)
-    response.headers['Content-Type'] = 'application/msword'
-    return output.getvalue()
