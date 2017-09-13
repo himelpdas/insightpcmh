@@ -13,7 +13,7 @@ DAYS_OF_THE_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Sat
 # PHONE_VALIDATOR = requires = IS_MATCH('\([0-9][0-9][0-9]\)[0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]',
 PHONE_VALIDATOR = requires = \
     IS_MATCH('^\(*\+*[1-9]{0,3}\)*-*[1-9]{0,3}[-. /]*\(*[2-9]\d{2}\)*[-. /]*\d{3}[-. /]*\d{4} *e*x*t*\.* *\d{0,4}$',
-             error_message='Invalid telephone number')
+             error_message='Invalid telephone number! Correct format is 1-234-5678-9012.')
 
 NOTE_FIELD = Field("note", label=XML("<span class='text-muted'>Note</span>"), comment="Optional")
 
