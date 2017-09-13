@@ -524,6 +524,7 @@ def load_logs_grid():
         query,
         formname="load_logs_grid",
         maxtextlength=50,
+        showbuttontext=False,
         deletable=False if not IS_MASTER else True,
         # editable=False if not IS_MASTER else True,
         # fields=[db.logging.id, db.logging.application, db.logging.difficulty, db.logging.description,
@@ -551,6 +552,7 @@ def load_users_grid():
 
     users_grid = SQLFORM.grid(db.auth_user,
                               formname="load_users_grid",
+                              showbuttontext=False,
                               maxtextlength=50,
                               links=links,
                               onupdate=_user_onupdate,
