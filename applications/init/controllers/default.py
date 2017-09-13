@@ -27,6 +27,7 @@ def test_email():
     response.view = os.path.join("templates", "email.html")
     return dict(summary="test", first_name="test", message="test", action_url="test", call_to_action="test")
 
+
 def _disable_rbac_fields(*args):
     def _decorator(func):
         """when displaying a grid with something joined, sometimes the auth tables joined are not necessary"""
@@ -406,6 +407,7 @@ def load_apps_grid():
 
     app_grid = SQLFORM.grid(my_apps_grid,
                             onvalidation=_app_onvalidation,
+                            showbuttontext=False,
                             orderby=~db.application.id,
                             maxtextlength=50,
                             oncreate=_app_oncreate,
