@@ -748,7 +748,7 @@ def pcmh_2_2c__1___4a__6():
     patient_population.set_template("{patients}")
 
     race = MultiQNA(
-        1, 1, True, "race",
+        1, 1, patient_population.row, "race",
         "Out of <b>100 patients</b>, what is the estimated number of patients in {practice} "
         "who represent each of the following races? The total of these numbers must add up to 100."
         .format(practice=APP.practice_name),
@@ -767,7 +767,7 @@ def pcmh_2_2c__1___4a__6():
                       "</ul>")
 
     ethnicity = MultiQNA(
-        1, 1, True, "ethnicity",
+        1, 1, patient_population.row, "ethnicity",
         "Out of <b>100 patients</b>, what is the estimated number of patients in {practice} "
         "who represent each of the following ethnicities? The total of these numbers must add up to 100."
         .format(practice=APP.practice_name),
@@ -781,7 +781,7 @@ def pcmh_2_2c__1___4a__6():
                            "</ul>")
 
     gender = MultiQNA(
-        1, 1, True, "gender",
+        1, 1, patient_population.row, "gender",
         "Out of <b>100 patients</b>, what is the estimated number of patients in {practice} "
         "who represent each of the following genders? The total of these numbers must add up to 100."
         .format(practice=APP.practice_name)
@@ -794,7 +794,7 @@ def pcmh_2_2c__1___4a__6():
                            "</ul>")
 
     language = MultiQNA(
-        1, 1, True, "languages",
+        1, 1, patient_population.row, "languages",
         "Out of <b>100 patients</b>, what is the estimated number of patients in {practice} "
         "who represent each of the following languages? The total of these numbers must add up to 100."
         .format(practice=APP.practice_name),
