@@ -417,7 +417,7 @@ def load_apps_grid():
                             formname="load_apps_grid",
                             links=links,
                             deletable=IS_ADMIN or IS_MASTER,
-                            editable=IS_ADMIN or IS_MASTER,
+                            editable=IS_ADMIN or IS_MASTER or IS_TRAINER,
                             # groupby=db.application.id, # groupby by itself behaves like distinct http://bit.ly/2h0Ou3Z
                             field_id=db.application.id,
                             links_placement='left',
