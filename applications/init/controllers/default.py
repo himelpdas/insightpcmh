@@ -374,7 +374,7 @@ def load_apps_grid():
                   body=lambda row:
                   A(SPAN(_class="glyphicon glyphicon-play"),
                     _class="btn btn-sm btn-default",
-                    _title="Start Portal",
+                    _title="Start Application Dashboard",
                     _style="background-color:#BA55D3;",
                     _href=URL("2014", 'index.html', args=[0],  # todo- set 2014/2017 standards here table may or may not be joined
                               vars=dict(app_id=getattr(row, "application", row).id))))]
