@@ -370,7 +370,7 @@ def load_apps_grid():
 
     db.application.progress.represent = _progress
 
-    db.application.website.represent = lambda v, r: A(v, _href=v) if v else "None"
+    db.application.website.represent = lambda v, r: A("Visit", _href=v) if v else "N/A"
 
     links = [dict(header='',  # header is col title
                   body=lambda row:
