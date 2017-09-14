@@ -203,7 +203,7 @@ def pcmh_0_emr():
 
 
 def pcmh_0_payment():
-    """Credit Card"""
+    """Payment method"""
 
     payment_type = MultiQNA(
         1, 1,
