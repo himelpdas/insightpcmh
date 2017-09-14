@@ -370,6 +370,8 @@ def load_apps_grid():
 
     db.application.progress.represent = _progress
 
+    db.application.website.represent = lambda v, r: A(_href=v) if v else "None"
+
     links = [dict(header='',  # header is col title
                   body=lambda row:
                   A(SPAN(_class="glyphicon glyphicon-play"),
