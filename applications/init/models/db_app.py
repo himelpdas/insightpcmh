@@ -1,8 +1,8 @@
 db.define_table("application",
     Field("practice_name", requires=IS_NOT_EMPTY()),
-    Field("first_site", 'boolean', label="First/Only site",
-          comment=XML("Un-check this <u>only</u> if you or your parent company already "
-                      "has other site(s) doing PCMH with us."), default=True),
+    # Field("first_site", 'boolean', label="First/Only site",
+    #       comment=XML("Un-check this <u>only</u> if you or your parent company already "
+    #                   "has other site(s) doing PCMH with us."), default=True),
     Field("progress", 'double', label="Data Progress", default=0.0, writable=False,
           represent=lambda value, row: '{:.1%}'.format(value)),
     Field("status", default="New",

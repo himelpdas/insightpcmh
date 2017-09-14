@@ -202,12 +202,23 @@ def pcmh_0_emr():
     return dict(documents=[])
 
 
-def pcmh_0_credit_card():
+def pcmh_0_payment():
     """Credit Card"""
+
+    payment_type = MultiQNA(
+        1, 1,
+        True,
+        'payment_type',
+        "A credit card or check is required to purchase the application tool(s) ($80/ea) and survey tool ($440). What "
+        "form of payment will you use?"
+    )
+
+    payment_type.set_template("{please_choose}")
+
     credit_card = CryptQNA(
         1, float("inf"),  # change the 3 to the number of days the practice is open from the info
-        True, 'credit_card',
-        "A credit card is required to purchase the application tool(s) ($80/ea) and survey tool ($440).",
+        getattr(payment_type.row, "please_choose", None) == "Credit Card", 'credit_card',
+        "Please enter credit card information now.",
     )
 
     credit_card.set_template(
@@ -627,10 +638,14 @@ def pcmh_2_2d__1_2():
         "Please enter your staff who <b>are</b> providers.",
     )
 
-    days = providers
     providers.set_template(
-        "<b class='text-success'>{first_name} {last_name}, "
-        "{role}<br>&emsp;Usually in office on: {days_of_the_week}</b>")
+        "<b class='text-success'>{first_name} {last_name}, {role}</b>"
+        "<br>&emsp;Usually in office on: {days_of_the_week}"
+        "<br>&emsp;DEA: {dea}"
+        "<br>&emsp;NPI: {npi}"
+        "<br>&emsp;License: {license}"
+        "<br>&emsp;Bills Under: {bills_under}"
+    )
 
     other_staff = MultiQNA(
         1, 1,
@@ -650,38 +665,7 @@ def pcmh_2_2d__1_2():
     )
 
     staff.set_template(
-        "{first_name} {last_name}, {role}&emsp;Usually in office on: {days_of_the_week}")
-
-    # providers = db(db.provider.application == APP_ID).count()
-    #
-    # assigned_pcp = MultiQNA(
-    #     1, 1, providers > 1,
-    #     'assigned_pcp',
-    #     "Is the patient's preferred clinician documented in his/her patient record?"
-    # )
-    #
-    # assigned_pcp.set_template("{please_choose}")
-    #
-    # assigned_pcp.add_warning(
-    #     getattr(assigned_pcp.row, "please_choose", None) in NOT_YES,
-    #     "In a multi-PCP setting, the practice should document the patient's PCP into the patient record in order to "
-    #     "receive credit for PCMH 2A."
-    # )
-    #
-    # see_assigned_pcp = MultiQNA(
-    #     1, 1, getattr(assigned_pcp.row, "please_choose", None) == "Yes",
-    #     'see_assigned_pcp',
-    #     "Do patients get to see their assigned PCP at least 75% of the time?"
-    # )
-    #
-    # see_assigned_pcp.add_warning(
-    #     getattr(see_assigned_pcp.row, "please_choose", None) in NOT_YES,
-    #     "In a multi-PCP setting, the pactice should implement a policy to allow patients to see their assigned PCP
-    # in "
-    #     "order to receive credit for PCMH 2A."
-    # )
-    #
-    # see_assigned_pcp.set_template("{please_choose}")
+        "{quantity}x {role}")
 
     return dict(documents=[])
 

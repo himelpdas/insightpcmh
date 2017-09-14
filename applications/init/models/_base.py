@@ -274,10 +274,25 @@ class MultiQNA(QNA):
                     return func(key)
                 return inner
 
+            def _bills_under(func):
+                def inner(key):
+                    if key == "bills_under":
+                        if row["bills_under"]:
+                            print row
+                            print row["bills_under"]
+                            bills_under = db(db.provider.id == row["bills_under"]).select().last()
+                            return key, "%s %s, %s" % (bills_under["first_name"], bills_under["last_name"],
+                                                       bills_under["role"])
+                        else:
+                            return key, "No one"
+                    return func(key)
+                return inner
+
             @_screenshot
             @_print_file
             @_print_row_delete_icon
             @_print_auth_user
+            @_bills_under
             def _print_comma_list(key):  # join with commas if object is list-like (python 2 only)
                 # http://stackoverflow.com/questions/1835018/python-check-if-an-object-is-a-list-or-tuple-but-not-string
                 # assert row.get(key), "Could not find '%s' in row" % key

@@ -32,6 +32,14 @@ db.define_table("emr_credentials",
 
 # (credit_card)###################################################
 
+db.define_table(
+    "payment_type",
+
+    Field("please_choose",
+          requires=IS_IN_SET(["Credit Card", "Check"], zero=None)),
+
+)
+
 FAKE_DB.update({"credit_card": [
     Field("account_holder", requires=IS_NOT_EMPTY(), comment="Must match exact name on card."),
     Field("expiration_month", requires=IS_IN_SET(range(1, 13), zero=None)),
@@ -42,7 +50,6 @@ FAKE_DB.update({"credit_card": [
     Field("cvv_code", requires=IS_NOT_EMPTY(), widget=SQLFORM.widgets.password.widget),
     auth.signature
 ]})
-
 
 db.define_table(
     "credit_card",

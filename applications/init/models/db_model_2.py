@@ -3,12 +3,12 @@ db.define_table(
     "provider",
     Field("first_name", requires=IS_NOT_EMPTY()),
     Field("last_name", requires=IS_NOT_EMPTY()),
-    Field("email", requires=IS_EMAIL()),
-    Field("npi", label='NPI#'),  # requires=IS_NOT_EMPTY()),
-    Field("dea", label='DEA#'),  # requires=IS_NOT_EMPTY()),
-    Field("license", label='License #'),  # requires=IS_NOT_EMPTY()),
+    #Field("email", requires=IS_EMPTY_OR(IS_EMAIL())),
+    Field("npi", label='NPI#', requires=IS_NOT_EMPTY()),
+    Field("dea", label='DEA#', requires=IS_NOT_EMPTY()),
+    Field("license", label='License #', requires=IS_NOT_EMPTY()),
     Field("role", requires=IS_IN_SET(["MD", "DO", "APRN (i.e. NP)", "PA"], sort=True, zero=None)),
-    Field("bills_under", 'list:reference provider', label='Bills Under / Shares Patients Under'),
+    Field("bills_under", 'reference provider', label='Bills Under / Shares Patients Under'),
     DAYS_OF_WEEK_FIELD(label="Official days",
                        comment="Only select the days when patients are seen by this provider in this location."),
     # Field("job_description", 'text', comment=XML("Enter a brief description of the <b>patient-centered</b>"
@@ -20,8 +20,8 @@ db.define_table(
     # auth.signature  # not needed because db._common_fields.append(auth.signature)
 )
 
-db.provider.bills_under.requires = IS_IN_DB(db(db.provider.application == APP_ID), 'provider.application',
-                                            staff_format, multiple=True)
+db.provider.bills_under.requires = IS_EMPTY_OR(IS_IN_DB(db(db.provider.application == APP_ID), 'provider.id',
+                                            staff_format, multiple=False))
 
 
 db.define_table(
@@ -35,13 +35,11 @@ db.define_table(
 
 db.define_table(
     "staff",
-    Field("first_name", requires=IS_NOT_EMPTY()),
-    Field("last_name", requires=IS_NOT_EMPTY()),
     Field("role", requires=IS_IN_SET(
         ["MA", 'RN', 'BSN', "Office Manager", "Intern", "Phlebotomist", "Front Desk", "Other (describe in note)"],
         sort=True,
         zero=None)),
-    DAYS_OF_WEEK_FIELD(label="Official days"),
+    Field("quantity", requires=IS_INT_IN_RANGE(1, 100)),
     # Field("job_description", 'text', comment=XML("Enter a brief description of the <b>patient-centered</b>"
     #                                              " tasks this employee conducts <i>(i.e. tracks referrals, "
     #                                              "makes call-backs, etc.)</i>."),
