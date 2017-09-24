@@ -410,7 +410,7 @@ def load_apps_grid():
     app_grid = SQLFORM.grid(my_apps_grid,
                             onvalidation=_app_onvalidation,
                             showbuttontext=False,
-                            orderby=~db.application.id | db.application.certified_on,  # ~db.auth_user.is_insight | ~db.auth_user.id,
+                            orderby=~db.application.certified_on | ~db.application.id,  # ~db.auth_user.is_insight | ~db.auth_user.id,
                             maxtextlength=50,
                             oncreate=_app_oncreate,
                             create=IS_ADMIN or IS_MASTER or IS_CONTRIB or IS_TRAINER,
