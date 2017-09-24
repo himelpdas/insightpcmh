@@ -371,9 +371,14 @@ def load_apps_grid():
     db.application.progress.represent = _progress
 
     db.application.website.represent = lambda v, r: A("Visit", _href=v) if v else "N/A"
-    db.application.owner_id.represent = lambda v, r: A(
-        "%s %s" % (r.first_name.capitalize(), r.last_name.capitalize()), _href="mailto:%s" % r.email
-    )
+
+    def _user(v, r):
+        u = db(db.auth_user.id == v).select().last()
+        if not u:
+            return SPAN("User Deleted", _class="text-danger")
+        return A("%s %s" % (u.first_name.capitalize(), u.last_name.capitalize()), _href="mailto:%s" % u.email)
+
+    db.application.owner_id.represent = _user
 
     links = [dict(header='',  # header is col title
                   body=lambda row:
