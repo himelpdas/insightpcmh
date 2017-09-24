@@ -4,9 +4,9 @@ LIST_OF_STATES = ["NY", "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "F
                    "NM", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
                    "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
 
-EMRS = ['Other', "Amazing Charts", 'eClinicalWorks', "EHI", 'Health Fusion', 'MDLand iClinic', "Practice Fusion",
-        "OmniMD"]
-REMOTE_EMRS = EMRS[1:2]
+EMRS = ["Amazing Charts", 'eClinicalWorks', "Office Practicum", "EHI", 'Health Fusion', 'MDLand iClinic',
+        "Practice Fusion", "OmniMD"]
+REMOTE_EMRS = EMRS[1:3]
 CLOUD_EMRS = EMRS[2:]
 
 DAYS_OF_THE_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
