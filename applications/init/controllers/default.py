@@ -371,6 +371,9 @@ def load_apps_grid():
     db.application.progress.represent = _progress
 
     db.application.website.represent = lambda v, r: A("Visit", _href=v) if v else "N/A"
+    db.application.owner_id.represent = lambda v, r: A(
+        "%s %s" % (r.first_name.capitalize(), r.last_name.capitalize()), _href="mailto:%s" % r.email
+    )
 
     links = [dict(header='',  # header is col title
                   body=lambda row:
