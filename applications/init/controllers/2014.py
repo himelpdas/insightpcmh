@@ -754,7 +754,7 @@ def pcmh_2_2c__1___4a__6():
         .format(practice=APP.practice_name),
         validator=lambda form:
         _on_validation_100(form, fields=["native_american", "pacific_islander", "black", "white", "east_asian",
-                                         "south_asian"]),
+                                         "south_asian", "south_central_american"]),
     )
 
     race.set_template("<ul>"
