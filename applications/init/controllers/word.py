@@ -257,7 +257,7 @@ def report_2c_factor_1_2_demographics():
         ethnicity_cells[3].text = "%.0f%%" % (ceil(float(request.get_vars[ethnicity])))
 
     doc.add_heading("Race", 1)
-    races = ["black", "white", "native_american", "pacific_islander", "south_asian", "east_asian"]
+    races = ["black", "white", "native_american", "pacific_islander", "south_asian", "east_asian", "south_central_american"]
     race_table = doc.add_table(rows=len(races)+1, cols=4)
     race_hdr_cells = race_table.rows[0].cells
     race_hdr_cells[0].text = 'Subset'
