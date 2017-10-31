@@ -4,7 +4,8 @@
 MY_KEY = "Himel123"
 TALK_TO_API_KEY = "e3730573ebe8f86994e9a07e49f1b0fe5a0fe2af"
 MASTER_EMAILS = ["himel@insightmanagement.org", "aspencer@insightmanagement.org", "rtorres@insightmanagement.org",
-                 "jason@insightmanagement.org", "sdurgapasad@insightmanagement.org", "gdewey@insightmanagement.org"]
+                 "jason@insightmanagement.org", "sdurgapasad@insightmanagement.org", "gdewey@insightmanagement.org",
+                 "npolan@therapyamerica.com"]
 # "himel@insightpcmh.org", "himel.p.das@gmail.com", "himeldas@live.com"
 HIMEL_EMAILS = ["himel@insightmanagement.org"]
 
