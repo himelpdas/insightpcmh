@@ -45,7 +45,7 @@ def index():
     # web2py performs inner joins automatically and transparently when the query links two or more tables
     response.title = "Insight PCMH"
     response.subtitle = " - Patient-Centered Medical Home Transformation for Practices"
-    redirect("dash")
+    redirect(URL('init', 'default', 'dash'))
 
 
 @_disable_rbac_fields(db.auth_membership, db.auth_permission, db.auth_group)
